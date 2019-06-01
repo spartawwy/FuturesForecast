@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{22860c3e-850b-46c3-afce-ca02b7320139}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{c4e6e38a-655d-466e-be83-ed836ff378ff}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;cxx;c;def</Extensions>
+    </Filter>
+    <Filter Include="Header">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="Form">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="win">
+      <UniqueIdentifier>{29230190-4ff6-4925-80a9-b5d61c534e8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="moudle">
+      <UniqueIdentifier>{7ff86872-e788-4913-95f6-3e9646384510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tdx">
+      <UniqueIdentifier>{c4450e83-7e8b-4e08-80b7-4f9a3e2b6786}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mainwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mainwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_mainwindow.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="favorite_codes_serial.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="stkfo_common.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="stock_data_man.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="stock_man.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="stockdayinfo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="zhibiao.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="kline_wall.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="kline_wall_paint.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindow.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="code_list_wall.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="database.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="exchange_calendar.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="statistic_dlg.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="stockinput_dlg.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="title_bar.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="tool_bar.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="train_dlg.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="train_trade_dlg.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_code_list_wall.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_code_list_wall.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_title_bar.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_title_bar.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_tool_bar.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_tool_bar.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_train_dlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_train_dlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_train_trade_dlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_train_trade_dlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_kline_wall.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_kline_wall.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="HintList.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HintList.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HintList.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_statistic_dlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_statistic_dlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_stockinput_dlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_stockinput_dlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="futures_forecast_app.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="forcast_man.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
+    <ClCompile Include="zhibiao_window.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
+    <ClCompile Include="tdx_exhq_wrapper.cpp">
+      <Filter>tdx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="mainwindow.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mainwindow.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="codelistwall.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="klinewall.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="statisticdlg.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="stockinputdlg.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="traindlg.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="traintrade.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="code_list_wall.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="title_bar.h">
+      <Filter>moudle</Filter>
+    </CustomBuild>
+    <CustomBuild Include="tool_bar.h">
+      <Filter>moudle</Filter>
+    </CustomBuild>
+    <CustomBuild Include="train_dlg.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="train_trade_dlg.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="kline_wall.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="HintList.h">
+      <Filter>moudle</Filter>
+    </CustomBuild>
+    <CustomBuild Include="statistic_dlg.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="stockinput_dlg.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mainwindow.h">
+      <Filter>win</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_codelistwall.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_klinewall.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_statisticdlg.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_stockinputdlg.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_traindlg.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_traintrade.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="futures_forecast_app.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="database.h">
+      <Filter>moudle</Filter>
+    </ClInclude>
+    <ClInclude Include="stkfo_common.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="tdxhq\ExHqApi.h">
+      <Filter>tdx</Filter>
+    </ClInclude>
+    <ClInclude Include="tdx_exhq_wrapper.h">
+      <Filter>tdx</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FutureSystem.rc" />
+  </ItemGroup>
+</Project>

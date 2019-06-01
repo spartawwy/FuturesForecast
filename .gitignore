@@ -10,11 +10,22 @@
 # Precompiled Headers
 *.gch
 *.pch
+*.ipch
 
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+*.sdf
+*.log
+*.tlog
+*.pdb
+*.lastbuildstate
+*.exp
+*.ilk
+*.unsuccessfulbuild
+*.opensdf
+*.idb
+*.suo
 
 # Fortran module files
 *.mod
@@ -24,7 +35,6 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
