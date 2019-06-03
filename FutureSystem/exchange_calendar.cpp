@@ -112,10 +112,49 @@ T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod typ
     struct tm * timeinfo;
     time( &rawtime );
     timeinfo = localtime( &rawtime ); 
+    const int hhmm = timeinfo->tm_hour * 100 + timeinfo->tm_min;
+
     int today = TSystem::Today();
-    if( timeinfo->tm_hour * 100 + timeinfo->tm_min < 930 )
+    
+   
+    int lack_k_num = 0;
+    if( IsTradeDate(today) )
     {
-        today = DateAddDays(today, -1);
+        if( type_period == TypePeriod::PERIOD_5M )
+        {
+            // calculate Cur tranding day's now k num
+            if( hhmm < 900 )
+            {
+                if( hhmm >= 230 ) // such as 05:55
+                    lack_k_num = 111 - 66;
+                else
+                    ;// todo:
+            }else if( hhmm <= 1015 )
+            {
+                lack_k_num = 111 - 66 - (timeinfo->tm_hour - 9) * 12 - (timeinfo->tm_min / 5 + 1);
+            }else if( hhmm <= 1130 )
+            {
+                if( timeinfo->tm_hour < 11 )
+                    lack_k_num = 111 - 66 - 15 - ( (timeinfo->tm_min - 30) / 5 + 1);
+                else
+                    lack_k_num = 111 - 66 - 15 - 5 - ( (timeinfo->tm_min ) / 5 + 1);
+            }else if( hhmm < 1330 )
+            {
+                lack_k_num = 111- 66 -27;
+            }else if( hhmm < 1400 )
+            {
+                lack_k_num = 111- 66 - 27 - ((timeinfo->tm_min - 30) / 5  + 1);
+            }else if( hhmm < 1500 )
+            {
+                lack_k_num = 111- 66 - 27 - 5 - (timeinfo->tm_min / 5 + 1);
+            }else 
+                lack_k_num = 0;
+        }
+    }
+    // after 2100 procedure as next trade day
+    if( hhmm >= 2100 )
+    {
+        today = DateAddDays(today, 1);
     }
     const int latest_trade_date = FloorTradeDate(today);
 
@@ -152,9 +191,17 @@ T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod typ
         span_len *= 16;
         break;
     case TypePeriod::PERIOD_5M:
-        start_index *= 16*3;
-        span_len *= 16*3;
+        start_index *= 111;
+        span_len *= 111;
         break;
+    }
+    if( start_index >= lack_k_num )
+    {
+        start_index -= lack_k_num;
+    }
+    if( span_len >= lack_k_num )
+    {
+        span_len -= lack_k_num;
     }
     return std::make_tuple(start_index, span_len);
 }

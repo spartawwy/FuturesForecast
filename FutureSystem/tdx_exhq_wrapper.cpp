@@ -73,7 +73,7 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
         case TypePeriod::PERIOD_HOUR:  return 4;
         case TypePeriod::PERIOD_30M: return 8;
         case TypePeriod::PERIOD_15M: return 16; 
-        case TypePeriod::PERIOD_5M: return 16*3;  
+        case TypePeriod::PERIOD_5M: return 111;  
         default: return 1;
         }
     };
@@ -234,12 +234,14 @@ do
     const bool has_time = ( ktype < 4 || ktype == 7 || ktype == 8 ) ? true : false;
     std::string expresstion_str;
     if( has_time )
-        //expresstion_str = "^(\\d{4}-\\d{2}-\\d{2})\\s(\\d{2}:\\d{2})\\t(\\d+\\.\\d+)\\t(\\d+\\.\\d+)\\t(\\d+\\.\\d+)\\t(\\d+\\.\\d+)\\t(\\d+)\\t(\\d+\\.\\d+)$";
-        expresstion_str = "^(\\d{4})-(\\d{2})-(\\d{2})\\s+(\\d{2}):(\\d{2})\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+).*";
-    else
+    {
+        //2019-05-30 15:00  476.100037      476.500031      475.900024      476.100037      32384   2802    0.000000
+        //时间                     开盘价         最高价           最低价          收盘价        持仓    成交    结算
+        expresstion_str = "^(\\d{4})-(\\d{2})-(\\d{2})\\s+(\\d{2}):(\\d{2})\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+).*";
+    }else
+    {   //2019-05-30        476.100037      476.500031      475.900024      476.100037      32384   2802    0.000000
         expresstion_str = "^(\\d{8})\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+).*";
-        //expresstion_str = "^(\\d{8})\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+).*";
-     
+    }
     std::regex  regex_obj(expresstion_str);
     char *p = m_szResult;
     while( *p != '\0' && *p != '\n') ++p;
@@ -277,11 +279,18 @@ do
                     ++index;  
                     int minute = boost::lexical_cast<int>(match_result[index]);
                     k_data.hhmmss = hour * 100 + minute;
+#if 1
+                    if( k_data.hhmmss > 2100 )
+                    {
+                        k_data.date = exchange_calendar_->PreTradeDate(k_data.date, 1);
+                    }
+#endif 
                 }else
                 {
                     k_data.date = boost::lexical_cast<int>(match_result[index]);
                     k_data.hhmmss = 0;
                 }
+
                 ++index;
                 k_data.open_price = boost::lexical_cast<double>(match_result[index]);
                 ++index;

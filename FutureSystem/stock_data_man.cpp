@@ -206,7 +206,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
 #endif
     
     // sort T_KlineDateItems by day from small to bigger
-    std::sort(items_in_container.begin(), items_in_container.end(), dompare);
+    //std::sort(items_in_container.begin(), items_in_container.end(), dompare);
 
     CaculateZhibiao(items_in_container);
 

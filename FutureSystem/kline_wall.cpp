@@ -34,7 +34,7 @@ void KLineWall::AppendData()
     case TypePeriod::PERIOD_HOUR:start_date = qdate_obj.addDays( -1 * (6 * 30) ).toString("yyyyMMdd").toInt(); break;
     case TypePeriod::PERIOD_30M: start_date = qdate_obj.addDays( -1 * (3 * 30) ).toString("yyyyMMdd").toInt(); break;
     case TypePeriod::PERIOD_15M: start_date = qdate_obj.addDays( -1 * (1 * 30) ).toString("yyyyMMdd").toInt(); break;
-    case TypePeriod::PERIOD_5M: start_date = qdate_obj.addDays( -1 * (1 * 15) ).toString("yyyyMMdd").toInt(); break;
+    case TypePeriod::PERIOD_5M: start_date = qdate_obj.addDays( -1 * (1 * 5) ).toString("yyyyMMdd").toInt(); break;
     default: break;
     }
      
@@ -429,7 +429,7 @@ int GetKDataTargetTime(TypePeriod type_period)
         hhmm = 945;
         break; 
     case TypePeriod::PERIOD_5M: 
-        hhmm = 935;
+        hhmm = 2105;
         break; 
     }
     return hhmm;

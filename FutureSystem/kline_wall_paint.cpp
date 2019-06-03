@@ -1180,6 +1180,9 @@ void KLineWall::mouseMoveEvent(QMouseEvent *e)
         if( k_num_ > 0 )
         {
             const int atom_k_width = this->width() / k_num_;
+            if( atom_k_width == 0 )
+                return;
+
             const int distance = e->pos().x() - move_start_point_.x();
             if( distance > 0 ) // drag to right 
             { 
@@ -1561,9 +1564,9 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     nmarket_ = nmarket;
 
     int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
-    if( QTime::currentTime().hour() * 100 + QTime::currentTime().minute() < 930 )
+    if( QTime::currentTime().hour() * 100 + QTime::currentTime().minute() > 2100 )
     {
-        cur_date = QDate::currentDate().addDays(-1).toString("yyyyMMdd").toInt();
+        cur_date = QDate::currentDate().addDays(1).toString("yyyyMMdd").toInt();
     }
 #if 0
     // 20 k line per 30 days
@@ -1617,6 +1620,9 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     }
     start_date = QDate::currentDate().addDays(span_day).toString("yyyyMMdd").toInt();
 #endif
+    // temp debug -------------
+    //start_date = 20190524;
+    //cur_date = 20190527;
     int hhmm = GetKDataTargetTime(type_period);
     // find his k data which till cur hhmm --------------
     p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, start_date, cur_date, hhmm, is_index);
