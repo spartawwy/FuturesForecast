@@ -103,89 +103,11 @@ bool StockDataMan::Init()
     ret = py_data_man_->Initiate();
 #endif
 
-#ifdef USE_STK_QUOTER
-    HMODULE moudle_handl = LoadLibrary("StkQuoter.dll");
-    if( !moudle_handl )
-    {
-        QMessageBox::information(nullptr, "ALERT", "can't load stkQuoter.dll");
-        return false;
-    }
-
-    stk_his_data_ = (StkHisDataDelegate)GetProcAddress(moudle_handl, "StkHisData");
-    stk_hisdata_release_ = (StkRelHisDataDelegate)GetProcAddress(moudle_handl, "StkRelHisData");
-    if( stk_his_data_ && stk_hisdata_release_ )
-        return true;
-    else
-        return false;
-#elif defined(USE_WINNER_API)
-    HMODULE moudle_handle = LoadLibrary("winner_api.dll");
-    if( !moudle_handle )
-    {
-        QMessageBox::information(nullptr, "ALERT", "can't load winner_api.dll");
-        return false;
-    }
-    WinnerHisHq_Connect_ = (WinnerHisHq_ConnectDelegate)GetProcAddress(moudle_handle, "WinnerHisHq_Connect"); 
-    if ( !WinnerHisHq_Connect_ )
-    {
-        std::cout << " GetProcAddress WinnerHisHq_Connect fail " << std::endl;
-        return false;
-    }
-
-    WinnerHisHq_DisConnect_ =  (WinnerHisHq_DisconnectDelegate)GetProcAddress(moudle_handle, "WinnerHisHq_Disconnect"); 
-    
-    char result[1024] = {0};
-    char error[1024] = {0};
-    if( !_stricmp(TSystem::utility::host().c_str(), "hzdev103") )
-        ret  = 0 == WinnerHisHq_Connect_("128.1.4.156", 50010, result, error);
-    else
-        ret  = 0 == WinnerHisHq_Connect_("192.168.1.5", 50010, result, error);
- 
-    if( ret )
-    {
-        WinnerHisHq_GetKData_ = (WinnerHisHq_GetKDataDelegate)GetProcAddress(moudle_handle, "WinnerHisHq_GetKData");
-        if( WinnerHisHq_GetKData_ )
-            return true;
-        else
-            return false;
-    }else
-    {
-        QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("连接行情服务器失败!")); 
-    }
-#elif defined(USE_TDXHQ)
-
     return tdx_exhq_wrapper_.Init();
-
-#endif
 
     return ret;
 }
 
-#ifdef USE_WINNER_API
-void call_back_fun(T_K_Data *k_data, bool is_end, void *para/*, std::vector<T_StockHisDataItem> &data_item_vector*/)
-{
-    T_KDataCallBack *cb_obj = (T_KDataCallBack*)para;
-    
-    StockDataMan *p_stk_data_man_obj = (StockDataMan *)(cb_obj->para);
-    std::vector<T_StockHisDataItem> *p_vector = p_stk_data_man_obj ? p_stk_data_man_obj->p_stk_hisdata_item_vector_ : nullptr;
-    
-    T_StockHisDataItem item;
-    item.open_price = k_data->open;
-    item.close_price = k_data->close;
-    item.high_price = k_data->high;
-    item.low_price = k_data->low;
-    item.vol = k_data->vol;
-    item.date = k_data->yyyymmdd;
-    item.hhmmss = k_data->hhmmdd;
-    if( p_vector )
-    {
-        p_vector->push_back(std::move(item));
-        if( is_end )
-        {
-            p_stk_data_man_obj->is_fetched_stk_hisdata_ = true;
-        }
-    }
-}
-#endif
 
 T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, const std::string &stk_code, int start_date, int end_date, int cur_hhmm, bool /*is_index*/)
 {
