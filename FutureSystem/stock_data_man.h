@@ -17,15 +17,17 @@
   
 #include "tdx_exhq_wrapper.h"
  
+#include "kline_wall.h"
 
 TypePeriod ToTypePeriod(PeriodType src);
 
+class KLineWall;
 class ExchangeCalendar;
 class StockDataMan
 {
 public:
 
-    StockDataMan(ExchangeCalendar *p_exchange_calendar);
+    StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar);
     ~StockDataMan();
     bool Init();
 
@@ -37,9 +39,10 @@ public:
     //void LoadDataFromFile(std::string &fileName);
 
     T_HisDataItemContainer* FindStockData(PeriodType period_type, const std::string &stk_code, int start_date, int end_date, int cur_hhmm, bool is_index=false);
+    T_HisDataItemContainer* FindStockData(PeriodType period_type, const std::string &stk_code, int start_date, int end_date, bool is_index=false);
     T_HisDataItemContainer* AppendStockData(PeriodType period_type, int nmarket, const std::string &stk_code, int start_date, int end_date, bool is_index=false);
 	     
-    bool UpdateLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index=false);
+    int UpdateLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index=false);
     void TraverseGetBi(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
 
     void TraverseGetStuctLines(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
@@ -58,6 +61,7 @@ public:
     T_SectionContainer &GetStructSectionContainer(PeriodType period_type, const std::string& code/*, int wall_index*/);
 
     // (stock , data)  date is from small to big
+    T_CodeMapHisDataItemContainer m1_stock_his_items_;
     T_CodeMapHisDataItemContainer m5_stock_his_items_;
     T_CodeMapHisDataItemContainer m15_stock_his_items_;
     T_CodeMapHisDataItemContainer m30_stock_his_items_;
@@ -66,6 +70,7 @@ public:
     T_CodeMapHisDataItemContainer week_stock_his_items_;
     T_CodeMapHisDataItemContainer mon_stock_his_items_;
 
+    T_CodeMapBiContainer m1_stock_bi_items_;
     T_CodeMapBiContainer m5_stock_bi_items_;
     T_CodeMapBiContainer m15_stock_bi_items_;
     T_CodeMapBiContainer m30_stock_bi_items_;
@@ -74,6 +79,7 @@ public:
     T_CodeMapBiContainer week_stock_bi_items_;
     T_CodeMapBiContainer mon_stock_bi_items_;
 
+    T_CodeMapStructDataContainer m1_stock_struct_datas_;
     T_CodeMapStructDataContainer m5_stock_struct_datas_;
     T_CodeMapStructDataContainer m15_stock_struct_datas_;
     T_CodeMapStructDataContainer m30_stock_struct_datas_;
@@ -92,6 +98,8 @@ private:
     void CaculateZhibiao(T_HisDataItemContainer &data_items_in_container);
 
 private:
+
+    KLineWall *kwall_;
 #if 1
     TdxExHqWrapper  tdx_exhq_wrapper_;
 #endif
@@ -102,5 +110,6 @@ private:
 
 // < 0 : meaning no related data
 int FindDataIndex(T_HisDataItemContainer &data_items_in_container, int date, int cur_hhmm);
+bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date);
 
 #endif // STOCK_DATA_MAN_H

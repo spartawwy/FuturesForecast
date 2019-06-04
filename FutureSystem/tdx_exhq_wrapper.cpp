@@ -74,6 +74,7 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
         case TypePeriod::PERIOD_30M: return 8;
         case TypePeriod::PERIOD_15M: return 16; 
         case TypePeriod::PERIOD_5M: return 111;  
+        case TypePeriod::PERIOD_1M: return 555;  
         default: return 1;
         }
     };
@@ -196,6 +197,8 @@ bool TdxExHqWrapper::__GetHisKBars(const std::string &code, bool is_index, int n
     case TypePeriod::PERIOD_15M:  ktype = 1; 
         break;
     case TypePeriod::PERIOD_5M:   ktype = 0; 
+        break;
+    case TypePeriod::PERIOD_1M:   ktype = 7; 
         break;
     default:
         assert(false);

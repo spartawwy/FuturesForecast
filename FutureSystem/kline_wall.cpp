@@ -35,6 +35,7 @@ void KLineWall::AppendData()
     case TypePeriod::PERIOD_30M: start_date = qdate_obj.addDays( -1 * (3 * 30) ).toString("yyyyMMdd").toInt(); break;
     case TypePeriod::PERIOD_15M: start_date = qdate_obj.addDays( -1 * (1 * 30) ).toString("yyyyMMdd").toInt(); break;
     case TypePeriod::PERIOD_5M: start_date = qdate_obj.addDays( -1 * (1 * 5) ).toString("yyyyMMdd").toInt(); break;
+    case TypePeriod::PERIOD_1M: start_date = qdate_obj.addDays( -1 * (1 * 3) ).toString("yyyyMMdd").toInt(); break;
     default: break;
     }
      
@@ -67,10 +68,18 @@ void KLineWall::UpdateKwallMinMaxPrice()
     std::tuple<int, int, int, int> date_times_tuple;
     if( GetContainerMaxMinPrice(ToPeriodType(k_type_), stock_code_, k_num_, price_tuple, date_times_tuple) )
     {
-        double try_new_high = std::get<0>(price_tuple) * cst_k_mm_enlarge_times;
+        float h_price = std::get<0>(price_tuple);
+        float l_price = std::get<1>(price_tuple);
+        double try_new_high = h_price * cst_k_mm_enlarge_times;
+        if( h_price > 100.0 )
+            try_new_high = h_price * 1.002;
+
         if( try_new_high < this->highestMaxPrice_ || try_new_high > this->highestMaxPrice_)
             SetHighestMaxPrice(try_new_high);
-        double try_new_low = std::get<1>(price_tuple) * cst_k_mm_narrow_times;
+
+        double try_new_low = l_price * cst_k_mm_narrow_times;
+        if( l_price > 100.0 )
+            try_new_low = l_price * 0.998;
         if( try_new_low < this->lowestMinPrice_ || try_new_low > this->lowestMinPrice_)
             SetLowestMinPrice(try_new_low);
         highest_price_date_ = std::get<0>(date_times_tuple);
@@ -84,6 +93,7 @@ PeriodType KLineWall::ToPeriodType(TypePeriod src)
 {
     switch(src)
     {
+    case TypePeriod::PERIOD_1M: return PeriodType::PERIOD_1M;
     case TypePeriod::PERIOD_5M: return PeriodType::PERIOD_5M;
     case TypePeriod::PERIOD_15M: return PeriodType::PERIOD_15M;
     case TypePeriod::PERIOD_30M: return PeriodType::PERIOD_30M;
@@ -91,7 +101,7 @@ PeriodType KLineWall::ToPeriodType(TypePeriod src)
     case TypePeriod::PERIOD_DAY: return PeriodType::PERIOD_DAY;
     case TypePeriod::PERIOD_WEEK: return PeriodType::PERIOD_WEEK;
     case TypePeriod::PERIOD_MON: return PeriodType::PERIOD_MON;
-        assert(false); 
+    default: assert(false); 
     }
     return PeriodType::PERIOD_DAY;
 }
@@ -346,6 +356,14 @@ int CalculateSpanDays(TypePeriod type_period, int k_count)
                 span_day = -1 * (k_count * 30 / (20 * 4 * 2 * 2 * 3)); 
             break;
         }
+    case TypePeriod::PERIOD_1M:
+        {
+            if( k_count * 30 / (20 * 4 * 2 * 2 * 3 * 5) < 1 )
+                span_day = -1;
+            else
+                span_day = -1 * (k_count * 30 / (20 * 4 * 2 * 2 * 3 * 5)); 
+            break;
+        }
     default:assert(false);
     }
     return span_day;
@@ -403,13 +421,16 @@ std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, Typ
             hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
             break;
         }
+    case TypePeriod::PERIOD_1M:
+        hhmm = tmp_hhmm;
+        break;
     }
     /*QDate q_date(end_date/10000, (end_date%10000)/100, end_date%100);
     int start_date = q_date.addDays(span_day).toString("yyyyMMdd").toInt();*/
     return std::make_tuple(start_date, hhmm);
 }
 
-int GetKDataTargetTime(TypePeriod type_period)
+int GetKDataTargetTime(TypePeriod type_period, int para_hhmm)
 { 
     int hhmm = 0;  
     switch( type_period )
@@ -429,7 +450,16 @@ int GetKDataTargetTime(TypePeriod type_period)
         hhmm = 945;
         break; 
     case TypePeriod::PERIOD_5M: 
-        hhmm = 905;
+        if( para_hhmm < 900 )
+            hhmm = 0;
+        else
+            hhmm = 905;
+        break; 
+    case TypePeriod::PERIOD_1M: 
+        if( para_hhmm < 900 )
+            hhmm = 0;
+        else
+            hhmm = 901;
         break; 
     }
     return hhmm;

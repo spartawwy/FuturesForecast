@@ -1564,66 +1564,16 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     nmarket_ = nmarket;
 
     int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
-    if( QTime::currentTime().hour() * 100 + QTime::currentTime().minute() > 2100 )
+    int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
+    if( cur_hhmm > 2100 )
     {
         cur_date = QDate::currentDate().addDays(1).toString("yyyyMMdd").toInt();
     }
-#if 0
-    // 20 k line per 30 days
-    int start_date = 0;
-    int span_day = 0;
-    int hhmm = 0; 
-    int tmp_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
-    
-    //std::array<int, 4> hour_array = {1030, 1300, 1400, 1500};
-    switch( type_period )
-    {
-    case TypePeriod::PERIOD_YEAR: 
-    case TypePeriod::PERIOD_MON:
-         span_day = -1 * 365 * 10;
-         break;
-    case TypePeriod::PERIOD_DAY:
-    case TypePeriod::PERIOD_WEEK:
-        span_day = -1 * (WOKRPLACE_DEFUALT_K_NUM * 30 / 20);
-        break;
-    case TypePeriod::PERIOD_HOUR:  // ndchk 
-        {
-        span_day = -1 * (WOKRPLACE_DEFUALT_K_NUM * 30 / (20 * 4));
-        //10:30 13:00 14:00 15:00
-        int tp_array[] = { 1030, 1300, 1400, 1500 };
-        hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
-        break;
-        }
-    case TypePeriod::PERIOD_30M:
-        {
-        span_day = -1 * (WOKRPLACE_DEFUALT_K_NUM * 30 / (20 * 4 * 2)); 
-        int tp_array[] = { 1000, 1030, 1100, 1130, 1330, 1400, 1430, 1500 };
-        hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
-        break;
-        }
-    case TypePeriod::PERIOD_15M:
-        {
-        span_day = -1 * (WOKRPLACE_DEFUALT_K_NUM * 30 / (20 * 4 * 2 * 2));  
-        int tp_array[] = { 945, 1000, 1015, 1030, 1045, 1100, 1115, 1130, 1315, 1330, 1345, 1400, 1415, 1430, 1445, 1500};
-        hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
-        break;
-        }
-    case TypePeriod::PERIOD_5M:
-        {
-        span_day = -1 * (WOKRPLACE_DEFUALT_K_NUM * 30 / (20 * 4 * 2 * 2 * 3));
-        int tp_array[] = {935,940,945,950,955,1000,1005,1010,1015,1020,1025,1030,1035,1040,1045,1050,1055,1100,1105
-                         ,1110,1115,1120,1125,1130,1305,1310,1315,1320,1325,1330,1335,1340,1345,1350,1355,1400,1405
-                         ,1410,1415,1420,1425,1430,1435,1440,1445,1450,1455,1500};
-        hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
-        break;
-        }
-    }
-    start_date = QDate::currentDate().addDays(span_day).toString("yyyyMMdd").toInt();
-#endif
+ 
     // temp debug -------------
     //start_date = 20190524;
     //cur_date = 20190527;
-    int hhmm = GetKDataTargetTime(type_period);
+    int hhmm = GetKDataTargetTime(type_period, cur_hhmm);
     // find his k data which till cur hhmm --------------
     p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, start_date, cur_date, hhmm, is_index);
     if( !p_hisdata_container_ )
@@ -1651,7 +1601,7 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
             k_num_ = p_hisdata_container_->size() / 2;
         else 
             k_num_ = p_hisdata_container_->size();
-
+#if 0
         std::tuple<float, float> price_tuple;
         std::tuple<int, int, int, int> date_time_tuple;
         if( GetContainerMaxMinPrice(ToPeriodType(k_type_), stock_code_, k_num_, price_tuple, date_time_tuple) )
@@ -1667,6 +1617,9 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
             lowest_price_date_ = std::get<2>(date_time_tuple);
             lowest_price_hhmm_ = std::get<3>(date_time_tuple);
         }
+#else
+        UpdateKwallMinMaxPrice();
+#endif
     }else
     {
         this->highestMaxPrice_ = 20.0;
@@ -1715,6 +1668,8 @@ void KLineWall::ShowDurationKlines(int date)
 
 void KLineWall::UpdateIfNecessary()
 { 
+    //return;
+
     if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
         return;
     bool is_need_updated = false;
@@ -1727,13 +1682,13 @@ void KLineWall::UpdateIfNecessary()
 #endif
     //auto date_time = GetKDataTargetTime(k_type_, QDate::currentDate(), QTime::currentTime());
     //int start_date = std::get<0>(date_time);
-    int hhmm = GetKDataTargetTime(k_type_);
+    int hhmm = GetKDataTargetTime(k_type_, cur_hhmm);
     
     
     // find if pre his k data  exists --------------
-    int pre_start_date = QDate::currentDate().addDays(-10).toString("yyyyMMdd").toInt();
+    int pre_start_date = QDate::currentDate().addDays(-8).toString("yyyyMMdd").toInt();
     int pre_end_date = QDate::currentDate().addDays(-7).toString("yyyyMMdd").toInt();
-    auto p_pre_data_container = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, pre_start_date, pre_end_date, hhmm);
+    auto p_pre_data_container = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, pre_start_date, pre_end_date);
 
     if( p_pre_data_container )
     {
@@ -1742,7 +1697,10 @@ void KLineWall::UpdateIfNecessary()
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
-            is_need_updated = app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
+            int ret = app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
+            is_need_updated = ret > 0;
+            //if( ret > 1 )
+            //    IncreaseRendIndex();
             
         }else
         {
@@ -1757,7 +1715,7 @@ void KLineWall::UpdateIfNecessary()
                 is_need_updated = true;
             }
         }
-
+        //return; //temp 
         if( is_need_updated )
         {
             Emit_UpdateKwall(); 

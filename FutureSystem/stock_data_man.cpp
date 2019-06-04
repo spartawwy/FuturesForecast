@@ -21,6 +21,7 @@
 #include "tdx_exhq_wrapper.h"
 #include "zhibiao.h"
 #include "exchange_calendar.h"
+#include "kline_wall.h"
 
 #define RESERVE_CAPACITY_IN_T_VECTOR    1024*16
 //#define RESERVE_SIZE_IN_T_VECTOR    1024*16
@@ -52,14 +53,17 @@ void TraverseClearFractalType(std::deque<std::shared_ptr<T_KlineDataItem> > &kli
 void TraverseAjustFractal(std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
  
 
-StockDataMan::StockDataMan(ExchangeCalendar *p_exchange_calendar)
-    : m5_stock_his_items_(1024)
+StockDataMan::StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar)
+    : /*kwall_(p_kwall)
+    ,*/ m5_stock_his_items_(1024)
+    , m1_stock_his_items_(1024)
     , m15_stock_his_items_(1024)
     , m30_stock_his_items_(1024)
     , hour_stock_his_items_(1024)
     , day_stock_his_items_(1024)
     , week_stock_his_items_(1024)
     , mon_stock_his_items_(1024)
+    , m1_stock_bi_items_(64)
     , m5_stock_bi_items_(64)
     , m15_stock_bi_items_(64)
     , m30_stock_bi_items_(64)
@@ -67,6 +71,7 @@ StockDataMan::StockDataMan(ExchangeCalendar *p_exchange_calendar)
     , day_stock_bi_items_(64)
     , week_stock_bi_items_(64)
     , mon_stock_bi_items_(64)
+    , m1_stock_struct_datas_(64)
     , m5_stock_struct_datas_(64)
     , m15_stock_struct_datas_(64)
     , m30_stock_struct_datas_(64)
@@ -137,9 +142,35 @@ T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, cons
             else
                 start_hhmm = 2105; 
             break;
+        case PeriodType::PERIOD_1M:
+            if( real_start_date == start_date )
+                start_hhmm = 900; 
+            else
+                start_hhmm = 2100; 
+            break;
     }
+    if( real_start_date == real_end_date )
+    {
+        if( FindDataIndex(items_in_container, real_end_date, cur_hhmm) > -1 )
+            return &items_in_container;
+        else
+            return nullptr;
+    }else if( FindDataIndex(items_in_container, real_start_date, start_hhmm) > -1 && FindDataIndex(items_in_container, real_end_date, cur_hhmm) > -1 )
+        return &items_in_container;
+    return nullptr;
+}
 
-    if( FindDataIndex(items_in_container, real_start_date, start_hhmm) > -1 && FindDataIndex(items_in_container, real_end_date, cur_hhmm) > -1 )
+
+T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, const std::string &stk_code, int start_date, int end_date, bool /*is_index*/)
+{
+    assert( !stk_code.empty() ); 
+    T_HisDataItemContainer & items_in_container = GetHisDataContainer(period_type, stk_code);
+    int real_start_date = exchange_calendar()->CeilingTradeDate(start_date);
+    int real_end_date = exchange_calendar()->FloorTradeDate(end_date);
+    if( real_start_date == 0 || real_end_date == 0 )
+        return nullptr;
+     
+    if( IsDataIn(items_in_container, real_start_date) && IsDataIn(items_in_container, real_end_date) )
         return &items_in_container;
     return nullptr;
 }
@@ -245,22 +276,51 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
 
 }
 
-bool StockDataMan::UpdateLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index)
+int StockDataMan::UpdateLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index)
 {
     assert( !stk_code.empty() );
-   
+    int ret = 0;
     T_HisDataItemContainer & items_in_container = GetHisDataContainer(period_type, stk_code);
     
     T_StockHisDataItem  item;
     memset(&item, 0, sizeof(item));
     tdx_exhq_wrapper_.GetLatestKBar(stk_code, is_index, nmarket, ToTypePeriod(period_type), item);
-    if( items_in_container.back()->stk_item.date == item.date && items_in_container.back()->stk_item.hhmmss == item.hhmmss )
+    if( items_in_container.back()->stk_item.date <= item.date )
     {
-        memcpy( std::addressof(items_in_container.back()->stk_item), &item, sizeof(item) );
+
+        if( items_in_container.back()->stk_item.date == item.date )
+        {
+            if( items_in_container.back()->stk_item.hhmmss == item.hhmmss )
+            {
+                memcpy( std::addressof(items_in_container.back()->stk_item), &item, sizeof(item) );
+                ret = 1;
+            }
+            else if( items_in_container.back()->stk_item.hhmmss < item.hhmmss )
+            {
+                auto k_date_item = std::make_shared<T_KlineDataItem>(item);
+                k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                items_in_container.push_back(std::move(k_date_item));
+                
+                //kwall_->IncreaseRendIndex();
+                ret = 2;
+            }
+            else
+            { 
+                return 0;
+            }
+
+        }else 
+        {
+            auto k_date_item = std::make_shared<T_KlineDataItem>(item);
+            k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+            items_in_container.push_back(std::move(k_date_item));
+            //kwall_->IncreaseRendIndex();
+            ret = 2;
+        }
         CaculateZhibiao(items_in_container);
-        return true;
+        return ret;
     }else
-        return false;
+        return 0;
 }
 
 // ps: data has sorted
@@ -285,6 +345,7 @@ T_HisDataItemContainer & StockDataMan::GetHisDataContainer(PeriodType period_typ
     T_CodeMapHisDataItemContainer *p_code_map_container = nullptr;
     switch(period_type)
     {
+    case PeriodType::PERIOD_1M:   p_code_map_container = &m1_stock_his_items_; break;
     case PeriodType::PERIOD_5M:   p_code_map_container = &m5_stock_his_items_; break;
     case PeriodType::PERIOD_15M:  p_code_map_container = &m15_stock_his_items_; break;
     case PeriodType::PERIOD_30M:  p_code_map_container = &m30_stock_his_items_; break;
@@ -305,6 +366,7 @@ T_BiContainer & StockDataMan::GetBiContainer(PeriodType period_type, const std::
     T_CodeMapBiContainer *p_code_map_container = nullptr;
     switch(period_type)
     {
+    case PeriodType::PERIOD_1M:   p_code_map_container = &m1_stock_bi_items_; break;
     case PeriodType::PERIOD_5M:   p_code_map_container = &m5_stock_bi_items_; break;
     case PeriodType::PERIOD_15M:  p_code_map_container = &m15_stock_bi_items_; break;
     case PeriodType::PERIOD_30M:  p_code_map_container = &m30_stock_bi_items_; break;
@@ -325,6 +387,7 @@ T_StructLineContainer &StockDataMan::GetStructLineContainer(PeriodType period_ty
     T_CodeMapStructDataContainer *p_code_map_container = nullptr;
     switch(period_type)
     {
+    case PeriodType::PERIOD_1M:   p_code_map_container = &m1_stock_struct_datas_; break;
     case PeriodType::PERIOD_5M:   p_code_map_container = &m5_stock_struct_datas_; break;
     case PeriodType::PERIOD_15M:  p_code_map_container = &m15_stock_struct_datas_; break;
     case PeriodType::PERIOD_30M:  p_code_map_container = &m30_stock_struct_datas_; break;
@@ -346,6 +409,7 @@ T_SectionContainer & StockDataMan::GetStructSectionContainer(PeriodType period_t
     T_CodeMapStructDataContainer *p_code_map_container = nullptr;
     switch(period_type)
     {
+    case PeriodType::PERIOD_1M:   p_code_map_container = &m1_stock_struct_datas_; break;
     case PeriodType::PERIOD_5M:   p_code_map_container = &m5_stock_struct_datas_; break;
     case PeriodType::PERIOD_15M:  p_code_map_container = &m15_stock_struct_datas_; break;
     case PeriodType::PERIOD_30M:  p_code_map_container = &m30_stock_struct_datas_; break;
@@ -1625,6 +1689,7 @@ TypePeriod ToTypePeriod(PeriodType src)
 {
     switch(src)
     {
+    case PeriodType::PERIOD_1M: return TypePeriod::PERIOD_1M;
     case PeriodType::PERIOD_5M: return TypePeriod::PERIOD_5M;
     case PeriodType::PERIOD_15M: return TypePeriod::PERIOD_15M;
     case PeriodType::PERIOD_30M: return TypePeriod::PERIOD_30M;
@@ -1646,4 +1711,18 @@ int FindDataIndex(T_HisDataItemContainer &data_items_in_container, int date, int
             return i;
     }
     return -1;
+}
+
+bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date)
+{
+    auto iter = std::find_if(std::begin(data_items_in_container), std::end(data_items_in_container)
+        , [date](T_HisDataItemContainer::reference entry){return entry->stk_item.date == date;} );
+
+    return iter != data_items_in_container.end();
+   /* for( int i = data_items_in_container.size() - 1; i >= 0;  --i )
+    {
+        if( data_items_in_container.at(i)->stk_item.date == date && data_items_in_container.at(i)->stk_item.hhmmss == cur_hhmm)
+            return i;
+    }
+    return -1;*/
 }

@@ -83,6 +83,8 @@ public:
 
     void Set_Cursor(Qt::CursorShape sp);
 
+    void IncreaseRendIndex() { ++k_rend_index_; }
+
     void Emit_UpdateKwall() { emit sigUpdateKwall(); }
 
 signals:
@@ -191,7 +193,7 @@ private:
     bool  show_cross_line_;
 
     int  k_num_;
-    int  k_rend_index_;
+    volatile int  k_rend_index_;
     int  pre_k_rend_index_;
     int  k_move_temp_index_;
 
@@ -246,7 +248,7 @@ int CalculateSpanDays(TypePeriod type_period, int k_count);
 // ret: <date, hhmm>
 std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, TypePeriod type_period, int end_date, int tmp_hhmm, int max_k_count);
 // ret: hhmm
-int GetKDataTargetTime(TypePeriod type_period);
+int GetKDataTargetTime(TypePeriod type_period, int hhmm);
 
 int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val);
 

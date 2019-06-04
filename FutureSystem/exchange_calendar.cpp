@@ -20,7 +20,7 @@ bool ExchangeCalendar::IsTradeDate(int date)
 
 bool ExchangeCalendar::IsTradeTime(int hhmm)
 {
-    return hhmm >= 915 &&  hhmm <= 1500;
+    return (hhmm >= 915 &&  hhmm <= 1500) || hhmm >= 2100 || hhmm <= 230;
 }
 
 // ps: ceiling trade date may be bigger then param date. if fail return 0
@@ -102,9 +102,92 @@ int ExchangeCalendar::NextTradeDate(int date, unsigned int n)
     return a;
 }
 
+int Get5mLackKnum(int hhmm)
+{
+    int lack_k_num = 0;
+    // calculate Cur tranding day's now k num
+    if( hhmm <= 230 )
+    { 
+        int already_num = ((hhmm / 100) * 60 / 5) + ((hhmm % 100) + 5) / 5;
+        lack_k_num = 111 - 66 + (30 - already_num);
+    }else if( hhmm < 900 )
+    {
+        // such as 05:55
+        lack_k_num = 111 - 66; 
+    }else if( hhmm <= 1015 )
+    {
+        lack_k_num = 111 - 66 - (hhmm/100 - 9) * 12 - (hhmm%100 / 5 + 1);
+    }else if( hhmm <= 1130 )
+    {
+        if( hhmm/100 < 11 ) // 1035-1059
+            lack_k_num = 111 - 66 - 15 - ( (hhmm%100 - 30) / 5 + 1);
+        else
+            lack_k_num = 111 - 66 - 15 - 5 - ( hhmm%100 / 5 + 1);
+    }else if( hhmm < 1330 )
+    {
+        lack_k_num = 111- 66 -27;
+    }else if( hhmm < 1400 )
+    {
+        lack_k_num = 111- 66 - 27 - ((hhmm%100 - 30) / 5  + 1);
+    }else if( hhmm < 1500 )
+    {
+        lack_k_num = 111- 66 - 27 - 5 - (hhmm%100 / 5 + 1);
+    }else if ( hhmm < 2100 )
+    {
+        lack_k_num = 0;
+    }else  // 2100-2359
+    {
+        int already_num = ((hhmm / 100 - 21) * 60 / 5) + ((hhmm % 100) + 5) / 5;
+        lack_k_num = 111 - already_num;
+    }
+    return lack_k_num;
+}
+
+
+int Get1mLackKnum(int hhmm)
+{
+    int lack_k_num = 0;
+    // calculate Cur tranding day's now k num
+    if( hhmm <= 230 )
+    { 
+        int already_num = ((hhmm / 100) * 60) + (hhmm % 100);
+        lack_k_num = (111 - 66)*5 + (30*5 - already_num);
+    }else if( hhmm < 900 )
+    {
+        // such as 05:55
+        lack_k_num = (111 - 66)*5; 
+    }else if( hhmm <= 1015 )
+    {
+        lack_k_num = (111 - 66)*5 - (hhmm/100 - 9) * 60 - hhmm%100;
+    }else if( hhmm <= 1130 ) // 1035-1130
+    {
+        if( hhmm/100 < 11 ) // 1035-1059
+            lack_k_num = (111 - 66 - 15)*5 - (hhmm%100 - 30);
+        else // 1100-1130
+            lack_k_num = (111 - 66 - 15 - 5)*5 - hhmm%100;
+    }else if( hhmm < 1330 )
+    {
+        lack_k_num = (111- 66 -27)*5;
+    }else if( hhmm < 1400 )
+    {
+        lack_k_num = (111- 66 -27)*5 - (hhmm%100 - 30);
+    }else if( hhmm < 1500 )
+    {
+        lack_k_num = (111- 66 - 27 - 5)*5 - hhmm%100;
+    }else if ( hhmm < 2100 )
+    {
+        lack_k_num = 0;
+    }else  // 2100-2359
+    {
+        int already_num = ((hhmm / 100 - 21) * 60) + (hhmm % 100);
+        lack_k_num = 111*5 - already_num;
+    }
+    return lack_k_num;
+}
+
 // ps: end_date <= today . ndedt
 T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod type_period, int start_date, int end_date)
-{
+{ 
     assert(trade_dates_->size() > 0);
     assert(start_date <= end_date);
 
@@ -122,33 +205,10 @@ T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod typ
     {
         if( type_period == TypePeriod::PERIOD_5M )
         {
-            // calculate Cur tranding day's now k num
-            if( hhmm < 900 )
-            {
-                if( hhmm >= 230 ) // such as 05:55
-                    lack_k_num = 111 - 66;
-                else
-                    ;// todo:
-            }else if( hhmm <= 1015 )
-            {
-                lack_k_num = 111 - 66 - (timeinfo->tm_hour - 9) * 12 - (timeinfo->tm_min / 5 + 1);
-            }else if( hhmm <= 1130 )
-            {
-                if( timeinfo->tm_hour < 11 )
-                    lack_k_num = 111 - 66 - 15 - ( (timeinfo->tm_min - 30) / 5 + 1);
-                else
-                    lack_k_num = 111 - 66 - 15 - 5 - ( (timeinfo->tm_min ) / 5 + 1);
-            }else if( hhmm < 1330 )
-            {
-                lack_k_num = 111- 66 -27;
-            }else if( hhmm < 1400 )
-            {
-                lack_k_num = 111- 66 - 27 - ((timeinfo->tm_min - 30) / 5  + 1);
-            }else if( hhmm < 1500 )
-            {
-                lack_k_num = 111- 66 - 27 - 5 - (timeinfo->tm_min / 5 + 1);
-            }else 
-                lack_k_num = 0;
+            lack_k_num = Get5mLackKnum(hhmm);
+        }else if( type_period == TypePeriod::PERIOD_1M )
+        {
+            lack_k_num = Get1mLackKnum(hhmm);
         }
     }
     // after 2100 procedure as next trade day
@@ -193,6 +253,10 @@ T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod typ
     case TypePeriod::PERIOD_5M:
         start_index *= 111;
         span_len *= 111;
+        break;
+    case TypePeriod::PERIOD_1M:
+        start_index *= 555;
+        span_len *= 555;
         break;
     }
     if( start_index >= lack_k_num )

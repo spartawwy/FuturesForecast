@@ -92,7 +92,8 @@ typedef int (__cdecl* WinnerHisHq_GetHisFenbiDataBatchDelegate)(char* Zqdm, int 
 
 enum class PeriodType : unsigned char
 {
-    PERIOD_5M = 1,
+    PERIOD_1M = 1,
+    PERIOD_5M,
     PERIOD_15M,
     PERIOD_30M,
     PERIOD_HOUR,

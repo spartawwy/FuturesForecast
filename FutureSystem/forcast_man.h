@@ -148,6 +148,7 @@ private:
     Code2pForcastType & Get2pUpDataHolder(TypePeriod type_period);
     Code2pForcastType & Get2pDownDataHolder(TypePeriod type_period);
 
+    Code2pForcastType  stock_2pdown_forcast_1m_; // 1 minute
     Code2pForcastType  stock_2pdown_forcast_5m_; // 5 minute
     Code2pForcastType  stock_2pdown_forcast_15m_; // 15 minute
     Code2pForcastType  stock_2pdown_forcast_30m_; // 30 minute
@@ -157,6 +158,7 @@ private:
     Code2pForcastType  stock_2pdown_forcast_mon_; // month
     Code2pForcastType  df_no_use_;
 
+    Code2pForcastType  stock_2pup_forcast_1m_; // 5 minute 
     Code2pForcastType  stock_2pup_forcast_5m_; // 5 minute 
     Code2pForcastType  stock_2pup_forcast_15m_; // 15 minute 
     Code2pForcastType  stock_2pup_forcast_30m_; // 30 minute 
@@ -166,6 +168,7 @@ private:
     Code2pForcastType  stock_2pup_forcast_mon_;  
     Code2pForcastType  uf_no_use_;  
 
+    Code3pForcastType    stock_3pdown_forcast_1m_;
     Code3pForcastType    stock_3pdown_forcast_5m_;
     Code3pForcastType    stock_3pdown_forcast_15m_;
     Code3pForcastType    stock_3pdown_forcast_30m_;
@@ -174,6 +177,7 @@ private:
     Code3pForcastType    stock_3pdown_forcast_w_;
     Code3pForcastType    stock_3pdown_forcast_mon_;
 
+    Code3pForcastType    stock_3pup_forcast_1m_;
     Code3pForcastType    stock_3pup_forcast_5m_;
     Code3pForcastType    stock_3pup_forcast_15m_;
     Code3pForcastType    stock_3pup_forcast_30m_;

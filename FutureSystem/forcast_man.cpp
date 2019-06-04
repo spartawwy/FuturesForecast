@@ -2,30 +2,38 @@
 
 ForcastMan::ForcastMan(int wall_index)
     : wall_index_(wall_index)
-    , stock_2pdown_forcast_15m_(1024)
-    , stock_2pdown_forcast_30m_(1024)
-    , stock_2pdown_forcast_h_(1024)
-    , stock_2pdown_forcast_d_(1024)
-    , stock_2pdown_forcast_w_(1024)
-    , stock_2pdown_forcast_mon_(1024)
-    , stock_2pup_forcast_15m_(1024)
-    , stock_2pup_forcast_30m_(1024)
-    , stock_2pup_forcast_h_(1024)
-    , stock_2pup_forcast_d_(1024)
-    , stock_2pup_forcast_w_(1024)
-    , stock_2pup_forcast_mon_(1024)
-    , stock_3pdown_forcast_15m_(1024)
-    , stock_3pdown_forcast_30m_(1024)
-    , stock_3pdown_forcast_h_(1024)
-    , stock_3pdown_forcast_d_(1024)
-    , stock_3pdown_forcast_w_(1024)
-    , stock_3pdown_forcast_mon_(1024)
-    , stock_3pup_forcast_15m_(1024)
-    , stock_3pup_forcast_30m_(1024)
-    , stock_3pup_forcast_h_(1024)
-    , stock_3pup_forcast_d_(1024)
-    , stock_3pup_forcast_w_(1024)
-    , stock_3pup_forcast_mon_(1024)
+    , stock_2pdown_forcast_1m_(512)
+    , stock_2pdown_forcast_5m_(512)
+    , stock_2pdown_forcast_15m_(512)
+    , stock_2pdown_forcast_30m_(512)
+    , stock_2pdown_forcast_h_(512)
+    , stock_2pdown_forcast_d_(512)
+    , stock_2pdown_forcast_w_(512)
+    , stock_2pdown_forcast_mon_(512)
+    , stock_2pup_forcast_1m_(512)
+    , stock_2pup_forcast_5m_(512)
+    , stock_2pup_forcast_15m_(512)
+    , stock_2pup_forcast_30m_(512)
+    , stock_2pup_forcast_h_(512)
+    , stock_2pup_forcast_d_(512)
+    , stock_2pup_forcast_w_(512)
+    , stock_2pup_forcast_mon_(512)
+    , stock_3pdown_forcast_1m_(512)
+    , stock_3pdown_forcast_5m_(512)
+    , stock_3pdown_forcast_15m_(512)
+    , stock_3pdown_forcast_30m_(512)
+    , stock_3pdown_forcast_h_(512)
+    , stock_3pdown_forcast_d_(512)
+    , stock_3pdown_forcast_w_(512)
+    , stock_3pdown_forcast_mon_(512)
+    , stock_3pup_forcast_1m_(512)
+    , stock_3pup_forcast_5m_(512)
+    , stock_3pup_forcast_15m_(512)
+    , stock_3pup_forcast_30m_(512)
+    , stock_3pup_forcast_h_(512)
+    , stock_3pup_forcast_d_(512)
+    , stock_3pup_forcast_w_(512)
+    , stock_3pup_forcast_mon_(512)
     , df_no_use_(1)
     , uf_no_use_(1)
 {
@@ -145,6 +153,7 @@ Code2pForcastType & ForcastMan::Get2pUpDataHolder(TypePeriod type_period)
 {
     switch (type_period)
     {
+    case TypePeriod::PERIOD_1M: return stock_2pup_forcast_1m_;
     case TypePeriod::PERIOD_5M: return stock_2pup_forcast_5m_;
     case TypePeriod::PERIOD_15M: return stock_2pup_forcast_15m_;
     case TypePeriod::PERIOD_30M: return stock_2pup_forcast_30m_;
@@ -161,6 +170,7 @@ Code2pForcastType & ForcastMan::Get2pDownDataHolder(TypePeriod type_period)
 {
     switch (type_period)
     {
+    case TypePeriod::PERIOD_1M:  return stock_2pdown_forcast_1m_;
     case TypePeriod::PERIOD_5M:  return stock_2pdown_forcast_5m_;
     case TypePeriod::PERIOD_15M: return stock_2pdown_forcast_15m_;
     case TypePeriod::PERIOD_30M: return stock_2pdown_forcast_30m_;
@@ -177,6 +187,7 @@ Code3pForcastType & ForcastMan::Get3pDataHolder(TypePeriod type_period, bool is_
 {
     switch (type_period)
     {
+    case TypePeriod::PERIOD_1M:  return  is_down ? stock_3pdown_forcast_1m_ : stock_3pup_forcast_1m_;
     case TypePeriod::PERIOD_5M:  return  is_down ? stock_3pdown_forcast_5m_ : stock_3pup_forcast_5m_;
     case TypePeriod::PERIOD_15M:  return is_down ? stock_3pdown_forcast_15m_ : stock_3pup_forcast_15m_;
     case TypePeriod::PERIOD_30M:  return is_down ? stock_3pdown_forcast_30m_ : stock_3pup_forcast_30m_;

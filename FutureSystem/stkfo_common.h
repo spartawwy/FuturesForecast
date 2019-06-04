@@ -52,7 +52,8 @@ enum class FractalType : int
 
 enum class TypePeriod : unsigned char
 {
-    PERIOD_5M = 1,
+    PERIOD_1M = 1,
+    PERIOD_5M,
     PERIOD_15M,
     PERIOD_30M,
     PERIOD_HOUR,
@@ -308,10 +309,10 @@ void ClearBtmFractal(T_KlineDataItem &k_data_item);
 
 #define  MOMENTUM_POS 0
 
-#define  DEFAULT_MAINKWALL_TYPE_PERIOD  TypePeriod::PERIOD_5M
+#define  DEFAULT_MAINKWALL_TYPE_PERIOD  TypePeriod::PERIOD_1M
 #define  DEFAULT_SUBKWALL_TYPE_PERIOD  TypePeriod::PERIOD_15M
 
-#define COMBO_PERIOD_DAY_INDEX 4
+#define COMBO_PERIOD_DAY_INDEX 5
 
 #define MARKET_SH_FUTURES  30
 
