@@ -132,8 +132,13 @@ T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, cons
         case PeriodType::PERIOD_15M:
             start_hhmm = 945; break;
         case PeriodType::PERIOD_5M:
-            start_hhmm = 935; break;
+            if( real_start_date == start_date )
+                start_hhmm = 905; 
+            else
+                start_hhmm = 2105; 
+            break;
     }
+
     if( FindDataIndex(items_in_container, real_start_date, start_hhmm) > -1 && FindDataIndex(items_in_container, real_end_date, cur_hhmm) > -1 )
         return &items_in_container;
     return nullptr;

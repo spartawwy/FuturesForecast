@@ -429,7 +429,7 @@ int GetKDataTargetTime(TypePeriod type_period)
         hhmm = 945;
         break; 
     case TypePeriod::PERIOD_5M: 
-        hhmm = 2105;
+        hhmm = 905;
         break; 
     }
     return hhmm;
