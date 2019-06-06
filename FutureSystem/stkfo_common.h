@@ -309,8 +309,8 @@ void ClearBtmFractal(T_KlineDataItem &k_data_item);
 
 #define  MOMENTUM_POS 0
 
-#define  DEFAULT_MAINKWALL_TYPE_PERIOD  TypePeriod::PERIOD_1M
-#define  DEFAULT_SUBKWALL_TYPE_PERIOD  TypePeriod::PERIOD_15M
+#define  DEFAULT_MAINKWALL_TYPE_PERIOD  TypePeriod::PERIOD_5M
+#define  DEFAULT_SUBKWALL_TYPE_PERIOD  TypePeriod::PERIOD_1M
 
 #define COMBO_PERIOD_DAY_INDEX 5
 

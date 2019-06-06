@@ -208,6 +208,8 @@ private:
     int  date_;
     std::string k_date_time_str_;
 
+    volatile bool is_resetting_stock_;
+
     volatile DrawAction draw_action_;
  
     QPointF drawing_line_A_;
@@ -248,7 +250,7 @@ int CalculateSpanDays(TypePeriod type_period, int k_count);
 // ret: <date, hhmm>
 std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, TypePeriod type_period, int end_date, int tmp_hhmm, int max_k_count);
 // ret: hhmm
-int GetKDataTargetTime(TypePeriod type_period, int hhmm);
+int GetKDataTargetStartTime(TypePeriod type_period, int hhmm);
 
 int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val);
 

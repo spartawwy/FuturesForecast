@@ -415,10 +415,18 @@ std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, Typ
         }
     case TypePeriod::PERIOD_5M:
         {
-            int tp_array[] = {935,940,945,950,955,1000,1005,1010,1015,1020,1025,1030,1035,1040,1045,1050,1055,1100,1105
-                ,1110,1115,1120,1125,1130,1305,1310,1315,1320,1325,1330,1335,1340,1345,1350,1355,1400,1405
-                ,1410,1415,1420,1425,1430,1435,1440,1445,1450,1455,1500};
+            // ndedt
+            int tp_array[] = {5, 10, 15,20,25,30,35,40,45,50,55,100,105,110,115,120,125,130,135,140,145,150,155
+                ,200,205,210,215,220,225,230
+                ,935,940,945,950,955,1000,1005,1010,1015,1035,1040,1045,1050,1055,1100,1105
+                ,1110,1115,1120,1125,1130,1335,1340,1345,1350,1355,1400,1405
+                ,1410,1415,1420,1425,1430,1435,1440,1445,1450,1455,1500
+                , 2105, 2110,2115, 2120, 2125,2130,2135,2140,2145,2150,2155,2200
+                , 2205, 2210,2215, 2220, 2225,2230,2235,2240,2245,2250,2255,2300
+                , 2305, 2310,2315, 2320, 2325,2330,2335,2340,2345,2350,2355,2359};
             hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
+            if( hhmm == 2359 )
+                hhmm == 0;
             break;
         }
     case TypePeriod::PERIOD_1M:
@@ -430,7 +438,7 @@ std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, Typ
     return std::make_tuple(start_date, hhmm);
 }
 
-int GetKDataTargetTime(TypePeriod type_period, int para_hhmm)
+int GetKDataTargetStartTime(TypePeriod type_period, int para_hhmm)
 { 
     int hhmm = 0;  
     switch( type_period )

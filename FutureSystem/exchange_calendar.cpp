@@ -185,7 +185,7 @@ int Get1mLackKnum(int hhmm)
     return lack_k_num;
 }
 
-// ps: end_date <= today . ndedt
+// ps: end_date <= today .  inner use current time
 T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod type_period, int start_date, int end_date)
 { 
     assert(trade_dates_->size() > 0);

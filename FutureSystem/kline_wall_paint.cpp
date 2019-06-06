@@ -60,6 +60,7 @@ KLineWall::KLineWall(FuturesForecastApp *app, QWidget *parent, int index, TypePe
     , k_cycle_year_(0)
     , date_(0)
     , k_date_time_str_() 
+    , is_resetting_stock_(false)
     , draw_action_(DrawAction::NO_ACTION)
     , mm_move_flag_(false)
     , move_start_point_(0, 0)
@@ -1553,8 +1554,9 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
 
     if( k_type_ == type_period && stock_code_ ==  stock.toLocal8Bit().data() && !items_in_container.empty() )
         return true;
+
+    is_resetting_stock_ = true;
     
-    //if( !main_win_->is_train_mode() )
     k_rend_index_ = 0;
     pre_k_rend_index_ = 0;
     k_move_temp_index_ = 0;
@@ -1570,10 +1572,13 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
         cur_date = QDate::currentDate().addDays(1).toString("yyyyMMdd").toInt();
     }
  
+    bool ret = false;
+    do
+    {
     // temp debug -------------
     //start_date = 20190524;
     //cur_date = 20190527;
-    int hhmm = GetKDataTargetTime(type_period, cur_hhmm);
+    int hhmm = GetKDataTargetStartTime(type_period, cur_hhmm);
     // find his k data which till cur hhmm --------------
     p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, start_date, cur_date, hhmm, is_index);
     if( !p_hisdata_container_ )
@@ -1582,11 +1587,16 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
         p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, start_date, cur_date, is_index);
     }else
     {
-        app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index);
+        int a_pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
+        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, a_pre_date, cur_date, is_index);
+        //app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index);
     }
 	
     if( !p_hisdata_container_ )
-		return false;
+    {
+        ret = false;
+        break;
+    }
 
     this->is_index_ = is_index;
     if( !p_hisdata_container_->empty() )
@@ -1601,25 +1611,9 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
             k_num_ = p_hisdata_container_->size() / 2;
         else 
             k_num_ = p_hisdata_container_->size();
-#if 0
-        std::tuple<float, float> price_tuple;
-        std::tuple<int, int, int, int> date_time_tuple;
-        if( GetContainerMaxMinPrice(ToPeriodType(k_type_), stock_code_, k_num_, price_tuple, date_time_tuple) )
-        {
-            double try_new_high = std::get<0>(price_tuple) * cst_k_mm_enlarge_times;
-            if( try_new_high < this->highestMaxPrice_ || try_new_high > this->highestMaxPrice_)
-                SetHighestMaxPrice(try_new_high);
-            double try_new_low = std::get<1>(price_tuple) * cst_k_mm_narrow_times;
-            if( try_new_low < this->lowestMinPrice_ || try_new_low > this->lowestMinPrice_)
-                SetLowestMinPrice(try_new_low);
-            highest_price_date_ = std::get<0>(date_time_tuple);
-            highest_price_hhmm_ = std::get<1>(date_time_tuple);
-            lowest_price_date_ = std::get<2>(date_time_tuple);
-            lowest_price_hhmm_ = std::get<3>(date_time_tuple);
-        }
-#else
+ 
         UpdateKwallMinMaxPrice();
-#endif
+ 
     }else
     {
         this->highestMaxPrice_ = 20.0;
@@ -1627,7 +1621,12 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     }
     
     UpdatePosDatas();
- 	return true;
+ 	ret = true;
+
+    }while(0);
+
+    is_resetting_stock_ = false;
+    return ret;
 }
 
 
@@ -1667,10 +1666,8 @@ void KLineWall::ShowDurationKlines(int date)
 }
 
 void KLineWall::UpdateIfNecessary()
-{ 
-    //return;
-
-    if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
+{  
+    if( is_resetting_stock_ || draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
         return;
     bool is_need_updated = false;
 
@@ -1680,17 +1677,18 @@ void KLineWall::UpdateIfNecessary()
     if( !app_->exchange_calendar()->IsTradeDate(cur_date) || !app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
         return;
 #endif
-    //auto date_time = GetKDataTargetTime(k_type_, QDate::currentDate(), QTime::currentTime());
+    //auto date_time = GetKDataTargetStartTime(k_type_, QDate::currentDate(), QTime::currentTime());
     //int start_date = std::get<0>(date_time);
-    int hhmm = GetKDataTargetTime(k_type_, cur_hhmm);
+    int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);
     
     
     // find if pre his k data  exists --------------
-    int pre_start_date = QDate::currentDate().addDays(-8).toString("yyyyMMdd").toInt();
-    int pre_end_date = QDate::currentDate().addDays(-7).toString("yyyyMMdd").toInt();
-    auto p_pre_data_container = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, pre_start_date, pre_end_date);
+    //int pre_start_date = QDate::currentDate().addDays(-8).toString("yyyyMMdd").toInt();
+    //int pre_end_date = QDate::currentDate().addDays(-7).toString("yyyyMMdd").toInt();
+    //auto p_pre_data_container = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, pre_start_date, pre_end_date);
 
-    if( p_pre_data_container )
+    T_HisDataItemContainer &container = app_->stock_data_man().GetHisDataContainer(ToPeriodType(k_type_), stock_code_);
+    if( !container.empty() )
     {
         auto p_contain = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, cur_date, cur_date, hhmm/*, bool is_index*/);
         if( p_contain ) // current time k data exists
@@ -1699,14 +1697,14 @@ void KLineWall::UpdateIfNecessary()
                 return;
             int ret = app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
             is_need_updated = ret > 0;
-            //if( ret > 1 )
-            //    IncreaseRendIndex();
             
         }else
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
-            auto p_cur_time_contain = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, pre_end_date, cur_date, is_index_);
+            auto date_time = GetKDataTargetDateTime(*app_->exchange_calendar(), k_type_, cur_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
+            auto p_cur_time_contain = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, std::get<0>(date_time), cur_date, is_index_);
+            
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
             if( p_cur_time_contain )
@@ -1715,7 +1713,6 @@ void KLineWall::UpdateIfNecessary()
                 is_need_updated = true;
             }
         }
-        //return; //temp 
         if( is_need_updated )
         {
             Emit_UpdateKwall(); 

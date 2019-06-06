@@ -301,7 +301,8 @@ void ToolBar::onClickedStructBtn()
         return;
     }else if( p_btn == sub_show_structline_btn_ )
     {
-        m_main_window->SubKlineWall()->SetShowStructLine(p_btn->isChecked());
+        if( m_main_window->SubKlineWall() )
+            m_main_window->SubKlineWall()->SetShowStructLine(p_btn->isChecked());
         return;
     }else if( p_btn == main_show_section_btn_ )
     {
@@ -309,13 +310,17 @@ void ToolBar::onClickedStructBtn()
         return;
     }else if( p_btn == sub_show_section_btn_ )
     {
-        m_main_window->SubKlineWall()->SetShowSection(p_btn->isChecked());
+        if( m_main_window->SubKlineWall() )
+            m_main_window->SubKlineWall()->SetShowSection(p_btn->isChecked());
         return;
     }
 }
 
 void ToolBar::onClickedShowSubKwallBtn()
 {
+    if( !m_main_window->SubKlineWall() )
+        return;
+
     auto p_btn = qobject_cast<QPushButton*>(sender());
     if( p_btn == show_sub_kwall_btn_ )
     {

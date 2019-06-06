@@ -89,10 +89,9 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
     //const short max_count = MAX_K_COUNT;
     short start = std::get<0>(tuple_index_len);  // back forward
     const short count = std::get<1>(tuple_index_len);
-#if 1
+ 
     short local_count = MAX_K_COUNT;
     short total_get = 0;
-#if 1
     
     start += count % MAX_K_COUNT;
     if( count / MAX_K_COUNT > 0 )
@@ -114,12 +113,8 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
         total_get += local_count;
     }
      
-#endif 
     return total_get > 0;
-
-#else 
-    
-#endif
+     
 }
 
 bool TdxExHqWrapper::GetLatestKBar(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, T_StockHisDataItem &item)
@@ -164,7 +159,7 @@ bool TdxExHqWrapper::__GetHisKBars(const std::string &code, bool is_index, int n
     memset(m_szResult, 0, cst_result_len);
     memset(m_szErrInfo, 0, cst_err_len);
 
-    int market_type = MARKET_TYPE_SH;
+    /*int market_type = MARKET_TYPE_SH;
     if( is_index )
     {
         if( code.at(0) == '3' )
@@ -174,8 +169,7 @@ bool TdxExHqWrapper::__GetHisKBars(const std::string &code, bool is_index, int n
     }else if( code.at(0) == '6' )
         market_type = MARKET_TYPE_SH;
     else 
-        market_type = MARKET_TYPE_SZ;
-
+        market_type = MARKET_TYPE_SZ;*/
    
     //获取股票K线数据 
     //数据种类, 0->5分钟K线    1->15分钟K线    2->30分钟K线  3->1小时K线    4->日K线  5->周K线  6->月K线  7->1分钟K线  8->1分钟K线  9->日K线  10->季K线  11->年K线
@@ -214,7 +208,7 @@ do
     { 
         if( ConnectServer() )
         {
-            bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, market_type, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
+            bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
             if( !bool1 )
             {
                 result = false;
