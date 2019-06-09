@@ -268,15 +268,15 @@ void MainWindow::PopTrainDlg()
 {
     assert(train_dlg_);
 
-    if( tool_bar()->main_cycle_comb()->currentIndex() != COMBO_PERIOD_DAY_INDEX )
+    if( tool_bar()->main_cycle_comb()->currentIndex() != COMBO_PERIOD_5M_INDEX )
     {
         // ps: it will trigger onMainKwallCycleChange
-        tool_bar()->main_cycle_comb()->setCurrentIndex(COMBO_PERIOD_DAY_INDEX); // set current to period day
+        tool_bar()->main_cycle_comb()->setCurrentIndex(COMBO_PERIOD_5M_INDEX); // set current to period day
     }
-    if( tool_bar()->sub_cycle_comb()->currentIndex() != COMBO_PERIOD_DAY_INDEX )
+    if( tool_bar()->sub_cycle_comb()->currentIndex() != COMBO_PERIOD_1M_INDEX )
     {
         // ps: it will trigger onSubKwallCycleChange
-        tool_bar()->sub_cycle_comb()->setCurrentIndex(COMBO_PERIOD_DAY_INDEX - 1);
+        tool_bar()->sub_cycle_comb()->setCurrentIndex(COMBO_PERIOD_1M_INDEX);
     }
     tool_bar()->main_cycle_comb()->setEnabled(false);
 
@@ -409,17 +409,17 @@ void MainWindow::onSubKwallCycleChange(int /*index*/)
     if( !kline_wall_sub )
         return;
     tool_bar_->sub_cycle_comb()->clearFocus();
-    if( is_train_mode() && tool_bar_->sub_cycle_comb()->currentIndex() >= COMBO_PERIOD_DAY_INDEX )
+    if( is_train_mode() && tool_bar_->sub_cycle_comb()->currentIndex() >= COMBO_PERIOD_5M_INDEX )
     {
-        tool_bar_->sub_cycle_comb()->setCurrentIndex(COMBO_PERIOD_DAY_INDEX - 1);
+        tool_bar_->sub_cycle_comb()->setCurrentIndex(COMBO_PERIOD_1M_INDEX);
         return;
     }else
     {
         kline_wall_sub->RestTypePeriod( TypePeriod(tool_bar_->sub_cycle_comb()->currentData().toInt()) );
         if( kline_wall_main->k_cur_train_date() > 0 )
         {
-            kline_wall_sub->ShowDurationKlines(kline_wall_main->k_cur_train_date());
-            kline_wall_sub->SetTrainStartDate(kline_wall_main->k_cur_train_date());
+            kline_wall_sub->ShowDurationKlines(kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
+            kline_wall_sub->SetTrainStartDateTime(kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
         }
     }
 }

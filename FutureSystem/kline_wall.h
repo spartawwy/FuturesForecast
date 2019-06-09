@@ -70,16 +70,19 @@ public:
      
     void DoIfForcastLineNearbyCursor(QMouseEvent &e);
 
-    void ShowDurationKlines(int date);
+    void ShowDurationKlines(int date, int hhmm);
 
     void UpdateIfNecessary();
     // train mode --------
-    void SetTrainStartDate(int date);
-    void MoveRightEndToNextDayK();
+    void SetTrainStartDateTime(int date, int hhmm);
+    std::tuple<int, int> MoveRightEndToNextK();
+    void MoveRightEndToNextK(int date, int hhmm);
+
     void MoveRightEndToPreDayK();
     const T_StockHisDataItem & CurTrainStockDataItem();
     void right_clicked_k_date(int val) { right_clicked_k_date_ = val; }
     int k_cur_train_date() { return k_cur_train_date_; }
+    int k_cur_train_hhmm() { return k_cur_train_hhmm_; }
 
     void Set_Cursor(Qt::CursorShape sp);
 
@@ -199,6 +202,7 @@ private:
 
     int  k_rend_index_for_train_;
     int  k_cur_train_date_;
+    int  k_cur_train_hhmm_;
 
     TypePeriod  k_type_;
     int nmarket_;
@@ -236,6 +240,7 @@ private:
     bool is_draw_section_;
 
     int  right_clicked_k_date_; // right mouse click
+    int  right_clicked_k_hhmm_; // right mouse click
      
     StatisticDlg  statistic_dlg_;
      
@@ -252,6 +257,6 @@ std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, Typ
 // ret: hhmm
 int GetKDataTargetStartTime(TypePeriod type_period, int hhmm);
 
-int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val);
+int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val, int hhmm);
 
 #endif // K_LINE_WALL_SDF32DSF_

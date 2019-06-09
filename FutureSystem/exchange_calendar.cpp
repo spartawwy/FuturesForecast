@@ -192,10 +192,10 @@ T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod typ
     assert(start_date <= end_date);
 
     time_t rawtime;
-    struct tm * timeinfo;
+    struct tm timeinfo;
     time( &rawtime );
-    timeinfo = localtime( &rawtime ); 
-    const int hhmm = timeinfo->tm_hour * 100 + timeinfo->tm_min;
+    localtime_s(&timeinfo, &rawtime); 
+    const int hhmm = timeinfo.tm_hour * 100 + timeinfo.tm_min;
 
     int today = TSystem::Today();
     

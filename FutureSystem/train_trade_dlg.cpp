@@ -10,9 +10,9 @@
 
 #include "train_dlg.h"
 
-TrainTradeDlg::TrainTradeDlg(TrainDlg *train_dlg, bool is_sell) 
+TrainTradeDlg::TrainTradeDlg(TrainDlg *train_dlg, bool is_close) 
     : train_dlg_(train_dlg)
-    , is_sell_(is_sell)
+    , is_close_(is_close)
     , date_(0)
 {
     ui.setupUi(this);
@@ -35,26 +35,26 @@ void TrainTradeDlg::showEvent(QShowEvent * event)
     QWidget::showEvent(event);
     if( event->type() != QEvent::Show )
         return;
-    if( is_sell_ )
+    if( is_close_ )
     {
-        this->setWindowTitle(QString::fromLocal8Bit("卖出"));
+        this->setWindowTitle(QString::fromLocal8Bit("平"));
 
-        ui.lab_price->setText(QString::fromLocal8Bit("卖出价格"));
-        ui.lab_qty_ava->setText(QString::fromLocal8Bit("可卖数量"));
-        ui.lab_qty->setText(QString::fromLocal8Bit("卖出数量"));
-        ui.lab_capital_ava->setText(QString::fromLocal8Bit("可用资金"));
-        ui.lab_capital->setText(QString::fromLocal8Bit("资金"));
-        ui.pbt_trade->setText(QString::fromLocal8Bit("卖出"));
+        ui.lab_price->setText(QString::fromLocal8Bit("价格"));
+        ui.le_qty_ava->setText(QString::fromLocal8Bit("可平数量"));
+        ui.lab_qty->setText(QString::fromLocal8Bit("平仓数量"));
+        //ui.lab_capital_ava->setText(QString::fromLocal8Bit("可用资金"));
+        //ui.lab_capital->setText(QString::fromLocal8Bit("资金"));
+        ui.pbt_trade->setText(QString::fromLocal8Bit("平仓"));
     }else
     {
-        this->setWindowTitle(QString::fromLocal8Bit("买入"));
+        this->setWindowTitle(QString::fromLocal8Bit("开"));
 
-        ui.lab_price->setText(QString::fromLocal8Bit("买入价格"));
-        ui.lab_qty_ava->setText(QString::fromLocal8Bit("可买数量"));
-        ui.lab_qty->setText(QString::fromLocal8Bit("买入数量"));
-        ui.lab_capital_ava->setText(QString::fromLocal8Bit("可用资金"));
-        ui.lab_capital->setText(QString::fromLocal8Bit("买入资金"));
-        ui.pbt_trade->setText(QString::fromLocal8Bit("买入"));
+        ui.lab_price->setText(QString::fromLocal8Bit("开仓价格"));
+        ui.le_qty_ava->setText(QString::fromLocal8Bit("可开数量"));
+        ui.lab_qty->setText(QString::fromLocal8Bit("开仓数量"));
+        //ui.lab_capital_ava->setText(QString::fromLocal8Bit("可用资金"));
+        //ui.lab_capital->setText(QString::fromLocal8Bit("资金"));
+        ui.pbt_trade->setText(QString::fromLocal8Bit("开仓"));
     }
 }
 
@@ -87,9 +87,12 @@ void TrainTradeDlg::_onBtnQuantity(double val)
 {
     assert(val > 0.0);
     assert(val < 1.0001);
-    if( is_sell_ )
+    if( is_close_ )
     {
-        ui.le_qty->setText( ToQString(int(train_dlg_->account_info().stock.avaliable * val)) );
+        if( ui.radioBtn_long->isChecked() )
+            ui.le_qty->setText( ToQString(int(train_dlg_->account_info().position.LongPos() * val)) );
+        else
+            ui.le_qty->setText( ToQString(int(train_dlg_->account_info().position.ShortPos() * val)) );
     }else
     {
         const T_StockHisDataItem & stock_item = train_dlg_->CurHisStockDataItem();

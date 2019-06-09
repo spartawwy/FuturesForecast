@@ -14,12 +14,15 @@ class TrainTradeDlg : public QWidget
 
 public:
 
-    TrainTradeDlg(TrainDlg *train_dlg, bool is_sell);
+    TrainTradeDlg(TrainDlg *train_dlg, bool is_close);
 
     Ui::TrainTradeForm  ui;
 
-    void is_sell(bool val) { is_sell_ = val; }
+    void is_close(bool val) { is_close_ = val; }
+    bool is_long() { return ui.radioBtn_long->isChecked(); }
     void SetDate(int date) { date_ = date; }
+    void SetHhmm(int hhmm) { hhmm_ = hhmm; }
+
 //private slots:
     virtual void closeEvent(QCloseEvent *) override;
     virtual void showEvent(QShowEvent *) override;
@@ -38,8 +41,9 @@ private:
     void _onBtnQuantity(double val);
 
     TrainDlg *train_dlg_;
-    bool is_sell_;
+    bool is_close_;
     int  date_;
+    int  hhmm_;
 
     friend class TrainDlg;
 };

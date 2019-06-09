@@ -54,6 +54,7 @@ KLineWall::KLineWall(FuturesForecastApp *app, QWidget *parent, int index, TypePe
     , pre_k_rend_index_(0)
     , k_rend_index_for_train_(0)
     , k_cur_train_date_(0)
+    , k_cur_train_hhmm_(0)
     , k_type_(k_type)
     , nmarket_(MARKET_SH_FUTURES)
     , k_cycle_tag_()
@@ -71,6 +72,7 @@ KLineWall::KLineWall(FuturesForecastApp *app, QWidget *parent, int index, TypePe
     , is_draw_struct_line_(false)
     , is_draw_section_(false)
     , right_clicked_k_date_(0)
+    , right_clicked_k_hhmm_(0)
     
 {
     ui.setupUi(this);
@@ -824,6 +826,7 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
         {  
             const double x_pos = e->localPos().x();
             right_clicked_k_date_ = 0;
+            right_clicked_k_hhmm_ = 0;
             int j = 0;
             for( auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
                 iter != p_hisdata_container_->rend() && j < k_num_; 
@@ -837,6 +840,16 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
                 if( pos_data.x_left <= x_pos && x_pos <= pos_data.x_right )
                 {
                     right_clicked_k_date_ = iter->get()->stk_item.date;
+                    right_clicked_k_hhmm_ = iter->get()->stk_item.hhmmss;
+#if 0
+                    if( right_clicked_k_hhmm_ > 0 )
+                    {
+                        int hour = right_clicked_k_hhmm_ / 100;
+                        int minute = right_clicked_k_hhmm_ % 100;
+
+                        right_clicked_k_hhmm_ -= 5;
+                    }
+#endif
                     break;
                 } 
             }
@@ -1518,7 +1531,7 @@ void KLineWall::slotZoominSelect(bool)
 
 void KLineWall::slotOpenRelatedSubKwall(bool)
 {
-    main_win_->SubKlineWall()->ShowDurationKlines(right_clicked_k_date_);
+    main_win_->SubKlineWall()->ShowDurationKlines(right_clicked_k_date_, right_clicked_k_hhmm_);
     main_win_->SubKlineWall()->setVisible(true);
     main_win_->tool_bar()->SetShowSubKwallBtn(true);
 }
@@ -1631,7 +1644,7 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
 
 
 // ps: for sub kline wall
-void KLineWall::ShowDurationKlines(int date)
+void KLineWall::ShowDurationKlines(int date, int hhmm)
 {
     if( p_hisdata_container_->empty() )
         return;
@@ -1652,7 +1665,7 @@ void KLineWall::ShowDurationKlines(int date)
         AppendPreData(beg_date); 
     }
     k_rend_index_ = 0;
-    int index = FindKRendIndex(p_hisdata_container_, date);
+    int index = FindKRendIndex(p_hisdata_container_, date, hhmm);
     if( index > -1 )
     { 
         k_rend_index_ = index;
@@ -1720,11 +1733,11 @@ void KLineWall::UpdateIfNecessary()
     }
 }
 
-void KLineWall::SetTrainStartDate(int date)
+void KLineWall::SetTrainStartDateTime(int date, int hhmm)
 {
     const int old_rend_index = k_rend_index_;
     const int old_k_num = k_num_;
-    int target_r_end_index = FindKRendIndex(p_hisdata_container_, date);
+    int target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
     if( target_r_end_index > -1 )
     {
         k_rend_index_ = target_r_end_index; 
@@ -1734,7 +1747,7 @@ void KLineWall::SetTrainStartDate(int date)
         QDate qdate_obj(date/10000, (date%10000)/100, date%100);
         const int start_date = qdate_obj.addDays( -1 * (4 * 30) ).toString("yyyyMMdd").toInt(); 
         AppendPreData(start_date);
-        target_r_end_index = FindKRendIndex(p_hisdata_container_, date);
+        target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
         if( target_r_end_index > -1 )
         {
             k_rend_index_ = target_r_end_index; 
@@ -1747,6 +1760,7 @@ void KLineWall::SetTrainStartDate(int date)
         }
     }
     k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
+    k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
 
     if( old_rend_index != k_rend_index_ || old_k_num != k_num_ )
     {
@@ -1757,13 +1771,40 @@ void KLineWall::SetTrainStartDate(int date)
     
 }
 
-void KLineWall::MoveRightEndToNextDayK()
+// return hhmm of next k
+std::tuple<int, int> KLineWall::MoveRightEndToNextK()
+{
+    if( p_hisdata_container_->empty() || k_rend_index_for_train_ <= 0 )
+        return std::make_tuple(0, 0);
+
+    const int old_k_rend_index = k_rend_index_; 
+    const int old_date = ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.date;
+    const int old_hhmm = ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss;
+
+    k_rend_index_for_train_ = k_rend_index_for_train_ - 1 > -1 ? k_rend_index_for_train_ - 1 : 0;
+
+    k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
+    k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
+    
+    k_rend_index_ = k_rend_index_for_train_;
+    if( old_k_rend_index != k_rend_index_ )
+    {
+        UpdateKwallMinMaxPrice();
+        UpdatePosDatas();
+        update();
+    }
+    return std::make_tuple(k_cur_train_date_, k_cur_train_hhmm_);
+}
+
+
+void KLineWall::MoveRightEndToNextK(int date, int hhmm)
 {
     if( p_hisdata_container_->empty() || k_rend_index_for_train_ <= 0 )
         return;
 
     const int old_k_rend_index = k_rend_index_; 
     const int old_date = ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.date;
+    const int old_hhmm = ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss;
 
     int index_help = k_rend_index_for_train_; 
     bool is_first_change_date = true;
@@ -1792,6 +1833,7 @@ void KLineWall::MoveRightEndToNextDayK()
     } // while
 
     k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
+    k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
 
     k_rend_index_ = k_rend_index_for_train_;
     if( old_k_rend_index != k_rend_index_ )
@@ -1832,6 +1874,7 @@ void KLineWall::MoveRightEndToPreDayK()
     }
 
     k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
+    k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
 
     k_rend_index_ = k_rend_index_for_train_;
     if( old_k_rend_index != k_rend_index_ )

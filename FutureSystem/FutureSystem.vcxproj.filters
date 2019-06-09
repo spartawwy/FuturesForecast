@@ -179,6 +179,9 @@
     <ClCompile Include="tdx_exhq_wrapper.cpp">
       <Filter>tdx</Filter>
     </ClCompile>
+    <ClCompile Include="train_trade.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.ui">
@@ -272,6 +275,9 @@
     </ClInclude>
     <ClInclude Include="tdx_exhq_wrapper.h">
       <Filter>tdx</Filter>
+    </ClInclude>
+    <ClInclude Include="train_trade.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

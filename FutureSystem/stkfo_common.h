@@ -45,7 +45,8 @@ enum class FractalType : int
  
 #define CST_MAGIC_POINT QPointF(-1, -1)
 #define MAX_PRICE 100000000.0f
-#define MIN_PRICE 0.0f
+#define MIN_PRICE EPSINON
+#define MAGIC_STOP_PRICE (-1.0f)
 
 #define MARKET_TYPE_SH  1
 #define MARKET_TYPE_SZ  0
@@ -307,12 +308,22 @@ void ClearTopFractal(T_KlineDataItem &k_data_item);
  
 void ClearBtmFractal(T_KlineDataItem &k_data_item);
 
+double ProcDecimal(double val, unsigned int decimal);
+
+#define  EPSINON  0.0001
+#define  DEFAULT_DECIMAL 1
+
 #define  MOMENTUM_POS 0
 
 #define  DEFAULT_MAINKWALL_TYPE_PERIOD  TypePeriod::PERIOD_5M
 #define  DEFAULT_SUBKWALL_TYPE_PERIOD  TypePeriod::PERIOD_1M
 
-#define COMBO_PERIOD_DAY_INDEX 5
+#define COMBO_PERIOD_1M_INDEX    0
+#define COMBO_PERIOD_5M_INDEX    1
+#define COMBO_PERIOD_15M_INDEX   2
+#define COMBO_PERIOD_30M_INDEX   3
+#define COMBO_PERIOD_HOUR_INDEX  4
+#define COMBO_PERIOD_DAY_INDEX   5
 
 #define MARKET_SH_FUTURES  30
 

@@ -168,6 +168,7 @@
     <ClCompile Include="title_bar.cpp" />
     <ClCompile Include="tool_bar.cpp" />
     <ClCompile Include="train_dlg.cpp" />
+    <ClCompile Include="train_trade.cpp" />
     <ClCompile Include="train_trade_dlg.cpp" />
     <ClCompile Include="zhibiao.cpp" />
     <ClCompile Include="zhibiao_window.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="stkfo_common.h" />
     <ClInclude Include="tdxhq\ExHqApi.h" />
     <ClInclude Include="tdx_exhq_wrapper.h" />
+    <ClInclude Include="train_trade.h" />
     <CustomBuild Include="stockinput_dlg.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing stockinput_dlg.h...</Message>

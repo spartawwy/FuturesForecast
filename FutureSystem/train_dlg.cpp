@@ -10,10 +10,7 @@
 
 //static const int cst_period_day_index = 4;
  
-static const double cst_default_ori_capital = 1000000.00;
-static const double cst_default_fee_rate_percent = 0.025;
-static const int cst_default_ori_stock_num = 0;
-
+//////////////////////////////////////////
 TrainDlg::TrainDlg(KLineWall *parent,  MainWindow *main_win)
     : QWidget(nullptr)
     , parent_(parent)
@@ -21,29 +18,31 @@ TrainDlg::TrainDlg(KLineWall *parent,  MainWindow *main_win)
     , trade_dlg_(this, true)
     , is_started_(false)
     , account_info_()
+    , force_close_low_(MAX_PRICE)
+    , force_close_high_(MIN_PRICE)
 {
     ui.setupUi(this);
 
     trade_dlg_.setWindowFlags(trade_dlg_.windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
-
+    bool ret = false;
     //ui.dateEditTrainBeg->mousePressEvent
-    bool ret = connect(ui.calendar, SIGNAL(clicked(const QDate &)), this, SLOT(OnCalendarClicked(const QDate &)));
+    //bool ret = connect(ui.calendar, SIGNAL(clicked(const QDate &)), this, SLOT(OnCalendarClicked(const QDate &)));
     ret = connect(ui.pbtnStart, SIGNAL(clicked()), this, SLOT(OnStartTrain()));
     ret = connect(ui.pbtnStop, SIGNAL(clicked()), this, SLOT(OnStopTrain()));
     ret = connect(ui.pbtnNextK, SIGNAL(clicked()), this, SLOT(OnMoveToNextK()));
     ret = connect(ui.pbtnPreK, SIGNAL(clicked()), this, SLOT(OnMoveToPreK()));
-    ret = connect(ui.pbtnBuy, SIGNAL(clicked()), this, SLOT(OnOpenBuyWin()));
-    ret = connect(ui.pbtnSell, SIGNAL(clicked()), this, SLOT(OnOpenSellWin()));
+    ret = connect(ui.pbtnBuy, SIGNAL(clicked()), this, SLOT(OnOpenOpenWin()));
+    ret = connect(ui.pbtnSell, SIGNAL(clicked()), this, SLOT(OnOpenCloseWin()));
 
     ret = connect(trade_dlg_.ui.pbt_trade, SIGNAL(clicked()), this, SLOT(OnTrade()));
     ret = ret;
 
-    ui.le_date->text().clear();
-    ui.le_date->setReadOnly(true);
+    //ui.le_date->text().clear();
+    //ui.le_date->setReadOnly(true);
     OnStopTrain();
      
     ui.dbspbBegCapital->setValue(cst_default_ori_capital);
-    ui.dbspbFeeRate->setValue(cst_default_fee_rate_percent);
+    //ui.dbspbFeeRate->setValue(cst_default_fee_rate_percent);
 }
 
 const T_StockHisDataItem & TrainDlg::CurHisStockDataItem()
@@ -53,7 +52,7 @@ const T_StockHisDataItem & TrainDlg::CurHisStockDataItem()
 
 void TrainDlg::OnCalendarClicked(const QDate & date)
 { 
-    ui.le_date->setText(date.toString("yyyyMMdd"));
+    //ui.le_date->setText(date.toString("yyyyMMdd"));
 }
 
 void TrainDlg::closeEvent(QCloseEvent * /*event*/)
@@ -77,28 +76,26 @@ void TrainDlg::closeEvent(QCloseEvent * /*event*/)
 
 void TrainDlg::OnStartTrain()
 {
-    if( ui.le_date->text().isEmpty() )
-    {
-        ui.calendar->setFocus();
-        return;
-    }
+    ui.de_begin->setFocus();
+
     trade_records_.clear();
 
     account_info_.capital.avaliable = ui.dbspbBegCapital->value();
     account_info_.capital.frozen = 0.0;
-    account_info_.stock.avaliable = cst_default_ori_stock_num;
-    account_info_.stock.frozen = 0.0;
+    //account_info_.position = cst_default_ori_stock_num;
+    
     ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.frozen));
-    ui.le_cur_stock_num->setText(ToQString(cst_default_ori_stock_num));
+    ui.le_long_pos->setText(ToQString(0));
+    ui.le_short_pos->setText(ToQString(0));
     ui.lab_assets->setText(ToQString(cst_default_ori_capital));
 
     ui.plain_te_record->clear();
 
     ui.dbspbBegCapital->setEnabled(false);
-    ui.dbspbFeeRate->setEnabled(false);
-    fee_rate_ = ui.dbspbFeeRate->value() / 100;
+    //ui.dbspbFeeRate->setEnabled(false);
+    //fee_rate_ = ui.dbspbFeeRate->value() / 100;
 
-    ui.calendar->setEnabled(false);
+    ui.de_begin->setEnabled(false);
     ui.pbtnStart->setEnabled(false);
     ui.pbtnStop->setEnabled(true);
 
@@ -120,10 +117,12 @@ void TrainDlg::OnStartTrain()
          this->showNormal();
     }*/
 
-    int date = ui.le_date->text().toInt();
-    parent_->SetTrainStartDate(date);
+    int date = ui.de_begin->date().toString("yyyyMMdd").toInt();
+    int time = ui.de_begin->time().toString("hhmm").toInt();
+    //int date = ui.le_date->text().toInt();
+    parent_->SetTrainStartDateTime(date, time);
 
-    main_win_->SubKlineWall()->SetTrainStartDate(date);
+    main_win_->SubKlineWall()->SetTrainStartDateTime(date, time);
     main_win_->SubKlineWall()->right_clicked_k_date(date);
     main_win_->SubKlineWall()->slotOpenRelatedSubKwall(false);
     
@@ -133,7 +132,10 @@ void TrainDlg::OnStartTrain()
 
 void TrainDlg::OnStopTrain()
 {
-    ui.calendar->setEnabled(true);
+    force_close_low_ = MAX_PRICE;
+    force_close_high_ = MIN_PRICE;
+
+    ui.de_begin->setEnabled(true);
     ui.pbtnStart->setEnabled(true);
     ui.pbtnStop->setEnabled(false);
 
@@ -143,38 +145,125 @@ void TrainDlg::OnStopTrain()
     ui.pbtnBuy->setEnabled(false);
     ui.pbtnSell->setEnabled(false);
 
-    ui.dbspbFeeRate->setEnabled(true);
+    //ui.dbspbFeeRate->setEnabled(true);
     ui.dbspbBegCapital->setEnabled(true);
 }
 
 void TrainDlg::OnMoveToNextK()
 {
-    parent_->MoveRightEndToNextDayK();
-    main_win_->SubKlineWall()->MoveRightEndToNextDayK();
+    auto date_time = parent_->MoveRightEndToNextK();
+    main_win_->SubKlineWall()->MoveRightEndToNextK(std::get<0>(date_time), std::get<1>(date_time));
 
     const T_StockHisDataItem & stock_item = CurHisStockDataItem();
-    //assert(trade_dlg_.date_ == stock_item.date);
-
-    if( account_info_.stock.frozen > 0 )
+    if( stock_item.date == 0 )
     {
-        TradeRecordAtom record_item;
-        record_item.date = stock_item.date;
-        record_item.action = RecordAction::UNFREEZE;
-        record_item.quantity = account_info_.stock.frozen;
-        trade_records_.push_back(record_item);
-
-        account_info_.stock.avaliable += account_info_.stock.frozen;
-        account_info_.stock.frozen = 0;
+        SetStatusBar(QString::fromLocal8Bit("日期为0, 数据异常!"));
+        return;
     }
-    ui.le_cur_stock_num->setText(ToQString(int(account_info_.stock.avaliable + account_info_.stock.frozen)));
-    double assets_today_end = stock_item.close_price * (account_info_.stock.avaliable + account_info_.stock.frozen) 
-        + account_info_.capital.avaliable + account_info_.capital.frozen;
-    ui.lab_assets->setText(ToQString(assets_today_end));
+    //assert(trade_dlg_.date_ == stock_item.date);
+    
+    double profit = 0.0;
+    bool has_trade = false;
+    if( fabs(stock_item.close_price - stock_item.high_price) > fabs(stock_item.close_price - stock_item.low_price) ) 
+    {
+        // close price is nearby low price: first high price then low price
+        double profit_long_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &profit_long_pos);
+        has_trade = (has_trade || !trades_stop_profit_long.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
+        double loss_short_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &loss_short_pos);
+        has_trade = (has_trade || !trades_stop_loss_short.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
+
+        double profit_short_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &profit_short_pos);
+        has_trade = (has_trade || !trades_stop_profit_short.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
+        double loss_long_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &loss_long_pos);
+        has_trade = (has_trade || !trades_stop_loss_long.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
+
+        profit = profit_long_pos + loss_short_pos + profit_short_pos + loss_long_pos;
+    }else
+    { // close price is nearby high price: first low price then high price
+        double profit_short_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &profit_short_pos);
+        has_trade = (has_trade || !trades_stop_profit_short.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
+        double loss_long_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &loss_long_pos);
+        has_trade = (has_trade || !trades_stop_loss_long.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
+
+        double profit_long_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &profit_long_pos);
+        has_trade = (has_trade || !trades_stop_profit_long.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
+        double loss_short_pos = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &loss_short_pos);
+        has_trade = (has_trade || !trades_stop_loss_short.empty());
+        trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
+
+        profit = profit_long_pos + loss_short_pos + profit_short_pos + loss_long_pos;
+    }
+     
+    if( has_trade )
+    {
+        account_info_.capital.float_profit = account_info_.position.FloatProfit(stock_item.open_price);
+        account_info_.capital.avaliable += profit;
+        auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
+        force_close_low_ = std::get<0>(low_high);
+        force_close_high_ = std::get<1>(low_high);
+    }
+
+    if( (force_close_low_ < MAX_PRICE && stock_item.low_price < force_close_low_ + EPSINON)
+        || (force_close_high_ > MIN_PRICE && stock_item.high_price + EPSINON > force_close_high_) )
+    {  // force close
+        double profit_close_long = 0.0;
+        auto long_pos = account_info_.position.LongPos();
+        if( long_pos > 0 )
+        {
+        std::vector<TradeRecordAtom> trades_close_long = account_info_.position.CloseLong(stock_item.date, stock_item.hhmmss, force_close_low_, unsigned int(long_pos), &profit_close_long);
+        trade_records_.insert(trade_records_.end(), trades_close_long.begin(), trades_close_long.end());
+        }
+
+        double profit_close_short = 0.0;
+        auto short_pos = account_info_.position.ShortPos();
+        if( short_pos > 0 )
+        {
+        std::vector<TradeRecordAtom> trades_close_short = account_info_.position.CloseShort(stock_item.date, stock_item.hhmmss, force_close_low_, unsigned int(short_pos), &profit_close_short);
+        trade_records_.insert(trade_records_.end(), trades_close_short.begin(), trades_close_short.end());
+        }
+
+        double this_price = 0.0;
+        if( force_close_low_ < MAX_PRICE && stock_item.low_price < force_close_low_ + EPSINON )
+            this_price = force_close_low_;
+        else
+            this_price = force_close_high_;
+        if( long_pos + short_pos > 0 )
+            account_info_.capital.avaliable = (long_pos + short_pos) * cst_margin_capital
+                                          - CalculateFee(long_pos + short_pos, this_price, true);
+        assert(account_info_.capital.avaliable + account_info_.capital.float_profit > EPSINON);
+    }else
+    {
+        account_info_.capital.float_profit = account_info_.position.FloatProfit(stock_item.close_price);
+        account_info_.capital.avaliable += profit;
+        assert(account_info_.capital.avaliable + account_info_.capital.float_profit > EPSINON);
+    }
+     
+    ui.le_long_pos->setText(ToQString(int(account_info_.position.LongPos())));
+    ui.le_short_pos->setText(ToQString(int(account_info_.position.ShortPos())));
+     
+    ui.lab_assets->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.float_profit));
+
     PrintTradeRecords();
 }
 
 void TrainDlg::OnMoveToPreK()
 {
+#if 0 
     const T_StockHisDataItem & stock_item = CurHisStockDataItem();
     // roll back trade records of cur k line 's 
     while( !trade_records_.empty() && trade_records_.back().date == stock_item.date )
@@ -216,53 +305,70 @@ void TrainDlg::OnMoveToPreK()
     double assets_today_end = pre_stock_item.close_price * (account_info_.stock.avaliable + account_info_.stock.frozen) 
         + account_info_.capital.avaliable + account_info_.capital.frozen;
     ui.lab_assets->setText(ToQString(assets_today_end));
+
     PrintTradeRecords();
+#endif
 }
 
-void TrainDlg::OnOpenBuyWin()
+void TrainDlg::OnOpenOpenWin()
 {
     trade_dlg_.SetStatusBar("");
     const T_StockHisDataItem & stock_item = CurHisStockDataItem();
     if( stock_item.date == 0 )
     {
-        trade_dlg_.SetStatusBar(QString::fromLocal8Bit("当前日期无对应股票数据!"));
+        trade_dlg_.SetStatusBar(QString::fromLocal8Bit("当前日期无对应期货数据!"));
         return;
     }
     this->hide();
-    trade_dlg_.is_sell(false);
+    trade_dlg_.is_close(false);
     trade_dlg_.SetDate(stock_item.date);
+    trade_dlg_.SetHhmm(stock_item.hhmmss);
+    trade_dlg_.ui.radioBtn_open->setChecked(true);
+    trade_dlg_.ui.radioBtn_close->setChecked(false);
     //const double allow_highest_price = (stock_item.open_price < stock_item.close_price ? stock_item.close_price : stock_item.open_price);
 
     trade_dlg_.ui.le_price->setText(ToQString(stock_item.close_price));
-     
-    int qty = CalculateMaxQtyAllowBuy(account_info_.capital.avaliable, stock_item.close_price);
+    trade_dlg_.ui.le_stop_profit->setText(ToQString(MAGIC_STOP_PRICE));
+    trade_dlg_.ui.le_stop_loss->setText(ToQString(MAGIC_STOP_PRICE));
+
+    int qty = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable + account_info_.capital.float_profit, stock_item.close_price);
     trade_dlg_.ui.le_qty_ava->setText(ToQString(qty));
     trade_dlg_.ui.le_qty->setText(ToQString(qty));
-    trade_dlg_.ui.le_capital_ava->setText(ToQString(account_info_.capital.avaliable));
-    trade_dlg_.ui.le_capital->clear();
+    trade_dlg_.ui.le_capital_ava->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.float_profit));
 
     trade_dlg_.showNormal();
 }
 
-void TrainDlg::OnOpenSellWin()
+void TrainDlg::OnOpenCloseWin()
 {
     trade_dlg_.SetStatusBar("");
     const T_StockHisDataItem & stock_item = CurHisStockDataItem();
     if( stock_item.date == 0 )
     {
-        trade_dlg_.SetStatusBar(QString::fromLocal8Bit("当前日期无对应股票数据!"));
+        trade_dlg_.SetStatusBar(QString::fromLocal8Bit("当前日期无对应期货数据!"));
         return;
     }
     this->hide();
-    trade_dlg_.is_sell(true);
+    trade_dlg_.is_close(true);
     trade_dlg_.SetDate(stock_item.date);
+    trade_dlg_.SetHhmm(stock_item.hhmmss);
+    trade_dlg_.ui.radioBtn_close->setChecked(true);
+    trade_dlg_.ui.radioBtn_open->setChecked(false);
+
     //const double allow_highest_price = (stock_item.open_price < stock_item.close_price ? stock_item.close_price : stock_item.open_price);
 
     trade_dlg_.ui.le_price->setText(ToQString(stock_item.close_price));
-    trade_dlg_.ui.le_qty_ava->setText(ToQString(account_info_.stock.avaliable));
-    trade_dlg_.ui.le_qty->setText(ToQString(account_info_.stock.avaliable));
+
+    if( trade_dlg_.ui.radioBtn_long->isChecked() )
+    {
+        trade_dlg_.ui.le_qty->setText(ToQString((int)account_info_.position.LongPos()));
+        trade_dlg_.ui.le_qty_ava->setText(ToQString((int)account_info_.position.LongPos()));
+    }else
+    {
+        trade_dlg_.ui.le_qty->setText(ToQString((int)account_info_.position.ShortPos()));
+        trade_dlg_.ui.le_qty_ava->setText(ToQString((int)account_info_.position.ShortPos()));
+    }
     trade_dlg_.ui.le_capital_ava->setText(ToQString(account_info_.capital.avaliable));
-    trade_dlg_.ui.le_capital->clear();
 
     trade_dlg_.showNormal();
 }
@@ -276,125 +382,139 @@ void TrainDlg::OnTrade()
         return;
     }
     const T_StockHisDataItem & stock_item = CurHisStockDataItem();
-    assert(trade_dlg_.date_ == stock_item.date);
+    //assert(trade_dlg_.date_ == stock_item.date);
 
     double price = trade_dlg_.ui.le_price->text().toDouble();
     int quantity = (int)trade_dlg_.ui.le_qty->text().toDouble();
     trade_dlg_.ui.le_qty->setText(ToQString(quantity));
 
-    const double allow_lowest_price = (stock_item.open_price < stock_item.close_price ? stock_item.open_price : stock_item.close_price);
-    const double allow_highest_price = (stock_item.open_price < stock_item.close_price ? stock_item.close_price : stock_item.open_price);
+    double allow_lowest_price = (stock_item.open_price < stock_item.close_price ? stock_item.open_price : stock_item.close_price);
+    allow_lowest_price = ProcDecimal(allow_lowest_price, DEFAULT_DECIMAL);
+    double allow_highest_price = (stock_item.open_price < stock_item.close_price ? stock_item.close_price : stock_item.open_price);
+    allow_highest_price = ProcDecimal(allow_highest_price, DEFAULT_DECIMAL);
     if( price < allow_lowest_price || price > allow_highest_price ) 
     {
         trade_dlg_.SetStatusBar(QString::fromLocal8Bit("报价非法!"));
         trade_dlg_.ui.le_price->setFocus();
         return;
     }
-    if( trade_dlg_.is_sell_ )
+    const bool is_pos_type_long = trade_dlg_.is_long();
+
+    if( trade_dlg_.is_close_ )
     {
         if( quantity <= 0 )
         {
-            trade_dlg_.SetStatusBar(QString::fromLocal8Bit("卖出数量非法!"));
+            trade_dlg_.SetStatusBar(QString::fromLocal8Bit("平仓数量非法!"));
             trade_dlg_.ui.le_qty->setFocus();
             return;
         } 
-        if( quantity > account_info_.stock.avaliable )
+        int avaliable_pos = 0;
+        if( is_pos_type_long )
+            avaliable_pos = (int)account_info_.position.LongPos();
+        else
+            avaliable_pos = (int)account_info_.position.ShortPos();
+
+        if( quantity > avaliable_pos )
         {
-            trade_dlg_.SetStatusBar(QString::fromLocal8Bit("可用数量不足!"));
+            trade_dlg_.SetStatusBar(QString::fromLocal8Bit("可平数量不足!"));
             trade_dlg_.ui.le_qty->setFocus();
             return;
         }
         
-        double fee = CalculateFee(quantity, price, true);
-        double capital_income = price * quantity - fee;
-        trade_dlg_.ui.le_capital->setText(ToQString(capital_income));
-
-        account_info_.capital.avaliable += capital_income;
-        account_info_.stock.avaliable -= quantity;
+        double final_fill_price = 0.0;
+        double profit = 0.0;
+        if( is_pos_type_long )
+        {
+            final_fill_price = price - cst_per_tick;
+            account_info_.position.CloseLong(stock_item.date, stock_item.hhmmss, final_fill_price, unsigned int(quantity), &profit);
+        }else
+        {
+            final_fill_price = price + cst_per_tick;
+            account_info_.position.CloseShort(stock_item.date, stock_item.hhmmss, final_fill_price, unsigned int(quantity), &profit);
+        }
+        double fee = CalculateFee(quantity, final_fill_price, true);
+         
+        account_info_.capital.avaliable += profit - fee; 
 
         TradeRecordAtom  trade_item;
         trade_item.date = trade_dlg_.date_;
-        trade_item.action = RecordAction::SELL;
-        trade_item.price = price;
+        trade_item.hhmm = trade_dlg_.hhmm_;
+        trade_item.action = RecordAction::CLOSE;
+        trade_item.pos_type = is_pos_type_long ? PositionType::POS_LONG : PositionType::POS_SHORT;
+        trade_item.price = final_fill_price;
         trade_item.quantity = quantity;
         trade_item.fee = fee;
+        trade_item.profit = profit;
         trade_records_.push_back(trade_item);
 
-    }else
-    {
-        quantity = quantity / 100 * 100;
-        
-        if( quantity < 100 )
+    }else // open 
+    { 
+        if( quantity < 1 )
         {
             trade_dlg_.SetStatusBar(QString::fromLocal8Bit("购买数量非法!"));
             trade_dlg_.ui.le_qty->setFocus();
             return;
         }
-
-        double capital_buy = price * quantity;
-        double fee = CalculateFee(quantity, price, false);
+        double capital_buy = cst_margin_capital * quantity;
+        double final_fill_price = 0.0;
+        if( is_pos_type_long )
+        {
+            final_fill_price = price + cst_per_tick;
+        }else
+        {
+            final_fill_price = price - cst_per_tick;
+        }
+        double fee = CalculateFee(quantity, final_fill_price, false);
         if( capital_buy + fee > account_info_.capital.avaliable )
         {
             trade_dlg_.SetStatusBar(QString::fromLocal8Bit("可用资金不足!"));
             return;
         }
-         
-        trade_dlg_.ui.le_capital->setText(ToQString(capital_buy + fee));
+        double stop_profit_price = MAGIC_STOP_PRICE;
+        if( !trade_dlg_.ui.le_stop_profit->text().trimmed().isEmpty() )
+            stop_profit_price = trade_dlg_.ui.le_stop_profit->text().trimmed().toDouble();
+        double stop_loss_price = MAGIC_STOP_PRICE;
+        if( !trade_dlg_.ui.le_stop_loss->text().trimmed().isEmpty() )
+            stop_loss_price = trade_dlg_.ui.le_stop_loss->text().trimmed().toDouble();
 
         account_info_.capital.avaliable -= capital_buy + fee;
-        account_info_.stock.frozen += quantity;
 
+        PositionAtom  pos_atom;
+        pos_atom.price = final_fill_price;
+        pos_atom.qty = (unsigned int)quantity;
+        pos_atom.stop_profit_price = stop_profit_price;
+        pos_atom.stop_loss_price = stop_loss_price;
+        account_info_.position.PushBack(is_pos_type_long, pos_atom);
+ 
         TradeRecordAtom  trade_item;
         trade_item.date = trade_dlg_.date_;
-        trade_item.action = RecordAction::BUY;
-        trade_item.price = price;
+        trade_item.hhmm = trade_dlg_.hhmm_;
+        trade_item.action = RecordAction::OPEN;
+        trade_item.pos_type = is_pos_type_long ? PositionType::POS_LONG : PositionType::POS_SHORT;
+        trade_item.price = final_fill_price;
         trade_item.quantity = quantity;
+        trade_item.profit = 0.0;
         trade_item.fee = fee;
         trade_records_.push_back(trade_item);
+
+        trade_dlg_.ui.le_capital_ava->setText(ToQString(account_info_.capital.avaliable));
     }
     
-    // update capital and stock num on ui--------
+    // update capital --------
     ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable));
-    ui.le_cur_stock_num->setText(ToQString(int(account_info_.stock.avaliable + account_info_.stock.frozen)));
+    //ui.le_cur_stock_num->setText(ToQString(int(account_info_.stock.avaliable + account_info_.stock.frozen)));
 
-    double assets_today_end = stock_item.close_price * (account_info_.stock.avaliable + account_info_.stock.frozen) 
-        + account_info_.capital.avaliable + account_info_.capital.frozen;
+    double assets_today_end = account_info_.capital.avaliable + account_info_.capital.frozen
+        + account_info_.position.FloatProfit(price);
     ui.lab_assets->setText(ToQString(assets_today_end));
+
+    auto force_close_low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.frozen);
+    force_close_low_ = std::get<0>(force_close_low_high);
+    force_close_high_ = std::get<1>(force_close_low_high);
 
     trade_dlg_.hide();
     PrintTradeRecords();
     this->showNormal();
-}
-
-double TrainDlg::CalculateFee(int quantity, double price, bool is_sell)
-{
-    assert(quantity > 0.0);
-    assert(price > 0.0);
-    double amount = quantity * price;
-    double commission = amount < 5.1 ? 5.0 : (fee_rate_ * amount);
-    return commission +  (is_sell ? amount / 1000 : 0);
-}
-
-int TrainDlg::CalculateMaxQtyAllowBuy(double capital, double price)
-{
-    assert(capital > 0.0);
-    assert(price > 0.0);
-    int qty = capital / price;
-    qty = qty / 100 * 100;
-    if( qty < 100 )
-        return 0;
-    double fee = CalculateFee(qty, price, false);
-
-    for( int i = 0; i < 100; ++i )
-    {
-        if( qty * price + fee > capital && qty >= 100 )
-        {
-            qty -= 100;
-            fee = CalculateFee(qty, price, false);
-        }else
-            break;
-    }
-    return qty < 100 ? 0 : qty;
 }
 
 void TrainDlg::PrintTradeRecords()
@@ -409,28 +529,4 @@ void TrainDlg::PrintTradeRecords()
     }
     ui.plain_te_record->setPlainText(records_str);
     //ui.plain_te_record->setText()
-}
-
-QString TrainDlg::TradeRecordAtom::ToQStr()
-{
-    char buf[1024] = {'\0'};
-    sprintf_s(buf, "日期:%d %s 数量:%d 价格:%.2f 佣金税费:%.2f "
-        , this->date
-        , ToStr(this->action).c_str()
-        , this->quantity
-        , this->price
-        , this->fee);
-    return QString::fromLocal8Bit(buf);
-}
-
-std::string ToStr(RecordAction action)
-{
-    switch(action)
-    {
-    case RecordAction::BUY:  return "买"; break;
-    case RecordAction::SELL: return "卖";break;
-    case RecordAction::UNFREEZE: return "解冻";break;
-    default:assert(false);
-    }
-    return "";
 }

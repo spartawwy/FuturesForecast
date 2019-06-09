@@ -426,7 +426,7 @@ std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, Typ
                 , 2305, 2310,2315, 2320, 2325,2330,2335,2340,2345,2350,2355,2359};
             hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
             if( hhmm == 2359 )
-                hhmm == 0;
+                hhmm = 0;
             break;
         }
     case TypePeriod::PERIOD_1M:
@@ -474,7 +474,7 @@ int GetKDataTargetStartTime(TypePeriod type_period, int para_hhmm)
 }
 
 // ps: from p_hisdata_container back to front
-int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val)
+int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val, int hhmm)
 {
     bool is_find = false;
     int j = 0;
@@ -484,11 +484,17 @@ int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val)
         iter != p_hisdata_container->rend(); 
         ++iter, ++j )
     { 
-        if( iter->get()->stk_item.date == date_val )
+        if( iter->get()->stk_item.date == date_val && iter->get()->stk_item.hhmmss == hhmm )
         {
             is_find = true;
             break;
-        }else if( iter->get()->stk_item.date < date_val )
+        }else if( iter->get()->stk_item.date == date_val && iter->get()->stk_item.hhmmss < hhmm )
+        {
+            near_span = date_val - iter->get()->stk_item.date;
+            near_j = j;
+            break;
+        }
+        else if( iter->get()->stk_item.date < date_val )
         {
             near_span = date_val - iter->get()->stk_item.date;
             near_j = j;

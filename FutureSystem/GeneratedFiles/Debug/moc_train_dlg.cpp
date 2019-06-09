@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_TrainDlg_t {
     QByteArrayData data[10];
-    char stringdata[116];
+    char stringdata[118];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,13 +36,13 @@ QT_MOC_LITERAL(3, 28, 12),
 QT_MOC_LITERAL(4, 41, 11),
 QT_MOC_LITERAL(5, 53, 13),
 QT_MOC_LITERAL(6, 67, 12),
-QT_MOC_LITERAL(7, 80, 12),
-QT_MOC_LITERAL(8, 93, 13),
-QT_MOC_LITERAL(9, 107, 7)
+QT_MOC_LITERAL(7, 80, 13),
+QT_MOC_LITERAL(8, 94, 14),
+QT_MOC_LITERAL(9, 109, 7)
     },
     "TrainDlg\0OnCalendarClicked\0\0OnStartTrain\0"
     "OnStopTrain\0OnMoveToNextK\0OnMoveToPreK\0"
-    "OnOpenBuyWin\0OnOpenSellWin\0OnTrade\0"
+    "OnOpenOpenWin\0OnOpenCloseWin\0OnTrade\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -92,8 +92,8 @@ void TrainDlg::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         case 2: _t->OnStopTrain(); break;
         case 3: _t->OnMoveToNextK(); break;
         case 4: _t->OnMoveToPreK(); break;
-        case 5: _t->OnOpenBuyWin(); break;
-        case 6: _t->OnOpenSellWin(); break;
+        case 5: _t->OnOpenOpenWin(); break;
+        case 6: _t->OnOpenCloseWin(); break;
         case 7: _t->OnTrade(); break;
         default: ;
         }

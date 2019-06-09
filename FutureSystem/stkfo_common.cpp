@@ -3,6 +3,7 @@
 
 #include <qtextcodec.h>
 #include <qdebug.h>
+#include <cmath>
 
 bool IsNumber(const std::string& str)
 {
@@ -246,6 +247,13 @@ bool IsStrNum(const std::string& str)
 
 }
 
+double ProcDecimal(double val, unsigned int decimal)
+{
+    int temp = pow(10, decimal);
+    int64_t big_val = int64_t(val * temp + 0.5); //4…·5»Î
+    return double(big_val) / temp;
+}
+
 void utf8ToGbk(std::string& strUtf8)
 {
     QTextCodec* utf8Codec = QTextCodec::codecForName("utf-8");
@@ -269,7 +277,7 @@ void gbkToUtf8(std::string& strGbk)
 
 QString ToQString(double val)
 { 
-    return QString::number(val, 'f', 2);
+    return QString::number(val, 'f', DEFAULT_DECIMAL);
 }
 
 QString ToQString(int val)
