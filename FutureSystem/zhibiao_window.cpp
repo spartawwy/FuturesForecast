@@ -99,6 +99,7 @@ void MomentumZhibiaoWin::DrawWindow(QPainter &painter, int mm_w)
     double tag_x_pos_end = right_end;
     double pre_val = 0.0;
     k = parent_->k_num_;
+     
     for( auto iter = parent_->p_hisdata_container_->rbegin() + parent_->k_rend_index_;
         iter != parent_->p_hisdata_container_->rend() && k > 0; 
         ++iter, --k)

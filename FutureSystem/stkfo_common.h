@@ -38,6 +38,14 @@ enum class FractalType : int
  TOP_FAKE        = 0x40000000,
 };
  
+enum class TagType : int
+{
+    UNKNOW_TAG      = 0,
+    SELL            = 0x00000001,
+    STRONG_SELL     = 0x00000002,
+    BUY             = 0x00000004,
+    STRONG_BUY      = 0x00000008,
+};
 
 #define UPWARD_FRACTAL   0x10000000
 #define DOWNWARD_FRACTAL 0x20000000
@@ -125,9 +133,10 @@ class T_KlineDataItem //_t_kline_dataitem
 public:
     T_StockHisDataItem  stk_item;
     int  type;
+    int  tag;
     std::vector<std::shared_ptr<ZhiBiaoAtom> > zhibiao_atoms;
 
-    T_KlineDataItem() : type(int(FractalType::UNKNOW_FRACTAL)), kline_posdata_1(), kline_posdata_0()
+    T_KlineDataItem() : type(int(FractalType::UNKNOW_FRACTAL)), tag(int(TagType::UNKNOW_TAG)), kline_posdata_1(), kline_posdata_0()
     {
         memset(&stk_item, 0, sizeof(stk_item));
     }
@@ -137,7 +146,7 @@ public:
             return;
         CreateHelper(lh);
     }
-    explicit T_KlineDataItem(T_KlineDataItem && lh): stk_item(std::move(lh.stk_item)), kline_posdata_1(std::move(lh.kline_posdata_1)), kline_posdata_0(std::move(lh.kline_posdata_0))
+    explicit T_KlineDataItem(T_KlineDataItem && lh): stk_item(std::move(lh.stk_item)), type(lh.type), tag(lh.tag), kline_posdata_1(std::move(lh.kline_posdata_1)), kline_posdata_0(std::move(lh.kline_posdata_0))
         , zhibiao_atoms(std::move(lh.zhibiao_atoms))
     {  
     }
@@ -148,7 +157,7 @@ public:
         CreateHelper(lh);
         return *this;
     }
-    explicit T_KlineDataItem(const T_StockHisDataItem & stock_his_data_item): type(int(FractalType::UNKNOW_FRACTAL)), kline_posdata_0(), kline_posdata_1()
+    explicit T_KlineDataItem(const T_StockHisDataItem & stock_his_data_item): type(int(FractalType::UNKNOW_FRACTAL)), tag(int(TagType::UNKNOW_TAG)), kline_posdata_0(), kline_posdata_1()
     {
         memcpy(&stk_item, &stock_his_data_item, sizeof(stock_his_data_item)); 
     }
@@ -163,6 +172,7 @@ private:
     {
         memcpy(&stk_item, &lh.stk_item, sizeof(lh.stk_item));
         this->type = lh.type;
+        this->tag = lh.tag;
         this->zhibiao_atoms = lh.zhibiao_atoms;
         this->kline_posdata_0 = lh.kline_posdata_0;
         this->kline_posdata_1 = lh.kline_posdata_1;
@@ -209,7 +219,22 @@ bool IsBtmFake(int val);
 bool IsTopFractal(int type);
 bool IsBtmFractal(int type);
 
- 
+enum class KGreenRedType : unsigned char
+{
+    UNKNOW_TYPE = 0,
+    TEN_CROSS,
+
+    SMALL_RED,
+    MID_RED,
+    STRONG_RED,
+
+    SMALL_GREEN,
+    MID_GREEN,
+    STRONG_GREEN,
+};
+
+KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_period);
+
 class T_BiPoint
 {
 public:
@@ -309,6 +334,8 @@ void ClearTopFractal(T_KlineDataItem &k_data_item);
 void ClearBtmFractal(T_KlineDataItem &k_data_item);
 
 double ProcDecimal(double val, unsigned int decimal);
+
+KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_period);
 
 #define  EPSINON  0.0001
 #define  DEFAULT_DECIMAL 1

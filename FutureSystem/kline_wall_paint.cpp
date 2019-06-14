@@ -883,7 +883,8 @@ void KLineWall::paintEvent(QPaintEvent*)
       | zhi_biao windows 
       | bottom (show date)
     *********************************/
-     
+    std::lock_guard<std::mutex> locker(painting_mutex_);
+
     QPainter painter(this); 
     auto old_font = painter.font();
     QPen red_pen; red_pen.setColor(Qt::red); red_pen.setStyle(Qt::SolidLine); red_pen.setWidth(1);
@@ -993,8 +994,8 @@ void KLineWall::paintEvent(QPaintEvent*)
 	{   
         char temp_str[1024];
         auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
-        sprintf_s(temp_str, sizeof(temp_str), "%s 开:%.2f 高:%.2f 低:%.2f 收:%.2f  ", stock_code_.c_str(), (*iter)->stk_item.open_price
-            , (*iter)->stk_item.high_price, (*iter)->stk_item.low_price, (*iter)->stk_item.close_price);
+        sprintf_s(temp_str, sizeof(temp_str), "%s 开:%.2f 收:%.2f   高:%.2f 低:%.2f ", stock_code_.c_str(), (*iter)->stk_item.open_price
+            , (*iter)->stk_item.close_price, (*iter)->stk_item.high_price, (*iter)->stk_item.low_price);
         k_detail_str = QString::fromLocal8Bit(temp_str);
 
         double item_w = double(mm_w - empty_right_w_ - right_w_) / double(k_num_ + 1) ;
@@ -1055,8 +1056,8 @@ void KLineWall::paintEvent(QPaintEvent*)
                 sprintf_s(temp_str, "%08d\0", (*iter)->stk_item.date);
             k_date_time_str_ = temp_str;
             
-            sprintf_s(temp_str, sizeof(temp_str), "%s 开:%.2f 高:%.2f 低:%.2f 收:%.2f  \0", stock_code_.c_str(), (*iter)->stk_item.open_price
-                                                  , (*iter)->stk_item.high_price, (*iter)->stk_item.low_price, (*iter)->stk_item.close_price);
+            sprintf_s(temp_str, sizeof(temp_str), "%s 开:%.2f 收:%.2f   高:%.2f 低:%.2f \0", stock_code_.c_str(), (*iter)->stk_item.open_price
+                                                  , (*iter)->stk_item.close_price, (*iter)->stk_item.high_price, (*iter)->stk_item.low_price);
             k_detail_str = QString::fromLocal8Bit(temp_str);
         }
         // debug -----------
@@ -1091,8 +1092,29 @@ void KLineWall::paintEvent(QPaintEvent*)
                 if( FindBtmItem_TowardLeft(*p_hisdata_container_, iter, j, left_pos_data) > 0 )
                     painter.drawLine(pos_data.top.x(), pos_data.top.y(), left_pos_data->bottom.x(), left_pos_data->bottom.y());
             }
+            //----------------draw signal -----------------------
+#if 1 
+            if( (*iter)->tag != (int)TagType::UNKNOW_TAG )
+            {
+                QPen old_pen = painter.pen();
+                if( ((*iter)->tag & (int)TagType::BUY) == (int)TagType::BUY )
+                {
+                    pen.setColor(Qt::red); 
+                    const auto font_size = painter.font().pointSizeF();
+                    painter.setPen(pen);
+                    painter.drawText(pos_data.bottom.x() - item_w/3, pos_data.bottom.y() + item_w, "B");
+                }
+                if( ((*iter)->tag & (int)TagType::SELL) == (int)TagType::SELL )
+                {
+                    pen.setColor(Qt::green); 
+                    const auto font_size = painter.font().pointSizeF();
+                    painter.setPen(pen);
+                    painter.drawText(pos_data.top.x() - item_w/3, pos_data.top.y() - item_w/2, "S");
+                }
+                painter.setPen(old_pen);
+            }
+#endif 
         }
-
       }  // for all k bar 
 
         if( is_draw_bi_ )
@@ -1170,7 +1192,7 @@ void KLineWall::paintEvent(QPaintEvent*)
     painter.drawText(pos_from_global.x(), this->height()-1, k_date_time_str_.c_str());
    
     this->pre_mm_w_ = this->width();
-    this->pre_mm_h_ = this->height();
+    this->pre_mm_h_ = this->height(); 
 }
 
 
@@ -1690,6 +1712,9 @@ void KLineWall::UpdateIfNecessary()
     if( !app_->exchange_calendar()->IsTradeDate(cur_date) || !app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
         return;
 #endif
+
+    std::lock_guard<std::mutex> locker(painting_mutex_);
+
     //auto date_time = GetKDataTargetStartTime(k_type_, QDate::currentDate(), QTime::currentTime());
     //int start_date = std::get<0>(date_time);
     int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);
@@ -1709,6 +1734,8 @@ void KLineWall::UpdateIfNecessary()
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
             int ret = app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
+            if( ret == 1 )
+                TraverSetSignale(k_type_, container, true);
             is_need_updated = ret > 0;
             
         }else

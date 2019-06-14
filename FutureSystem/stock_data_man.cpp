@@ -5,7 +5,7 @@
 #include <sstream>
 #include <set>
 #include <memory>
-#include <assert.h>
+#include <cassert>
 //#include <algorithm>
 #include <TLib/core/tsystem_utility_functions.h>
 #include <TLib/core/tsystem_time.h>
@@ -271,6 +271,8 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
         TraversGetSections(period_type, stk_code, items_in_container);
     else
         TraversGetSections(period_type, code, items_in_container);
+
+    TraverSetSignale(ToTypePeriod(period_type), items_in_container, false);
 
 	return std::addressof(items_in_container);
 
@@ -1342,12 +1344,7 @@ void StockDataMan::TraverseGetStuctLines(PeriodType period_type, const std::stri
                  if( is_to_add_line )
                  {
                      pre_btm_price = kline_data_items[end]->stk_item.low_price;
-                    /* if( !container.empty() && container[container.size()-1]->type == LineType::UP )
-                     {
-                         auto line_down = std::make_shared<T_StructLine>(LineType::DOWN, index, container[container.size()-1]->beg_index);
-                         container.push_back(std::move(line_down));
-                         is_pre_add_down_line = true;
-                     }*/
+                     
                      auto line = std::make_shared<T_StructLine>(LineType::UP, end, index);
                      container.push_back(std::move(line));
                      if( IsTopFractal(kline_data_items[end]->type) )
@@ -1406,6 +1403,7 @@ void StockDataMan::TraverseGetStuctLines(PeriodType period_type, const std::stri
     } // while 
 }
 
+// data in kline_data_items is raw 
 // ps:  TraverseGetStuctLines have to be called before 
 void StockDataMan::TraversGetSections(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items)
 {
@@ -1581,18 +1579,14 @@ void StockDataMan::TraversGetSections(PeriodType period_type, const std::string 
                 { 
                     T_Section  section;
                     section.top_left_index = (struct_line_container[j]->end_index + struct_line_container[j - 1]->end_index) / 2;
-                    //double top_l_price = MIN_VAL(kline_data_items[struct_line_container[j - 1]->end_index]->stk_item.high_price
-                    //                        ,  kline_data_items[struct_line_container[i + 1]->beg_index]->stk_item.high_price);
-                    //section.top_left_price = top_l_price; 
+                    
                     std::set<int> top_index_set;
                     top_index_set.insert(struct_line_container[j - 1]->end_index);
                     top_index_set.insert(struct_line_container[i + 1]->beg_index);
                     section.top_left_price = find_section_fit_hight_price(kline_data_items, struct_line_container, true, i, j, top_index_set);
 
                     section.btm_right_index = (struct_line_container[i]->beg_index + struct_line_container[i]->end_index) / 2;
-                    /*double btm_r_price = MAX_VAL(kline_data_items[struct_line_container[j - 2]->end_index]->stk_item.low_price 
-                    , kline_data_items[struct_line_container[i]->beg_index]->stk_item.low_price);
-                    section.btm_right_price = btm_r_price;*/
+                    
                     std::set<int> btm_index_set;
                     btm_index_set.insert(struct_line_container[j - 2]->end_index);
                     btm_index_set.insert(struct_line_container[i + 1]->end_index);
@@ -1623,19 +1617,13 @@ void StockDataMan::TraversGetSections(PeriodType period_type, const std::string 
                 { 
                     T_Section  section;
                     section.top_left_index = (struct_line_container[j]->end_index + struct_line_container[j - 1]->end_index) / 2;
-                   /* double top_l_price = MIN_VAL(kline_data_items[struct_line_container[j - 1]->end_index]->stk_item.high_price
-                                            ,  kline_data_items[struct_line_container[i]->beg_index]->stk_item.high_price);
-                    section.top_left_price = top_l_price;*/
+                    
                     std::set<int> top_index_set;
                     top_index_set.insert(struct_line_container[j - 1]->end_index);
                     top_index_set.insert(struct_line_container[i]->beg_index);
                     section.top_left_price = find_section_fit_hight_price(kline_data_items, struct_line_container, false, i, j, top_index_set);
-
-
                     section.btm_right_index = (struct_line_container[i]->beg_index + struct_line_container[i]->end_index) / 2;
-                   /* double btm_r_price = MAX_VAL(kline_data_items[struct_line_container[j - 2]->end_index]->stk_item.low_price 
-                                            , kline_data_items[struct_line_container[i + 1]->beg_index]->stk_item.low_price);
-                    section.btm_right_price = btm_r_price;*/
+                   
                     std::set<int> btm_index_set;
                     btm_index_set.insert(struct_line_container[j - 2]->end_index);
                     btm_index_set.insert(struct_line_container[i + 1]->beg_index);
@@ -1655,18 +1643,14 @@ void StockDataMan::TraversGetSections(PeriodType period_type, const std::string 
                 { 
                     T_Section  section;
                     section.top_left_index = (struct_line_container[j]->end_index + struct_line_container[j - 1]->end_index) / 2;
-                    //double top_l_price = MIN_VAL(kline_data_items[struct_line_container[j - 2]->end_index]->stk_item.high_price
-                    //                        ,  kline_data_items[struct_line_container[i]->beg_index]->stk_item.high_price);
-                    //section.top_left_price = top_l_price;
+                   
                     std::set<int> top_index_set;
                     top_index_set.insert(struct_line_container[j - 2]->end_index);
                     top_index_set.insert(struct_line_container[i]->beg_index);
                     section.top_left_price = find_section_fit_hight_price(kline_data_items, struct_line_container, false, i, j, top_index_set);
 
                     section.btm_right_index = (struct_line_container[i]->beg_index + struct_line_container[i]->end_index) / 2;
-                    //double btm_r_price = MAX_VAL(kline_data_items[struct_line_container[j - 1]->end_index]->stk_item.low_price 
-                    //                        , kline_data_items[struct_line_container[i + 1]->beg_index]->stk_item.low_price);
-                    //section.btm_right_price = btm_r_price;
+                    
                     std::set<int> btm_index_set;
                     btm_index_set.insert(struct_line_container[j - 1]->end_index);
                     btm_index_set.insert(struct_line_container[i + 1]->beg_index);
@@ -1719,10 +1703,77 @@ bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date)
         , [date](T_HisDataItemContainer::reference entry){return entry->stk_item.date == date;} );
 
     return iter != data_items_in_container.end();
-   /* for( int i = data_items_in_container.size() - 1; i >= 0;  --i )
+    
+}
+
+void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, bool is_only_set_tail)
+{
+    static auto proc_if_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
     {
-        if( data_items_in_container.at(i)->stk_item.date == date && data_items_in_container.at(i)->stk_item.hhmmss == cur_hhmm)
-            return i;
+        const unsigned int max_inner_count = 5;
+        int target_front_index = -1;
+        unsigned int k = index - 1;
+        for( ; k >= 0 && k >= index - 1 - max_inner_count; --k )
+        {
+            if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price - EPSINON
+                || data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price + EPSINON  )
+            {
+                target_front_index = k;
+                break;
+            } 
+        }
+        if( target_front_index == -1 )
+            return;
+
+        int target_follow_index = -1;
+        k = index + 1;
+        for( ; k < data_items_in_container.size() && k <= index + max_inner_count; ++k )
+        {
+            if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price - EPSINON
+                || data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price + EPSINON  )
+            {
+                target_follow_index = k;
+                break;
+            } 
+        }
+        if( target_follow_index == -1 )
+            return;
+        KGreenRedType left_gr_type = KGGetGreenRedType(data_items_in_container[target_front_index]->stk_item, type_period);
+        KGreenRedType right_gr_type = KGGetGreenRedType(data_items_in_container[target_follow_index]->stk_item, type_period);
+
+        if( data_items_in_container[target_follow_index]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price 
+            && data_items_in_container[target_follow_index]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price 
+            && data_items_in_container[target_front_index]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price 
+            && data_items_in_container[target_front_index]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price )
+        {
+            
+            if( left_gr_type >= KGreenRedType::SMALL_GREEN
+                && right_gr_type >= KGreenRedType::SMALL_RED && right_gr_type < KGreenRedType::SMALL_GREEN )
+                data_items_in_container[index]->tag |= (int)TagType::BUY;
+        }
+        else if( data_items_in_container[target_follow_index]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price 
+            && data_items_in_container[target_follow_index]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price 
+            && data_items_in_container[target_front_index]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price 
+            && data_items_in_container[target_front_index]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price )
+        {
+            if( right_gr_type >= KGreenRedType::SMALL_GREEN 
+                && left_gr_type >= KGreenRedType::SMALL_RED && left_gr_type < KGreenRedType::SMALL_GREEN)
+                data_items_in_container[index]->tag |= (int)TagType::SELL;
+        }
+    };
+      
+    if( data_items_in_container.size() < 3 )
+        return;
+    unsigned int index = data_items_in_container.size() - 2;
+    while( index > 0 )
+    {
+        if( (data_items_in_container[index]->tag & (int)TagType::BUY) == (int)TagType::BUY )
+            data_items_in_container[index]->tag ^= (int)TagType::BUY;
+        if( (data_items_in_container[index]->tag & (int)TagType::SELL) == (int)TagType::SELL )
+            data_items_in_container[index]->tag ^= (int)TagType::SELL;
+        proc_if_face(type_period, data_items_in_container, index);
+        if( is_only_set_tail )
+            break;
+        --index;
     }
-    return -1;*/
 }

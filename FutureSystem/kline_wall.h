@@ -1,6 +1,7 @@
 #ifndef K_LINE_WALL_SDF32DSF_
 #define K_LINE_WALL_SDF32DSF_
 
+#include <mutex>
 #include <QtWidgets/QWidget>
 
 #include "ui_klinewall.h"
@@ -89,6 +90,8 @@ public:
     void IncreaseRendIndex() { ++k_rend_index_; }
 
     void Emit_UpdateKwall() { emit sigUpdateKwall(); }
+
+    //void LockPaintingMutex() { std::lock locker(painting_mutex_); }
 
 signals:
     void sigUpdateKwall();
@@ -238,6 +241,7 @@ private:
     bool is_draw_bi_;
     bool is_draw_struct_line_;
     bool is_draw_section_;
+    std::mutex  painting_mutex_;
 
     int  right_clicked_k_date_; // right mouse click
     int  right_clicked_k_hhmm_; // right mouse click

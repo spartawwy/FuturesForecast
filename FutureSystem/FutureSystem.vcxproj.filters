@@ -279,6 +279,9 @@
     <ClInclude Include="train_trade.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="stock_data_man.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FutureSystem.rc" />

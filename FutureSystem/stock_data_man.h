@@ -47,7 +47,7 @@ public:
 
     void TraverseGetStuctLines(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
     void TraversGetSections(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
-
+     
 public:
       
 	float GetHisDataLowestMinPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);
@@ -111,5 +111,7 @@ private:
 // < 0 : meaning no related data
 int FindDataIndex(T_HisDataItemContainer &data_items_in_container, int date, int cur_hhmm);
 bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date);
+
+void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, bool is_only_set_tail);
 
 #endif // STOCK_DATA_MAN_H

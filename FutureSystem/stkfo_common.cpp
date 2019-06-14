@@ -4,6 +4,7 @@
 #include <qtextcodec.h>
 #include <qdebug.h>
 #include <cmath>
+#include <cassert>
 
 bool IsNumber(const std::string& str)
 {
@@ -199,6 +200,52 @@ bool IsStrAlpha(const std::string& str)
         return false;
     }
 
+}
+
+KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_period)
+{
+    KGreenRedType  gr_type = KGreenRedType::UNKNOW_TYPE;
+    double small = 0.0;
+    double mid = 0.0;
+    double big = 0.0;
+    switch(type_period)
+    {
+    case TypePeriod::PERIOD_1M: small = 0.1; mid = 0.5; big = 1.0; break;
+    case TypePeriod::PERIOD_5M: small = 0.2; mid = 0.5; big = 1.5; break;
+    case TypePeriod::PERIOD_15M: small = 0.5; mid = 1.5; big = 3.5;break;
+    case TypePeriod::PERIOD_30M: small = 0.5; mid = 4.0; big = 8.0;break;
+    case TypePeriod::PERIOD_HOUR: small = 1.0; mid = 4.0; big = 8.0;break;
+    case TypePeriod::PERIOD_DAY: small = 2.5; mid = 7.0; big = 9.0;break;
+    case TypePeriod::PERIOD_WEEK: small = 7.0; mid = 10.0; big = 15.0;break;
+    default: assert(false);
+    }
+    double body_high = 0.0; 
+    if( item.close_price > item.open_price + EPSINON )
+    {
+        body_high = item.close_price - item.open_price;
+        if( body_high < small )
+            gr_type = KGreenRedType::TEN_CROSS;
+        else if( body_high < mid )
+            gr_type = KGreenRedType::SMALL_RED;
+        else if( body_high < big )
+            gr_type = KGreenRedType::MID_RED;
+        else
+            gr_type = KGreenRedType::STRONG_RED;
+    }else if( item.close_price < item.open_price - EPSINON )
+    {
+        body_high = item.open_price - item.close_price;
+        if( body_high < small )
+            gr_type = KGreenRedType::TEN_CROSS;
+        else if( body_high < mid )
+            gr_type = KGreenRedType::SMALL_GREEN;
+        else if( body_high < big )
+            gr_type = KGreenRedType::MID_GREEN;
+        else
+            gr_type = KGreenRedType::STRONG_GREEN;
+    }else
+        gr_type = KGreenRedType::TEN_CROSS;
+
+    return gr_type;
 }
 
 //void ClearTopFractal(int &val)

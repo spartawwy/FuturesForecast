@@ -201,6 +201,7 @@
     <ClInclude Include="database.h" />
     <ClInclude Include="futures_forecast_app.h" />
     <ClInclude Include="stkfo_common.h" />
+    <ClInclude Include="stock_data_man.h" />
     <ClInclude Include="tdxhq\ExHqApi.h" />
     <ClInclude Include="tdx_exhq_wrapper.h" />
     <ClInclude Include="train_trade.h" />
