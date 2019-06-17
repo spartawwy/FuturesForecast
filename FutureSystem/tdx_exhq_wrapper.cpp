@@ -63,6 +63,13 @@ bool TdxExHqWrapper::ConnectServer()
     return false;
 }
 
+void TdxExHqWrapper::DisConnect()
+{
+    if( conn_handle_ > -1 )
+        TdxExHq_Disconnect(conn_handle_);
+    conn_handle_ = -1;
+}
+
 // items date is from small to big
 bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, int start_date, int end_date, std::vector<T_StockHisDataItem> &items)
 {  
@@ -206,6 +213,7 @@ do
     bool bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
     if( !bool1 )
     { 
+        DisConnect();
         if( ConnectServer() )
         {
             bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);

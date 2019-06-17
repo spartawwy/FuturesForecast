@@ -377,11 +377,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 void MainWindow::onTimer()
 {
     // updateDateTime();
-    /*if( ++timer_update_kwall_inter_ % cst_update_kwall_inter == 0 )
-    {
-    kline_wall_main->UpdateIfNecessary();
-    kline_wall_sub->UpdateIfNecessary();
-    }*/
+ 
 }
 
 void MainWindow::on_actionExit_triggered()
