@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>StockForcast</string>
+   <string>FuturesForcast</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLabel" name="labelCurrentTime">
@@ -65,7 +65,7 @@
   </action>
   <action name="actionExit">
    <property name="icon">
-    <iconset resource="res.qrc">
+    <iconset>
      <normaloff>:/gif/1.gif</normaloff>:/gif/1.gif</iconset>
    </property>
    <property name="text">
@@ -77,8 +77,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

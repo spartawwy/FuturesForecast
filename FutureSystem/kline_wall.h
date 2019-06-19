@@ -87,7 +87,7 @@ public:
 
     void Set_Cursor(Qt::CursorShape sp);
 
-    void IncreaseRendIndex() { ++k_rend_index_; }
+    //void IncreaseRendIndex() { ++k_rend_index_; }
 
     void Emit_UpdateKwall() { emit sigUpdateKwall(); }
 

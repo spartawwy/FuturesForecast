@@ -377,7 +377,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 void MainWindow::onTimer()
 {
     // updateDateTime();
- 
+    //QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss");
+    //QTime::currentTime().toString("HHMMDD")
+    statusBar()->showMessage(QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss"));
 }
 
 void MainWindow::on_actionExit_triggered()

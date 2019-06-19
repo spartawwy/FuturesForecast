@@ -316,7 +316,7 @@ int StockDataMan::UpdateLatestItemStockData(PeriodType period_type, int nmarket,
             auto k_date_item = std::make_shared<T_KlineDataItem>(item);
             k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
             items_in_container.push_back(std::move(k_date_item));
-            //kwall_->IncreaseRendIndex();
+             
             ret = 2;
         }
         CaculateZhibiao(items_in_container);
@@ -1766,7 +1766,7 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
         return;
     unsigned int index = data_items_in_container.size() - 2;
     const unsigned int max_inner_count = 5;
-    int count_when_only_set_tail = max_inner_count + 1;
+    int count_when_only_set_tail = 50;
     while( index > 0 )
     {
         if( (data_items_in_container[index]->tag & (int)TagType::BUY) == (int)TagType::BUY )
