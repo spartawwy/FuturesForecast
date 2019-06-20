@@ -59,7 +59,8 @@ void TrainDlg::closeEvent(QCloseEvent * /*event*/)
 {
     main_win_->is_train_mode(false);
     parent_->k_rend_index_for_train_ = 0;
-    main_win_->SubKlineWall()->k_rend_index_for_train_ = 0;
+    if( main_win_->SubKlineWall() )
+        main_win_->SubKlineWall()->k_rend_index_for_train_ = 0;
     main_win_->tool_bar()->main_cycle_comb()->setEnabled(true);
 
     is_started_ = false;
@@ -120,13 +121,16 @@ void TrainDlg::OnStartTrain()
     int date = ui.de_begin->date().toString("yyyyMMdd").toInt();
     int time = ui.de_begin->time().toString("hhmm").toInt();
     //int date = ui.le_date->text().toInt();
-    parent_->SetTrainStartDateTime(date, time);
+    parent_->SetTrainStartDateTime(TypePeriod(main_win_->tool_bar_->main_cycle_comb()->currentData().toInt()), date, time);
 
-    main_win_->SubKlineWall()->SetTrainStartDateTime(date, time);
-    main_win_->SubKlineWall()->right_clicked_k_date(date);
-    main_win_->SubKlineWall()->slotOpenRelatedSubKwall(false);
+    if( main_win_->SubKlineWall() )
+    {
+        main_win_->SubKlineWall()->SetTrainStartDateTime(TypePeriod(main_win_->tool_bar_->sub_cycle_comb()->currentData().toInt())
+            , date, time);
+        main_win_->SubKlineWall()->right_clicked_k_date(date);
+        main_win_->SubKlineWall()->slotOpenRelatedSubKwall(false);
+    }
     
-
     is_started_ = true;
 }
 
@@ -152,7 +156,8 @@ void TrainDlg::OnStopTrain()
 void TrainDlg::OnMoveToNextK()
 {
     auto date_time = parent_->MoveRightEndToNextK();
-    main_win_->SubKlineWall()->MoveRightEndToNextK(std::get<0>(date_time), std::get<1>(date_time));
+    if( main_win_->SubKlineWall() )
+        main_win_->SubKlineWall()->MoveRightEndToNextK(std::get<0>(date_time), std::get<1>(date_time));
 
     const T_StockHisDataItem & stock_item = CurHisStockDataItem();
     if( stock_item.date == 0 )
@@ -163,25 +168,31 @@ void TrainDlg::OnMoveToNextK()
     //assert(trade_dlg_.date_ == stock_item.date);
     
     double profit = 0.0;
+    double capital_ret_stop_profit_short = 0.0;
+    double capital_ret_stop_loss_long = 0.0;
+    double capital_ret_stop_profit_long = 0.0;
+    double capital_ret_stop_loss_short = 0.0;
+    
     bool has_trade = false;
     if( fabs(stock_item.close_price - stock_item.high_price) > fabs(stock_item.close_price - stock_item.low_price) ) 
     {
         // close price is nearby low price: first high price then low price
         double profit_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &profit_long_pos);
+        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_profit_long, &profit_long_pos);
         has_trade = (has_trade || !trades_stop_profit_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
         double loss_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &loss_short_pos);
+        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_loss_short, &loss_short_pos);
         has_trade = (has_trade || !trades_stop_loss_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
 
         double profit_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &profit_short_pos);
+        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_profit_short, &profit_short_pos);
         has_trade = (has_trade || !trades_stop_profit_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
         double loss_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &loss_long_pos);
+        double capital_ret_stop_loss_long = 0.0;
+        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, &loss_long_pos);
         has_trade = (has_trade || !trades_stop_loss_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
 
@@ -189,20 +200,20 @@ void TrainDlg::OnMoveToNextK()
     }else
     { // close price is nearby high price: first low price then high price
         double profit_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &profit_short_pos);
+        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_profit_short, &profit_short_pos);
         has_trade = (has_trade || !trades_stop_profit_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
         double loss_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, &loss_long_pos);
+        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, &loss_long_pos);
         has_trade = (has_trade || !trades_stop_loss_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
 
         double profit_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &profit_long_pos);
+        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_profit_long, &profit_long_pos);
         has_trade = (has_trade || !trades_stop_profit_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
         double loss_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, &loss_short_pos);
+        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_loss_short, &loss_short_pos);
         has_trade = (has_trade || !trades_stop_loss_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
 
@@ -212,7 +223,7 @@ void TrainDlg::OnMoveToNextK()
     if( has_trade )
     {
         account_info_.capital.float_profit = account_info_.position.FloatProfit(stock_item.open_price);
-        account_info_.capital.avaliable += profit;
+        account_info_.capital.avaliable += profit + capital_ret_stop_profit_short + capital_ret_stop_loss_long + capital_ret_stop_profit_long + capital_ret_stop_loss_short;
         auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
         force_close_low_ = std::get<0>(low_high);
         force_close_high_ = std::get<1>(low_high);
@@ -225,7 +236,8 @@ void TrainDlg::OnMoveToNextK()
         auto long_pos = account_info_.position.LongPos();
         if( long_pos > 0 )
         {
-        std::vector<TradeRecordAtom> trades_close_long = account_info_.position.CloseLong(stock_item.date, stock_item.hhmmss, force_close_low_, unsigned int(long_pos), &profit_close_long);
+        double capital_ret = 0.0;
+        std::vector<TradeRecordAtom> trades_close_long = account_info_.position.CloseLong(stock_item.date, stock_item.hhmmss, force_close_low_, unsigned int(long_pos), capital_ret, &profit_close_long);
         trade_records_.insert(trade_records_.end(), trades_close_long.begin(), trades_close_long.end());
         }
 
@@ -233,7 +245,8 @@ void TrainDlg::OnMoveToNextK()
         auto short_pos = account_info_.position.ShortPos();
         if( short_pos > 0 )
         {
-        std::vector<TradeRecordAtom> trades_close_short = account_info_.position.CloseShort(stock_item.date, stock_item.hhmmss, force_close_low_, unsigned int(short_pos), &profit_close_short);
+        double capital_ret = 0.0;
+        std::vector<TradeRecordAtom> trades_close_short = account_info_.position.CloseShort(stock_item.date, stock_item.hhmmss, force_close_low_, unsigned int(short_pos), capital_ret, &profit_close_short);
         trade_records_.insert(trade_records_.end(), trades_close_short.begin(), trades_close_short.end());
         }
 
@@ -249,14 +262,18 @@ void TrainDlg::OnMoveToNextK()
     }else
     {
         account_info_.capital.float_profit = account_info_.position.FloatProfit(stock_item.close_price);
-        account_info_.capital.avaliable += profit;
         assert(account_info_.capital.avaliable + account_info_.capital.float_profit > EPSINON);
     }
      
-    ui.le_long_pos->setText(ToQString(int(account_info_.position.LongPos())));
-    ui.le_short_pos->setText(ToQString(int(account_info_.position.ShortPos())));
+    auto long_pos = account_info_.position.LongPos();
+    auto short_pos = account_info_.position.ShortPos();
+
+    ui.le_long_pos->setText(ToQString(int(long_pos)));
+    ui.le_short_pos->setText(ToQString(int(short_pos)));
      
-    ui.lab_assets->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.float_profit));
+    ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.float_profit));
+    ui.lab_assets->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.float_profit
+                                    + cst_margin_capital * (long_pos + short_pos)));
 
     PrintTradeRecords();
 }
@@ -296,7 +313,8 @@ void TrainDlg::OnMoveToPreK()
     } // while 
 
     parent_->MoveRightEndToPreDayK();
-    main_win_->SubKlineWall()->MoveRightEndToPreDayK();
+    if( main_win_->SubKlineWall() )
+        main_win_->SubKlineWall()->MoveRightEndToPreDayK();
 
     const T_StockHisDataItem & pre_stock_item = CurHisStockDataItem();
     ui.le_cur_stock_num->setText(ToQString(int(account_info_.stock.avaliable + account_info_.stock.frozen)));
@@ -423,18 +441,19 @@ void TrainDlg::OnTrade()
         
         double final_fill_price = 0.0;
         double profit = 0.0;
+        double capital_ret = 0.0;
         if( is_pos_type_long )
         {
             final_fill_price = price - cst_per_tick;
-            account_info_.position.CloseLong(stock_item.date, stock_item.hhmmss, final_fill_price, unsigned int(quantity), &profit);
+            account_info_.position.CloseLong(stock_item.date, stock_item.hhmmss, final_fill_price, unsigned int(quantity), capital_ret, &profit);
         }else
         {
             final_fill_price = price + cst_per_tick;
-            account_info_.position.CloseShort(stock_item.date, stock_item.hhmmss, final_fill_price, unsigned int(quantity), &profit);
+            account_info_.position.CloseShort(stock_item.date, stock_item.hhmmss, final_fill_price, unsigned int(quantity), capital_ret, &profit);
         }
         double fee = CalculateFee(quantity, final_fill_price, true);
          
-        account_info_.capital.avaliable += profit - fee; 
+        account_info_.capital.avaliable += profit - fee + capital_ret; 
 
         TradeRecordAtom  trade_item;
         trade_item.date = trade_dlg_.date_;

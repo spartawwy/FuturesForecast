@@ -55,7 +55,7 @@ void KLineWall::AppendPreData(int date)
     app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, date, oldest_day, is_index_);
 }
 
-void KLineWall::RestTypePeriod(TypePeriod  type)
+void KLineWall::ResetTypePeriod(TypePeriod  type)
 { 
     if( k_type_ == type )
         return;

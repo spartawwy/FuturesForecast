@@ -1712,7 +1712,7 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
     {
         const unsigned int max_inner_count = 5;
         int target_front_index = -1;
-        unsigned int k = index - 1;
+        int k = index - 1;
         for( ; k >= 0 && k >= index - 1 - max_inner_count; --k )
         {
             if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price - EPSINON
@@ -1764,7 +1764,7 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
       
     if( data_items_in_container.size() < 3 )
         return;
-    unsigned int index = data_items_in_container.size() - 2;
+    int index = data_items_in_container.size() - 2;
     const unsigned int max_inner_count = 5;
     int count_when_only_set_tail = 50;
     while( index > 0 )

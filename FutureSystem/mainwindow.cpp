@@ -26,7 +26,7 @@
 #include "code_list_wall.h"
 #include "train_dlg.h"
 
-#define MAKE_SUB_WALL 
+//#define MAKE_SUB_WALL 
 
 static const int cst_win_width = 1000;
 static const int cst_win_height = 500;
@@ -100,7 +100,7 @@ bool MainWindow::Initialize()
     if( !kline_wall_main->Init() )
         return false;
     kline_wall_main->setMouseTracking(true);
-    //kline_wall_main->RestTypePeriod(DEFAULT_MAINKWALL_TYPE_PERIOD);
+    //kline_wall_main->ResetTypePeriod(DEFAULT_MAINKWALL_TYPE_PERIOD);
     kline_wall_main->setFocusPolicy(Qt::StrongFocus);
     view_layout->addWidget(kline_wall_main);
 #ifdef MAKE_SUB_WALL
@@ -108,7 +108,7 @@ bool MainWindow::Initialize()
     if( !kline_wall_sub->Init() )
         return false;
     kline_wall_sub->setMouseTracking(true);
-    //kline_wall_sub->RestTypePeriod(DEFAULT_SUBKWALL_TYPE_PERIOD);
+    //kline_wall_sub->ResetTypePeriod(DEFAULT_SUBKWALL_TYPE_PERIOD);
     kline_wall_sub->setFocusPolicy(Qt::StrongFocus);
     view_layout->addWidget(kline_wall_sub);
 
@@ -399,7 +399,7 @@ void MainWindow::onMainKwallCycleChange(int /*index*/)
 {
     assert(kline_wall_main);
     tool_bar_->main_cycle_comb()->clearFocus();
-    kline_wall_main->RestTypePeriod( TypePeriod(tool_bar_->main_cycle_comb()->currentData().toInt()) );
+    kline_wall_main->ResetTypePeriod( TypePeriod(tool_bar_->main_cycle_comb()->currentData().toInt()) );
 }
 
 void MainWindow::onSubKwallCycleChange(int /*index*/)
@@ -413,11 +413,12 @@ void MainWindow::onSubKwallCycleChange(int /*index*/)
         return;
     }else
     {
-        kline_wall_sub->RestTypePeriod( TypePeriod(tool_bar_->sub_cycle_comb()->currentData().toInt()) );
+        kline_wall_sub->ResetTypePeriod( TypePeriod(tool_bar_->sub_cycle_comb()->currentData().toInt()) );
         if( kline_wall_main->k_cur_train_date() > 0 )
         {
             kline_wall_sub->ShowDurationKlines(kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
-            kline_wall_sub->SetTrainStartDateTime(kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
+            kline_wall_sub->SetTrainStartDateTime(TypePeriod(tool_bar_->sub_cycle_comb()->currentData().toInt())
+                , kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
         }
     }
 }

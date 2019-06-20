@@ -1604,8 +1604,11 @@ void KLineWall::slotZoominSelect(bool)
 
 void KLineWall::slotOpenRelatedSubKwall(bool)
 {
-    main_win_->SubKlineWall()->ShowDurationKlines(right_clicked_k_date_, right_clicked_k_hhmm_);
-    main_win_->SubKlineWall()->setVisible(true);
+    if(  main_win_->SubKlineWall() )
+    {
+        main_win_->SubKlineWall()->ShowDurationKlines(right_clicked_k_date_, right_clicked_k_hhmm_);
+        main_win_->SubKlineWall()->setVisible(true);
+    }
     main_win_->tool_bar()->SetShowSubKwallBtn(true);
 }
 
@@ -1811,7 +1814,7 @@ void KLineWall::UpdateIfNecessary()
     }
 }
 
-void KLineWall::SetTrainStartDateTime(int date, int hhmm)
+void KLineWall::SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm)
 {
     const int old_rend_index = k_rend_index_;
     const int old_k_num = k_num_;
@@ -1823,7 +1826,16 @@ void KLineWall::SetTrainStartDateTime(int date, int hhmm)
     }else
     {
         QDate qdate_obj(date/10000, (date%10000)/100, date%100);
-        const int start_date = qdate_obj.addDays( -1 * (4 * 30) ).toString("yyyyMMdd").toInt(); 
+        int start_date = 0;
+        if( tp_period >= TypePeriod::PERIOD_DAY )
+            start_date = qdate_obj.addDays( -1 * (4 * 30) ).toString("yyyyMMdd").toInt(); 
+        else if( tp_period == TypePeriod::PERIOD_HOUR )
+            start_date = qdate_obj.addDays( -1 * 10 ).toString("yyyyMMdd").toInt(); 
+        else if( tp_period >= TypePeriod::PERIOD_15M && tp_period <= TypePeriod::PERIOD_30M )
+            start_date = qdate_obj.addDays( -1 * 5 ).toString("yyyyMMdd").toInt(); 
+        else if( tp_period <= TypePeriod::PERIOD_5M )
+            start_date = qdate_obj.addDays( -1 * 3 ).toString("yyyyMMdd").toInt();
+
         AppendPreData(start_date);
         target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
         if( target_r_end_index > -1 )

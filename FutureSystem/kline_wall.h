@@ -53,7 +53,7 @@ public:
     void SetShowStructLine(bool val);
     void SetShowSection(bool val);
 
-    void RestTypePeriod(TypePeriod  type);
+    void ResetTypePeriod(TypePeriod  type);
 
     PeriodType ToPeriodType(TypePeriod src);
     
@@ -75,7 +75,7 @@ public:
 
     void UpdateIfNecessary();
     // train mode --------
-    void SetTrainStartDateTime(int date, int hhmm);
+    void SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm);
     std::tuple<int, int> MoveRightEndToNextK();
     void MoveRightEndToNextK(int date, int hhmm);
 
