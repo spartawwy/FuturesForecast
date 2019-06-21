@@ -329,5 +329,6 @@ QString ToQString(double val)
 
 QString ToQString(int val)
 { 
-   return ToQString(double(val));
+   //return ToQString(double(val));
+    return QString::number(val);
 }

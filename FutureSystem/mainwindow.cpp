@@ -26,7 +26,7 @@
 #include "code_list_wall.h"
 #include "train_dlg.h"
 
-//#define MAKE_SUB_WALL 
+#define MAKE_SUB_WALL 
 
 static const int cst_win_width = 1000;
 static const int cst_win_height = 500;

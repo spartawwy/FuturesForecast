@@ -40,8 +40,7 @@ TrainDlg::TrainDlg(KLineWall *parent,  MainWindow *main_win)
     //ui.le_date->text().clear();
     //ui.le_date->setReadOnly(true);
     OnStopTrain();
-     
-    ui.dbspbBegCapital->setValue(cst_default_ori_capital);
+      
     //ui.dbspbFeeRate->setValue(cst_default_fee_rate_percent);
 }
 
@@ -151,6 +150,14 @@ void TrainDlg::OnStopTrain()
 
     //ui.dbspbFeeRate->setEnabled(true);
     ui.dbspbBegCapital->setEnabled(true);
+
+    account_info_.capital.avaliable = cst_default_ori_capital;
+    ui.dbspbBegCapital->setValue(account_info_.capital.avaliable);
+    ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable));
+    ui.lab_assets->setText(ToQString(account_info_.capital.avaliable));
+
+    ui.le_long_pos->setText(ToQString(int(account_info_.position.LongPos())));
+    ui.le_short_pos->setText(ToQString(int(account_info_.position.ShortPos())));
 }
 
 void TrainDlg::OnMoveToNextK()
@@ -463,7 +470,7 @@ void TrainDlg::OnTrade()
         trade_item.price = final_fill_price;
         trade_item.quantity = quantity;
         trade_item.fee = fee;
-        trade_item.profit = profit;
+        trade_item.profit = profit; 
         trade_records_.push_back(trade_item);
 
     }else // open 
@@ -514,22 +521,25 @@ void TrainDlg::OnTrade()
         trade_item.quantity = quantity;
         trade_item.profit = 0.0;
         trade_item.fee = fee;
+        trade_item.price_stop_loss = stop_loss_price;
+        trade_item.price_stop_profit = stop_profit_price;
         trade_records_.push_back(trade_item);
 
         trade_dlg_.ui.le_capital_ava->setText(ToQString(account_info_.capital.avaliable));
     }
     
-    // update capital --------
-    ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable));
-    //ui.le_cur_stock_num->setText(ToQString(int(account_info_.stock.avaliable + account_info_.stock.frozen)));
-
-    double assets_today_end = account_info_.capital.avaliable + account_info_.capital.frozen
-        + account_info_.position.FloatProfit(price);
-    ui.lab_assets->setText(ToQString(assets_today_end));
-
     auto force_close_low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.frozen);
     force_close_low_ = std::get<0>(force_close_low_high);
     force_close_high_ = std::get<1>(force_close_low_high);
+
+    // ui --------
+    ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable));
+    ui.le_long_pos->setText(ToQString(int(account_info_.position.LongPos())));
+    ui.le_short_pos->setText(ToQString(int(account_info_.position.ShortPos())));
+
+    double assets_today_end = account_info_.capital.avaliable + account_info_.capital.frozen
+        + account_info_.position.FloatProfit(price) + account_info_.position.TotalPosition() * cst_margin_capital;
+    ui.lab_assets->setText(ToQString(assets_today_end));
 
     trade_dlg_.hide();
     PrintTradeRecords();

@@ -13,14 +13,17 @@
 QString TradeRecordAtom::ToQStr()
 {
     char buf[1024] = {'\0'};
-    sprintf_s(buf, "日期:%d %s %s 数量:%d 价格:%.2f 佣金税费:%.2f 盈亏:%.2f"
+    sprintf_s(buf, "日期:%d %s %s 数量:%d 价格:%.2f (止赢价:%.2f 止损价:%.2f) 佣金税费:%.2f 盈亏:%.2f "
         , this->date
         , ToStr(this->action).c_str()
         , ToStr(this->pos_type).c_str()
         , this->quantity
         , this->price
+        , this->price_stop_profit
+        , this->price_stop_loss
         , this->fee
-        , this->profit);
+        , this->profit
+        );
     return QString::fromLocal8Bit(buf);
 }
 
@@ -392,7 +395,7 @@ std::vector<TradeRecordAtom> PositionInfo::CloseLong(int date, int hhmm, double 
         if( iter->qty >= remain_tgt_qty )
         {
             this_qty = remain_tgt_qty;
-            this_profit = (price - iter->price) / 0.01 * cst_per_tick_capital * remain_tgt_qty;
+            this_profit = (price - iter->price) / cst_per_tick * cst_per_tick_capital * remain_tgt_qty;
             capital_ret += cst_margin_capital * remain_tgt_qty;
             if( iter->qty == remain_tgt_qty )
                 iter = long_positions_.erase(iter);
@@ -405,7 +408,7 @@ std::vector<TradeRecordAtom> PositionInfo::CloseLong(int date, int hhmm, double 
         }else
         {
             this_qty = iter->qty;
-            this_profit = (price - iter->price) / 0.01 * cst_per_tick_capital * this_qty;
+            this_profit = (price - iter->price) / cst_per_tick * cst_per_tick_capital * this_qty;
             remain_tgt_qty -= this_qty;
             capital_ret += cst_margin_capital * this_qty;
             iter = long_positions_.erase(iter);
@@ -450,7 +453,7 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
         if( iter->qty >= remain_tgt_qty )
         {
             this_qty = remain_tgt_qty;
-            this_profit = (iter->price - price) / 0.01 * cst_per_tick_capital * remain_tgt_qty;
+            this_profit = (iter->price - price) / cst_per_tick * cst_per_tick_capital * remain_tgt_qty;
             capital_ret += cst_margin_capital * remain_tgt_qty;
             if( iter->qty == remain_tgt_qty )
                 iter = short_positions_.erase(iter);
@@ -463,7 +466,7 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
         }else
         {
             this_qty = iter->qty;
-            this_profit = (iter->price - price) / 0.01 * cst_per_tick_capital * this_qty;
+            this_profit = (iter->price - price) / cst_per_tick * cst_per_tick_capital * this_qty;
             capital_ret += cst_margin_capital * this_qty;
             remain_tgt_qty -= this_qty;
             iter = short_positions_.erase(iter);

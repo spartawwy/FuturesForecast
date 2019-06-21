@@ -10,7 +10,7 @@
 static const double cst_per_tick = 0.1; // pow(0.1, DEFAULT_DECIMAL)
 static const double cst_per_tick_capital = 100.00;
 static const double cst_margin_capital = 6000.00;
-static const double cst_default_ori_capital = 1000000.00;
+static const double cst_default_ori_capital = 12000.00;
 static const double cst_default_fee_rate_percent = 0.025;
 static const int cst_default_ori_stock_num = 0;
 
@@ -45,15 +45,19 @@ public:
     double price;
     double profit;
     double fee;
-
-    explicit TradeRecordAtom() : date(0), action(RecordAction::OPEN), pos_type(PositionType::POS_LONG), quantity(0), price(0.0), profit(0.0), fee(0.0){ }
-    TradeRecordAtom(const TradeRecordAtom &lh) : date(lh.date), action(lh.action), pos_type(lh.pos_type), quantity(lh.quantity), price(lh.price), profit(lh.profit), fee(lh.fee){ }
+    double price_stop_profit;
+    double price_stop_loss;
+    explicit TradeRecordAtom() : date(0), action(RecordAction::OPEN), pos_type(PositionType::POS_LONG), quantity(0), price(0.0), profit(0.0), fee(0.0)
+        , price_stop_profit(MAGIC_STOP_PRICE), price_stop_loss(MAGIC_STOP_PRICE) { }
+    TradeRecordAtom(const TradeRecordAtom &lh) : date(lh.date), action(lh.action), pos_type(lh.pos_type), quantity(lh.quantity), price(lh.price), profit(lh.profit), fee(lh.fee)
+        , price_stop_profit(lh.price_stop_profit), price_stop_loss(lh.price_stop_loss) { }
     TradeRecordAtom & operator = (const TradeRecordAtom &lh)
     {
         if( &lh == this ) 
             return *this;
         date = lh.date; action = lh.action; pos_type = lh.pos_type;
         quantity = lh.quantity; price = lh.price; profit = lh.profit; fee = lh.fee;
+        price_stop_profit = lh.price_stop_profit; price_stop_loss = lh.price_stop_loss;
         return *this;
     }
 
@@ -90,10 +94,16 @@ class PositionInfo
 {  
 public:
      
+    PositionInfo(){}
+
+    unsigned int TotalPosition() { return LongPos() + ShortPos(); }
+
     unsigned int LongPos();
     double LongAveragePrice();
+
     unsigned int ShortPos();
     double ShortAveragePirce();
+
     double FloatProfit(double price);
     // ret <low, high>
     std::tuple<double, double> GetForceClosePrices(double capital);
@@ -122,6 +132,9 @@ public:
     PositionAtom PopBack(bool is_long);
 
 private:
+
+    PositionInfo(const PositionInfo&);
+    PositionInfo& operator = (const PositionInfo&);
 
     std::vector<PositionAtom>  long_positions_;
     std::vector<PositionAtom>  short_positions_;
