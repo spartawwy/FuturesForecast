@@ -127,6 +127,8 @@ void TrainDlg::OnStartTrain()
         main_win_->SubKlineWall()->SetTrainStartDateTime(TypePeriod(main_win_->tool_bar_->sub_cycle_comb()->currentData().toInt())
             , date, time);
         main_win_->SubKlineWall()->right_clicked_k_date(date);
+        main_win_->SubKlineWall()->right_clicked_k_hhmm(time);
+
         main_win_->SubKlineWall()->slotOpenRelatedSubKwall(false);
     }
     

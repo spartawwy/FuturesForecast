@@ -428,9 +428,9 @@ T_SectionContainer & StockDataMan::GetStructSectionContainer(PeriodType period_t
 }
 
 // ok: ret <  MAX_PRICE
-float StockDataMan::GetHisDataLowestMinPrice(PeriodType period_type, const std::string& code, int start_date, int end_date)
+double StockDataMan::GetHisDataLowestMinPrice(PeriodType period_type, const std::string& code, int start_date, int end_date)
 { 
-	float lowestMinPrice = MAX_PRICE; 
+	double lowestMinPrice = MAX_PRICE; 
     assert(start_date <= end_date);
     auto index_tuple = GetDateIndexFromContainer(period_type, code, start_date, end_date);
     if( index_tuple == std::make_tuple(-1, -1) )
@@ -448,9 +448,9 @@ float StockDataMan::GetHisDataLowestMinPrice(PeriodType period_type, const std::
 }
 
 // ok : > 0.0 
-float StockDataMan::GetHisDataHighestMaxPrice(PeriodType period_type, const std::string& code, int start_date, int end_date)
+double StockDataMan::GetHisDataHighestMaxPrice(PeriodType period_type, const std::string& code, int start_date, int end_date)
 {
-    float higestMaxPrice = MIN_PRICE; 
+    double higestMaxPrice = MIN_PRICE; 
     assert(start_date <= end_date);
     auto index_tuple = GetDateIndexFromContainer(period_type, code, start_date, end_date);
     if( index_tuple == std::make_tuple(-1, -1) )

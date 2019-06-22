@@ -52,6 +52,8 @@ private slots:
     void onClickedShowSubKwallBtn();
     void onShowTrainModelWin();
 
+    void onShowSignal(bool);
+
 private:
      
     void ConnectAllDrawNormalBtn();

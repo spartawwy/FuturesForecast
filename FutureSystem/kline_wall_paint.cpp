@@ -1094,7 +1094,7 @@ void KLineWall::paintEvent(QPaintEvent*)
             }
             //----------------draw signal -----------------------
 #if 1 
-            if( (*iter)->tag != (int)TagType::UNKNOW_TAG )
+            if( main_win_->show_sig() && (*iter)->tag != (int)TagType::UNKNOW_TAG )
             {
                 QPen old_pen = painter.pen();
                 if( ((*iter)->tag & (int)TagType::BUY) == (int)TagType::BUY )
@@ -1167,8 +1167,7 @@ void KLineWall::paintEvent(QPaintEvent*)
     painter.translate(0, -1 * trans_y_totoal); // translate axis back
     pen.setColor(Qt::white);
     pen.setStyle(Qt::SolidLine); 
-    painter.setPen(pen); 
-    //font.setPointSize(HeadHeight() * 0.9);
+    painter.setPen(pen);  
     font.setPointSizeF(mm_w / 50);
     painter.setFont(font);
     painter.drawText(0, font.pointSize() * 1.2, k_detail_str);
@@ -1189,7 +1188,7 @@ void KLineWall::paintEvent(QPaintEvent*)
         painter.fillRect(rect, QBrush(QColor(128, 128, 255, 128))); 
     }
     // draw date
-    painter.drawText(pos_from_global.x(), this->height()-1, k_date_time_str_.c_str());
+    painter.drawText(pos_from_global.x()-k_date_time_str_.size(), this->height()-1, k_date_time_str_.c_str());
    
     this->pre_mm_w_ = this->width();
     this->pre_mm_h_ = this->height(); 
@@ -1604,7 +1603,7 @@ void KLineWall::slotZoominSelect(bool)
 
 void KLineWall::slotOpenRelatedSubKwall(bool)
 {
-    if(  main_win_->SubKlineWall() )
+    if( main_win_->SubKlineWall() )
     {
         main_win_->SubKlineWall()->ShowDurationKlines(right_clicked_k_date_, right_clicked_k_hhmm_);
         main_win_->SubKlineWall()->setVisible(true);
@@ -1886,7 +1885,7 @@ std::tuple<int, int> KLineWall::MoveRightEndToNextK()
     return std::make_tuple(k_cur_train_date_, k_cur_train_hhmm_);
 }
 
-
+// move to target k( date, hhmm )
 void KLineWall::MoveRightEndToNextK(int date, int hhmm)
 {
     if( p_hisdata_container_->empty() || k_rend_index_for_train_ <= 0 )
@@ -1895,33 +1894,48 @@ void KLineWall::MoveRightEndToNextK(int date, int hhmm)
     const int old_k_rend_index = k_rend_index_; 
     const int old_date = ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.date;
     const int old_hhmm = ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss;
+    if( old_date > date )
+    {   // move to pre target k
+        while( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.date > date && k_rend_index_for_train_ < p_hisdata_container_->size() - 1 )
+        {
+            k_rend_index_for_train_ = k_rend_index_for_train_ + 1 < p_hisdata_container_->size() - 1 ? k_rend_index_for_train_ + 1 : p_hisdata_container_->size() - 1; // move to pre k
+        }
+        while( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss > hhmm && k_rend_index_for_train_ < p_hisdata_container_->size() - 1 )
+        {
+            k_rend_index_for_train_ = k_rend_index_for_train_ + 1 < p_hisdata_container_->size() - 1 ? k_rend_index_for_train_ + 1 : p_hisdata_container_->size() - 1; // move to pre k
+        }
 
-    int index_help = k_rend_index_for_train_; 
-    bool is_first_change_date = true;
-    int date_help = 0;
-
-    while( index_help >= 0 )
+    }else if( old_date == date )
     {
-        index_help = index_help - 1 > -1 ? index_help - 1 : 0;
-        if( index_help == 0 )
+        if( old_hhmm > hhmm )
         {
-            k_rend_index_for_train_ = index_help;
-            break;
-        } 
-        if( old_date != (*(p_hisdata_container_->rbegin() + index_help))->stk_item.date )
+            while( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss > hhmm && k_rend_index_for_train_ < p_hisdata_container_->size() - 1 )
+            {
+                k_rend_index_for_train_ = k_rend_index_for_train_ + 1 < p_hisdata_container_->size() - 1 ? k_rend_index_for_train_ + 1 : p_hisdata_container_->size() - 1; // move to pre k
+            }
+            
+        }else if( old_hhmm < hhmm )
         {
-            if( is_first_change_date )
+            while( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss < hhmm && k_rend_index_for_train_ > 0 )
             {
-                is_first_change_date = false; 
-                date_help = (*(p_hisdata_container_->rbegin() + index_help))->stk_item.date;
-            }else if( date_help != (*(p_hisdata_container_->rbegin() + index_help))->stk_item.date )
-            {
-                k_rend_index_for_train_ = index_help + 1;
-                break;
+                k_rend_index_for_train_ -= 1; // move to next k
             }
         }
-    } // while
-
+    }else // old_data < date
+    {
+        while( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.date < date && k_rend_index_for_train_ > 0 )
+        {
+            k_rend_index_for_train_ -= 1; // move to next k
+        }
+        if( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.date == date )
+        {
+            while( ( *(p_hisdata_container_->rbegin() + k_rend_index_for_train_) )->stk_item.hhmmss < hhmm && k_rend_index_for_train_ > 0 )
+            {
+                k_rend_index_for_train_ -= 1; // move to next k
+            }
+        }
+    }
+     
     k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
     k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
 

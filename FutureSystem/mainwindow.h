@@ -70,6 +70,9 @@ public:
 
     void UpdateStockData();
 
+    void show_sig(bool val) { show_sig_ = val; }
+    bool show_sig() { return show_sig_; }
+
 protected:
 
     virtual void closeEvent(QCloseEvent * event) override;
@@ -104,6 +107,8 @@ private:
 
     TrainDlg *train_dlg_;
     volatile bool  is_train_mode_;
+
+    bool show_sig_;
 
 private slots:
 

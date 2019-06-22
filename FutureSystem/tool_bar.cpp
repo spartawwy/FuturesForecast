@@ -57,6 +57,10 @@ ToolBar::ToolBar(QWidget *parent)
     sub_show_section_btn_->setFixedSize(54, 22);
     sub_show_section_btn_->setCheckable(true);
 
+    auto show_sig_btn = new QPushButton(QString::fromLocal8Bit("ÐÅºÅ"));
+    show_sig_btn->setFixedSize(30, 22);
+    show_sig_btn->setCheckable(true);
+
     auto train_model_btn = new QPushButton(QString::fromLocal8Bit("ÑµÁ·Ä£Ê½"));
     train_model_btn->setFixedSize(54, 22);
     //train_model_btn->setCheckable(true);
@@ -126,6 +130,8 @@ ToolBar::ToolBar(QWidget *parent)
     ret = connect(show_sub_kwall_btn_, SIGNAL(clicked(bool)), this, SLOT(onClickedShowSubKwallBtn()));
 
     ret = connect(train_model_btn, SIGNAL(clicked(bool)), this, SLOT(onShowTrainModelWin()));
+
+    ret = connect(show_sig_btn, SIGNAL(clicked(bool)), this, SLOT(onShowSignal(bool))); 
     ret = ret;
 
     QHBoxLayout *pLayout = new QHBoxLayout(this);
@@ -146,6 +152,8 @@ ToolBar::ToolBar(QWidget *parent)
     pLayout->addWidget(abc_up_for_d_pen_);
     pLayout->addSpacing(5);
     pLayout->addWidget(clear_pen_);
+    pLayout->addSpacing(5);
+    pLayout->addWidget(show_sig_btn);
     pLayout->addSpacing(5);
     pLayout->addWidget(train_model_btn);
 
@@ -329,6 +337,11 @@ void ToolBar::onClickedShowSubKwallBtn()
         sub_show_section_btn_->setVisible(p_btn->isChecked());
         sub_cycle_comb_->setVisible(p_btn->isChecked());
     }
+}
+
+void ToolBar::onShowSignal(bool val)
+{
+    m_main_window->show_sig(val);
 }
 
 void ToolBar::onShowTrainModelWin()

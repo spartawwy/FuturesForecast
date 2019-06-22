@@ -81,7 +81,8 @@ public:
 
     void MoveRightEndToPreDayK();
     const T_StockHisDataItem & CurTrainStockDataItem();
-    void right_clicked_k_date(int val) { right_clicked_k_date_ = val; }
+    void right_clicked_k_date(int date) { right_clicked_k_date_ = date; }
+    void right_clicked_k_hhmm(int hhmm){ right_clicked_k_hhmm_ = hhmm; }
     int k_cur_train_date() { return k_cur_train_date_; }
     int k_cur_train_hhmm() { return k_cur_train_hhmm_; }
 
@@ -156,7 +157,7 @@ private:
     void SetHighestMaxPrice(float val) { highestMaxPrice_ = val;}
     double GetHighestMaxPrice() { return highestMaxPrice_; }
 
-    bool GetContainerMaxMinPrice(PeriodType period_type, const std::string& code, int k_num, std::tuple<float, float>& ret, std::tuple<int, int, int, int> &date_times);
+    bool GetContainerMaxMinPrice(PeriodType period_type, const std::string& code, int k_num, std::tuple<double, double>& ret, std::tuple<int, int, int, int> &date_times);
 
     int FindTopItem_TowardLeft(T_HisDataItemContainer &his_data, T_HisDataItemContainer::reverse_iterator iter, int k_index, T_KlinePosData *&left_pos_data);
     int FindTopFakeItem_TowardLeft(T_HisDataItemContainer &his_data, T_HisDataItemContainer::reverse_iterator iter, int k_index, T_KlinePosData *&left_pos_data);

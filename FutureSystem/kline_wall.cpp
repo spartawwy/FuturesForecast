@@ -64,7 +64,7 @@ void KLineWall::ResetTypePeriod(TypePeriod  type)
 
 void KLineWall::UpdateKwallMinMaxPrice()
 {
-    std::tuple<float, float> price_tuple;
+    std::tuple<double, double> price_tuple;
     std::tuple<int, int, int, int> date_times_tuple;
     if( GetContainerMaxMinPrice(ToPeriodType(k_type_), stock_code_, k_num_, price_tuple, date_times_tuple) )
     {
@@ -131,7 +131,7 @@ T_KlineDataItem * KLineWall::GetKLineDataItemByDate(int date, int hhmm)
 }
 
 // dates : tuple<highest related date, highest related hhmm, lowest related date, lowest related hhmm>
-bool KLineWall::GetContainerMaxMinPrice(PeriodType period_type, const std::string& code, int k_num, std::tuple<float, float>& ret, std::tuple<int, int, int, int> &date_times)
+bool KLineWall::GetContainerMaxMinPrice(PeriodType period_type, const std::string& code, int k_num, std::tuple<double, double>& ret, std::tuple<int, int, int, int> &date_times)
 {
     T_HisDataItemContainer &container = app_->stock_data_man().GetHisDataContainer(period_type, code);
     if( container.empty() )
@@ -150,8 +150,8 @@ bool KLineWall::GetContainerMaxMinPrice(PeriodType period_type, const std::strin
         end_index = start_index;
         start_index = temp_val;
     }
-    float highest_price = MIN_PRICE;
-    float lowest_price = MAX_PRICE;
+    double highest_price = MIN_PRICE;
+    double lowest_price = MAX_PRICE;
     int highest_price_date = 0;
     int highest_price_hhmm = 0;
     int lowest_price_date = 0;

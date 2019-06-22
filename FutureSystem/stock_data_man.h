@@ -50,8 +50,8 @@ public:
      
 public:
       
-	float GetHisDataLowestMinPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);
-	float GetHisDataHighestMaxPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);
+	double GetHisDataLowestMinPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);
+	double GetHisDataHighestMaxPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);
 
 public: 
 

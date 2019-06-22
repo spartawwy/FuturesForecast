@@ -48,6 +48,7 @@ MainWindow::MainWindow(FuturesForecastApp *app, QWidget *parent) :
     , timer_update_kwall_inter_(0)
     , train_dlg_(nullptr)
     , is_train_mode_(false)
+    , show_sig_(false)
 {
     ui->setupUi(this); 
 }
