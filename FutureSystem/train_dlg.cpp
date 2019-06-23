@@ -200,7 +200,6 @@ void TrainDlg::OnMoveToNextK()
         has_trade = (has_trade || !trades_stop_profit_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
         double loss_long_pos = 0.0;
-        double capital_ret_stop_loss_long = 0.0;
         std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, &loss_long_pos);
         has_trade = (has_trade || !trades_stop_loss_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
