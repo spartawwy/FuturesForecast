@@ -82,7 +82,6 @@ void TrainDlg::OnStartTrain()
 
     account_info_.capital.avaliable = ui.dbspbBegCapital->value();
     account_info_.capital.frozen = 0.0;
-    //account_info_.position = cst_default_ori_stock_num;
     
     ui.le_cur_capital->setText(ToQString(account_info_.capital.avaliable + account_info_.capital.frozen));
     ui.le_long_pos->setText(ToQString(0));

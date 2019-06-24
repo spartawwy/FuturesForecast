@@ -61,6 +61,9 @@ ToolBar::ToolBar(QWidget *parent)
     show_sig_btn->setFixedSize(30, 22);
     show_sig_btn->setCheckable(true);
 
+    auto mock_trade_btn = new QPushButton(QString::fromLocal8Bit("模拟交易"));
+    mock_trade_btn->setFixedSize(54, 22);
+
     auto train_model_btn = new QPushButton(QString::fromLocal8Bit("训练模式"));
     train_model_btn->setFixedSize(54, 22);
     //train_model_btn->setCheckable(true);
@@ -132,6 +135,7 @@ ToolBar::ToolBar(QWidget *parent)
     ret = connect(train_model_btn, SIGNAL(clicked(bool)), this, SLOT(onShowTrainModelWin()));
 
     ret = connect(show_sig_btn, SIGNAL(clicked(bool)), this, SLOT(onShowSignal(bool))); 
+    ret = connect(mock_trade_btn, SIGNAL(clicked(bool)), this, SLOT(onShowMockTradeWin(bool))); 
     ret = ret;
 
     QHBoxLayout *pLayout = new QHBoxLayout(this);
@@ -154,6 +158,8 @@ ToolBar::ToolBar(QWidget *parent)
     pLayout->addWidget(clear_pen_);
     pLayout->addSpacing(5);
     pLayout->addWidget(show_sig_btn);
+    pLayout->addSpacing(5);
+    pLayout->addWidget(mock_trade_btn);
     pLayout->addSpacing(5);
     pLayout->addWidget(train_model_btn);
 
@@ -337,6 +343,11 @@ void ToolBar::onClickedShowSubKwallBtn()
         sub_show_section_btn_->setVisible(p_btn->isChecked());
         sub_cycle_comb_->setVisible(p_btn->isChecked());
     }
+}
+
+void ToolBar::onShowMockTradeWin()
+{
+
 }
 
 void ToolBar::onShowSignal(bool val)

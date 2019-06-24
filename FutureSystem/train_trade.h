@@ -12,7 +12,6 @@ static const double cst_per_tick_capital = 100.00;
 static const double cst_margin_capital = 6000.00;
 static const double cst_default_ori_capital = 12000.00;
 static const double cst_default_fee_rate_percent = 0.025;
-static const int cst_default_ori_stock_num = 0;
 
 enum PositionType : unsigned char
 {

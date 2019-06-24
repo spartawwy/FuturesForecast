@@ -51,6 +51,7 @@ private slots:
     void onClickedStructBtn();
     void onClickedShowSubKwallBtn();
     void onShowTrainModelWin();
+    void onShowMockTradeWin();
 
     void onShowSignal(bool);
 

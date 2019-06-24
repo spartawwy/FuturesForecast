@@ -25,6 +25,7 @@
 #include "tool_bar.h"
 #include "code_list_wall.h"
 #include "train_dlg.h"
+#include "mock_trade_dlg.h"
 
 #define MAKE_SUB_WALL 
 
@@ -48,6 +49,7 @@ MainWindow::MainWindow(FuturesForecastApp *app, QWidget *parent) :
     , timer_update_kwall_inter_(0)
     , train_dlg_(nullptr)
     , is_train_mode_(false)
+    , mock_trade_dlg_(nullptr)
     , show_sig_(false)
 {
     ui->setupUi(this); 
@@ -132,6 +134,8 @@ bool MainWindow::Initialize()
     train_dlg_ = new TrainDlg(kline_wall_main, this);
     train_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
     train_dlg_->hide();
+
+    mock_trade_dlg_ = new MockTradeDlg();
 
     //-------------------------
 
@@ -283,6 +287,11 @@ void MainWindow::PopTrainDlg()
 
     is_train_mode(true);
     train_dlg_->showNormal();
+}
+
+void MainWindow::PopModeTradeDlg()
+{
+
 }
 
 void MainWindow::changeEvent(QEvent *e)

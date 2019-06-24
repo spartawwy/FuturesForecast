@@ -182,6 +182,15 @@
     <ClCompile Include="train_trade.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mock_trade_dlg.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mock_trade_dlg.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="mock_trade_dlg.cpp">
+      <Filter>win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.ui">
@@ -238,6 +247,12 @@
     <CustomBuild Include="mainwindow.h">
       <Filter>win</Filter>
     </CustomBuild>
+    <CustomBuild Include="mocktrade.ui">
+      <Filter>Form</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mock_trade_dlg.h">
+      <Filter>win</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
@@ -281,6 +296,9 @@
     </ClInclude>
     <ClInclude Include="stock_data_man.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_mocktrade.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

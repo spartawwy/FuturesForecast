@@ -26,6 +26,7 @@ enum class WallType : unsigned char
     CODE_LIST,
 };
 
+class MockTradeDlg;
 class TrainDlg;
 class FuturesForecastApp;
 class TitleBar;
@@ -73,6 +74,8 @@ public:
     void show_sig(bool val) { show_sig_ = val; }
     bool show_sig() { return show_sig_; }
 
+    void PopModeTradeDlg();
+
 protected:
 
     virtual void closeEvent(QCloseEvent * event) override;
@@ -107,6 +110,8 @@ private:
 
     TrainDlg *train_dlg_;
     volatile bool  is_train_mode_;
+
+    MockTradeDlg *mock_trade_dlg_;
 
     bool show_sig_;
 
