@@ -135,7 +135,7 @@ ToolBar::ToolBar(QWidget *parent)
     ret = connect(train_model_btn, SIGNAL(clicked(bool)), this, SLOT(onShowTrainModelWin()));
 
     ret = connect(show_sig_btn, SIGNAL(clicked(bool)), this, SLOT(onShowSignal(bool))); 
-    ret = connect(mock_trade_btn, SIGNAL(clicked(bool)), this, SLOT(onShowMockTradeWin(bool))); 
+    ret = connect(mock_trade_btn, SIGNAL(clicked(bool)), this, SLOT(onShowMockTradeWin())); 
     ret = ret;
 
     QHBoxLayout *pLayout = new QHBoxLayout(this);
@@ -347,7 +347,7 @@ void ToolBar::onClickedShowSubKwallBtn()
 
 void ToolBar::onShowMockTradeWin()
 {
-
+    m_main_window->PopMokeTradeDlg();
 }
 
 void ToolBar::onShowSignal(bool val)

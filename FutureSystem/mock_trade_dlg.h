@@ -9,10 +9,9 @@
 
 class MockTradeDlg : public QWidget
 {
-public:
-
     Q_OBJECT
 
+public:
     MockTradeDlg();
 
 private:

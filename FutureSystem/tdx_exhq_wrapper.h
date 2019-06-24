@@ -20,9 +20,11 @@ public:
 
     bool GetLatestKBar(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, T_StockHisDataItem &item);
 
+    bool GetInstrumentQuote(const std::string &code, int nmarket, T_Quote_Data &ret_quote_data);
+
 private:
     bool __GetHisKBars(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, short start, short &count, std::vector<T_StockHisDataItem> &items);
-
+     
     int conn_handle_;
     ExchangeCalendar  *exchange_calendar_;
 };

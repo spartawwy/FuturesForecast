@@ -329,3 +329,77 @@ do
 
     return result;
 }
+
+bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_Quote_Data &ret_quote_data)
+{ 
+    bool (WINAPI* pFuncGetInstrumentQuote)(
+        int nConnID,
+        char nMarket,
+        const char* pszZqdm,
+        char* pszResult,
+        char* pszErrInfo);
+    pFuncGetInstrumentQuote = &TdxExHq_GetInstrumentQuote;
+
+
+    const int cst_result_len = 1024 * 1024;
+    const int cst_err_len = 1024; 
+
+    char m_szResult[1024] = {'\0'};
+    char m_szErrInfo[1024] = {'\0'};
+      
+    memset(&ret_quote_data, 0, sizeof(ret_quote_data));
+    bool result = true;
+    do 
+    {  
+        // bool1 = TdxExHq_GetInstrumentQuote(nConn, 30, "SC1908",  Result, ErrInfo);
+        bool bool1 = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
+        if( !bool1 )
+        { 
+            DisConnect();
+            if( ConnectServer() )
+            {
+                bool1 = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
+                if( !bool1 )
+                {
+                    result = false;
+                    break;
+                }
+            } else
+            {
+                result = false;
+                break;
+            }
+        }
+        if( strlen(m_szResult) < 1 )
+        {
+            std::cout << " result empty !" << std::endl;
+            result = false;
+            break;
+        }
+        //qDebug() << m_szResult << "\n";
+
+        std::string expresstion_str = "^(\\d+)\\s+(\\w+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+.*";
+        std::regex  regex_obj(expresstion_str);
+        char *p = m_szResult;
+        while( *p != '\0' && *p != '\n') ++p;
+
+        ++p;
+
+        std::string src_str = p;
+
+        std::smatch  match_result;
+        if( std::regex_match(src_str.cbegin(), src_str.cend(), match_result, regex_obj) )
+        {
+            //cout << "buy1:" << match_result[14] << " buy1_vol:" << match_result[19] << std::endl;
+            ret_quote_data.buy_price = boost::lexical_cast<double>(match_result[14]);
+            ret_quote_data.buy_vol = boost::lexical_cast<int>(match_result[19]);
+            //cout << "sell1:" <<  match_result[24] << " sell1_vol:" << match_result[29] << std::endl;
+            ret_quote_data.sell_price = boost::lexical_cast<double>(match_result[24]);
+            ret_quote_data.sell_vol = boost::lexical_cast<int>(match_result[29]);
+        }else
+            result = false;
+
+    }while(0);
+
+    return result;
+}

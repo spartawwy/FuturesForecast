@@ -136,7 +136,8 @@ bool MainWindow::Initialize()
     train_dlg_->hide();
 
     mock_trade_dlg_ = new MockTradeDlg();
-
+    mock_trade_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
+    mock_trade_dlg_->hide();
     //-------------------------
 
     timer = new QTimer(this);
@@ -289,9 +290,9 @@ void MainWindow::PopTrainDlg()
     train_dlg_->showNormal();
 }
 
-void MainWindow::PopModeTradeDlg()
+void MainWindow::PopMokeTradeDlg()
 {
-
+    mock_trade_dlg_->showNormal();
 }
 
 void MainWindow::changeEvent(QEvent *e)

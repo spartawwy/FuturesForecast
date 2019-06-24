@@ -74,7 +74,7 @@ public:
     void show_sig(bool val) { show_sig_ = val; }
     bool show_sig() { return show_sig_; }
 
-    void PopModeTradeDlg();
+    void PopMokeTradeDlg();
 
 protected:
 

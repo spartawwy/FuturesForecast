@@ -278,6 +278,14 @@ typedef struct _t_k_data
 #define T_K_Data  T_K_Data
 #endif
 
+typedef struct _t_quote_data
+{
+    double sell_price;
+    double buy_price;
+    int sell_vol;
+    int buy_vol;
+}T_Quote_Data;
+
 enum class LineType : unsigned char { UP = 0, DOWN};
 //typedef struct _t_struct_line
 class T_StructLine
