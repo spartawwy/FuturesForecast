@@ -1601,6 +1601,15 @@ void KLineWall::slotZoominSelect(bool)
     update();
 }
 
+void KLineWall::UpdateStockQuote()
+{
+    T_Quote_Data  quote_date;
+    if( app_->stock_data_man().GetInstrumentQuote(stock_code_, nmarket_, quote_date) )
+    {
+        main_win_->EmitSigQuoteData(quote_date.sell_price, quote_date.buy_price, quote_date.sell_vol, quote_date.buy_vol);
+    }
+}
+
 void KLineWall::slotOpenRelatedSubKwall(bool)
 {
     if( main_win_->SubKlineWall() )

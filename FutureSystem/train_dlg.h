@@ -13,12 +13,7 @@
 
 #include "train_trade_dlg.h"
 
-struct AccountInfo
-{
-    AccountAtom  capital; 
-    PositionInfo  position;
-};
-
+ 
 class KLineWall;
 class MainWindow;
 class TrainDlg : public QWidget

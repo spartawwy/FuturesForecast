@@ -39,6 +39,8 @@ public:
 
     void UpdateStockData();
 
+    void UpdateStockQuote();
+
 protected:
 
     virtual void HandleNodeHandShake(TSystem::communication::Connection* , const TSystem::Message& ) override {};

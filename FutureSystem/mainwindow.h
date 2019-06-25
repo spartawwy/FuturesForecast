@@ -70,11 +70,18 @@ public:
     void is_train_mode(bool val) { is_train_mode_ = val; }
 
     void UpdateStockData();
+    void UpdateStockQuote();
 
     void show_sig(bool val) { show_sig_ = val; }
     bool show_sig() { return show_sig_; }
 
     void PopMokeTradeDlg();
+
+    void EmitSigQuoteData(double sell1, double buy1, int sell_vol, int buy_vol) { emit sigQuoteData(sell1, buy1, sell_vol, buy_vol); }
+
+signals:
+
+    void sigQuoteData(double, double, int, int);
 
 protected:
 

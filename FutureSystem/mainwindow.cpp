@@ -138,6 +138,9 @@ bool MainWindow::Initialize()
     mock_trade_dlg_ = new MockTradeDlg();
     mock_trade_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
     mock_trade_dlg_->hide();
+
+    bool result = connect(this, SIGNAL(sigQuoteData(double, double, int, int)), mock_trade_dlg_, SLOT(slotHandleQuote(double, double, int, int)));
+
     //-------------------------
 
     timer = new QTimer(this);
@@ -268,6 +271,12 @@ void MainWindow::UpdateStockData()
         kline_wall_main->UpdateIfNecessary();
     if( kline_wall_sub )
         kline_wall_sub->UpdateIfNecessary();
+}
+
+void MainWindow::UpdateStockQuote()
+{
+    if( kline_wall_main )
+        kline_wall_main->UpdateStockQuote();
 }
 
 void MainWindow::PopTrainDlg()

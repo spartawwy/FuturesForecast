@@ -33,6 +33,7 @@ public:
 
     //std::vector<std::shared_ptr<T_KlineDataItem> > &day_kline_data_container() { return day_kline_data_container_; }
     ExchangeCalendar * exchange_calendar() { return p_exchange_calendar_;}
+
 public:
 
     //从fileName指定的磁盘路径中将数据一行一行读取出来，每一行初始化一个StockDayInfo对象
@@ -48,6 +49,8 @@ public:
     void TraverseGetStuctLines(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
     void TraversGetSections(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
      
+    bool GetInstrumentQuote(const std::string &code, int nmarket, T_Quote_Data &ret_quote_data);
+
 public:
       
 	double GetHisDataLowestMinPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);

@@ -141,6 +141,12 @@ private:
     double short_price_ave;*/
 };
 
+struct AccountInfo
+{
+    AccountAtom  capital; 
+    PositionInfo  position;
+};
+
 std::string ToStr(RecordAction action);
 std::string ToStr(PositionType pos_tp);
 

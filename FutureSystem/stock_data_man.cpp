@@ -1669,6 +1669,11 @@ void StockDataMan::TraversGetSections(PeriodType period_type, const std::string 
    
 }
 
+bool StockDataMan::GetInstrumentQuote(const std::string &code, int nmarket, T_Quote_Data &ret_quote_data)
+{
+    return tdx_exhq_wrapper_.GetInstrumentQuote(code, nmarket, ret_quote_data);
+}
+
 TypePeriod ToTypePeriod(PeriodType src)
 {
     switch(src)

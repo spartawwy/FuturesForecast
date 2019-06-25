@@ -94,6 +94,8 @@ public:
 
     //void LockPaintingMutex() { std::lock locker(painting_mutex_); }
 
+    void UpdateStockQuote();
+
 signals:
     void sigUpdateKwall();
 

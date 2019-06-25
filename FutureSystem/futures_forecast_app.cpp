@@ -64,12 +64,16 @@ bool FuturesForecastApp::Init()
 
     this->task_pool().PostTask([this]()
     {
+        int count = 0;
         while( !exit_flag_ )
         {
-            Delay(5000);
+            Delay(1000);
             if( exit_flag_ )
                 break;
-            this->UpdateStockData();
+            if( ++count % 5 == 0 )
+                this->UpdateStockData();
+            this->UpdateStockQuote();
+            
         }
     });
     //---------------
@@ -91,6 +95,12 @@ void FuturesForecastApp::Stop()
 void FuturesForecastApp::UpdateStockData()
 {
      main_window()->UpdateStockData();
+     
+}
+
+void FuturesForecastApp::UpdateStockQuote()
+{
+    main_window()->UpdateStockQuote();
 }
 
 void Delay(__int64 mseconds)

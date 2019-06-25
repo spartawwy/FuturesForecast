@@ -273,7 +273,7 @@
     <string>status</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pbtnclose">
+  <widget class="QPushButton" name="pbtnClose">
    <property name="geometry">
     <rect>
      <x>320</x>
@@ -291,7 +291,7 @@
     <string>平仓</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="le_long_pos">
+  <widget class="QLineEdit" name="le_qty">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -299,6 +299,84 @@
      <width>71</width>
      <height>31</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>120</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>卖1:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>140</y>
+     <width>21</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>买1:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="le_sell_price">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>120</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>价格1</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="le_buy_price">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>140</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>价格2</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="le_sell_vol">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>120</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>量1</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="le_buy_vol">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>140</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>量2</string>
    </property>
   </widget>
  </widget>
