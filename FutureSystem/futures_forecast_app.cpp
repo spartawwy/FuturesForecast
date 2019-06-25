@@ -61,7 +61,13 @@ bool FuturesForecastApp::Init()
         QMessageBox::information(nullptr, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("stock_man构件初始化失败!"));
         return false;
     }
-
+      
+    main_window_ = std::make_shared<MainWindow>(this);
+    if( !main_window_->Initialize() )
+        return false; 
+    main_window_->show();
+     
+    //---------------
     this->task_pool().PostTask([this]()
     {
         int count = 0;
@@ -73,15 +79,9 @@ bool FuturesForecastApp::Init()
             if( ++count % 5 == 0 )
                 this->UpdateStockData();
             this->UpdateStockQuote();
-            
+
         }
     });
-    //---------------
-    main_window_ = std::make_shared<MainWindow>(this);
-    if( !main_window_->Initialize() )
-        return false; 
-    main_window_->show();
-     
     return true;
 }
 
