@@ -13,6 +13,7 @@ static int cst_column_data = 6;
 
 MockTradeDlg::MockTradeDlg()
     : account_info_()
+    , cur_price_(0.0)
 {
     ui.setupUi(this);
     memset(&quote_data_, 0, sizeof(quote_data_));
@@ -47,21 +48,31 @@ MockTradeDlg::MockTradeDlg()
     ui.table_view_record->setColumnWidth(cst_column_qty, 40);
 }
 
-void MockTradeDlg::slotHandleQuote(double sell1, double buy1, int sell_vol, int buy_vol)
+void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, int sell_vol, int buy_vol)
 {
-    std::lock_guard<std::mutex> locker(quote_data_mutex_);
+    //{
+        std::lock_guard<std::mutex> locker(quote_data_mutex_);
 
-    quote_data_.sell_price = sell1;
-    quote_data_.buy_price = buy1;
-    quote_data_.sell_vol = sell_vol;
-    quote_data_.buy_vol = buy_vol;
+        quote_data_.cur_price = cur_price;
+        quote_data_.sell_price = sell1;
+        quote_data_.buy_price = buy1;
+        quote_data_.sell_vol = sell_vol;
+        quote_data_.buy_vol = buy_vol;
+        ui.le_sell_price->setText(QString::number(sell1));
+        ui.le_buy_price->setText(QString::number(buy1));
 
-    ui.le_sell_price->setText(QString::number(sell1));
-    ui.le_buy_price->setText(QString::number(buy1));
-
-    ui.le_sell_vol->setText(QString::number(sell_vol));
-    ui.le_buy_vol->setText(QString::number(buy_vol));
-     
+        ui.le_sell_vol->setText(QString::number(sell_vol));
+        ui.le_buy_vol->setText(QString::number(buy_vol));
+    //}
+    
+    if( !Equal(cur_price_, cur_price) )
+    {
+        cur_price_ = cur_price;
+        double avaliable_capital = account_info_.capital.avaliable + account_info_.position.FloatProfit(cur_price);
+        ui.le_cur_capital->setText(QString::number(avaliable_capital));
+        double asserts = cst_margin_capital * account_info_.position.TotalPosition() + avaliable_capital;
+        ui.lab_assets->setText(QString::number(asserts));
+    }
 }
 
 void MockTradeDlg::slotOpenSell()
@@ -88,19 +99,34 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
 {
     if( ui.le_qty->text().isEmpty() || !IsNumber(ui.le_qty->text().trimmed().toLocal8Bit().data()) )
     {
+        SetStatusBar(QString::fromLocal8Bit("数量非法!"));
+        ui.le_qty->setFocus();
         return;
     }
-    int qty = ui.le_qty->text().trimmed().toInt();
     double quote_price = 0.0;
     {
-    std::lock_guard<std::mutex> locker(quote_data_mutex_);
-    quote_price = quote_data_.buy_price;
+        std::lock_guard<std::mutex> locker(quote_data_mutex_);
+        quote_price = quote_data_.buy_price;
     }
+    int qty = ui.le_qty->text().trimmed().toInt();
+
+    int qty_can_open = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable, quote_price);
+    if( qty > qty_can_open )
+    {
+        SetStatusBar(QString::fromLocal8Bit("资金不足!"));
+        return;
+    }
+    
+    
     auto position_item = std::make_shared<PositionAtom>();
+    position_item->trade_id = account_info_.position.GenerateTradeId();
     position_item->price = quote_price;
     position_item->qty = qty; 
 
     account_info_.position.PushBack(is_buy, position_item);
+    account_info_.capital.avaliable -= cst_margin_capital * position_item->qty + CalculateFee(qty, quote_price, false);
+
+    ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
 
     auto model = static_cast<QStandardItemModel *>(ui.table_view_record->model());
     model->insertRow(model->rowCount());
@@ -119,4 +145,9 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     item = new QStandardItem(QString::number(quote_price));
     item->setEditable(false);
     model->setItem(row_index, cst_column_ava_price, item);
+}
+
+void MockTradeDlg::SetStatusBar(const QString & val)
+{
+    ui.lab_status->setText(val);
 }

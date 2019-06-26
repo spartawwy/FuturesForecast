@@ -301,6 +301,11 @@ double ProcDecimal(double val, unsigned int decimal)
     return double(big_val) / temp;
 }
 
+bool Equal(double lh, double rh)
+{
+    return fabs(lh-rh) < 0.0001;
+}
+
 void utf8ToGbk(std::string& strUtf8)
 {
     QTextCodec* utf8Codec = QTextCodec::codecForName("utf-8");

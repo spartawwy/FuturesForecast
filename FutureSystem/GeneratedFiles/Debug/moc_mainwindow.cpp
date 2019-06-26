@@ -57,16 +57,16 @@ static const uint qt_meta_data_MainWindow[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    4,   39,    2, 0x06,
+       1,    5,   39,    2, 0x06,
 
  // slots: name, argc, parameters, tag, flags
-       3,    0,   48,    2, 0x08,
-       4,    0,   49,    2, 0x08,
-       5,    1,   50,    2, 0x08,
-       6,    1,   53,    2, 0x08,
+       3,    0,   50,    2, 0x08,
+       4,    0,   51,    2, 0x08,
+       5,    1,   52,    2, 0x08,
+       6,    1,   55,    2, 0x08,
 
  // signals: parameters
-    QMetaType::Void, QMetaType::Double, QMetaType::Double, QMetaType::Int, QMetaType::Int,    2,    2,    2,    2,
+    QMetaType::Void, QMetaType::Double, QMetaType::Double, QMetaType::Double, QMetaType::Int, QMetaType::Int,    2,    2,    2,    2,    2,
 
  // slots: parameters
     QMetaType::Void,
@@ -82,7 +82,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     if (_c == QMetaObject::InvokeMetaMethod) {
         MainWindow *_t = static_cast<MainWindow *>(_o);
         switch (_id) {
-        case 0: _t->sigQuoteData((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4]))); break;
+        case 0: _t->sigQuoteData((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])),(*reinterpret_cast< int(*)>(_a[5]))); break;
         case 1: _t->onTimer(); break;
         case 2: _t->on_actionExit_triggered(); break;
         case 3: _t->onMainKwallCycleChange((*reinterpret_cast< int(*)>(_a[1]))); break;
@@ -93,7 +93,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         int *result = reinterpret_cast<int *>(_a[0]);
         void **func = reinterpret_cast<void **>(_a[1]);
         {
-            typedef void (MainWindow::*_t)(double , double , int , int );
+            typedef void (MainWindow::*_t)(double , double , double , int , int );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::sigQuoteData)) {
                 *result = 0;
             }
@@ -138,9 +138,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void MainWindow::sigQuoteData(double _t1, double _t2, int _t3, int _t4)
+void MainWindow::sigQuoteData(double _t1, double _t2, double _t3, int _t4, int _t5)
 {
-    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)) };
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)), const_cast<void*>(reinterpret_cast<const void*>(&_t5)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_END_MOC_NAMESPACE

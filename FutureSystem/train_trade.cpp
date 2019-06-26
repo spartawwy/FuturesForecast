@@ -13,7 +13,8 @@
 QString TradeRecordAtom::ToQStr()
 {
     char buf[1024] = {'\0'};
-    sprintf_s(buf, "日期:%d %s %s 数量:%d 价格:%.2f (止赢价:%.2f 止损价:%.2f) 佣金税费:%.2f 盈亏:%.2f "
+    sprintf_s(buf, "编号:%d 日期:%d %s %s 数量:%d 价格:%.2f (止赢价:%.2f 止损价:%.2f) 佣金税费:%.2f 盈亏:%.2f "
+        , this->trade_id
         , this->date
         , ToStr(this->action).c_str()
         , ToStr(this->pos_type).c_str()
@@ -153,6 +154,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int h
         if( (*iter)->stop_profit_price > EPSINON && h_price > (*iter)->stop_profit_price - EPSINON ) // >= stop profit price
         {
             TradeRecordAtom  trade_item;
+            trade_item.trade_id = (*iter)->trade_id;
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;

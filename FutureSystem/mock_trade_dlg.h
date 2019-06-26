@@ -18,9 +18,11 @@ public:
 
     MockTradeDlg();
 
+    void SetStatusBar(const QString & val);
+
 public slots:
 
-    void slotHandleQuote(double /*sell1*/, double /*bull1*/, int /*sell_vol1*/, int /*bull_vol1*/);
+    void slotHandleQuote(double /*cur_price*/, double /*sell1*/, double /*bull1*/, int /*sell_vol1*/, int /*bull_vol1*/);
 
     void slotOpenSell();
     void slotOpenBuy();
@@ -37,6 +39,7 @@ private:
     AccountInfo  account_info_;
 
     T_Quote_Data  quote_data_;
+    double cur_price_;
 
     double force_close_low_;
     double force_close_high_;

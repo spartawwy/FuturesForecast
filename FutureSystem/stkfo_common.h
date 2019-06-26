@@ -280,6 +280,7 @@ typedef struct _t_k_data
 
 typedef struct _t_quote_data
 {
+    double cur_price;
     double sell_price;
     double buy_price;
     int sell_vol;
@@ -342,6 +343,7 @@ void ClearTopFractal(T_KlineDataItem &k_data_item);
 void ClearBtmFractal(T_KlineDataItem &k_data_item);
 
 double ProcDecimal(double val, unsigned int decimal);
+bool Equal(double lh, double rh);
 
 KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_period);
 

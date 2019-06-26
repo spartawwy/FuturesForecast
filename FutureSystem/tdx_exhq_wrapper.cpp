@@ -390,7 +390,8 @@ bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_
         std::smatch  match_result;
         if( std::regex_match(src_str.cbegin(), src_str.cend(), match_result, regex_obj) )
         {
-            //cout << "buy1:" << match_result[14] << " buy1_vol:" << match_result[19] << std::endl;
+            //cout <<  "cur_price:" << match_result[7] << "buy1:" << match_result[14] << " buy1_vol:" << match_result[19] << std::endl;
+            ret_quote_data.cur_price = boost::lexical_cast<double>(match_result[7]);
             ret_quote_data.buy_price = boost::lexical_cast<double>(match_result[14]);
             ret_quote_data.buy_vol = boost::lexical_cast<int>(match_result[19]);
             //cout << "sell1:" <<  match_result[24] << " sell1_vol:" << match_result[29] << std::endl;

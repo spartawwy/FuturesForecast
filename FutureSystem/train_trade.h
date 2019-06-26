@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <tuple>
+#include <atomic>
 #include <QString>
 
 #include "stkfo_common.h"
@@ -36,6 +37,7 @@ struct AccountAtom
 class TradeRecordAtom
 { 
 public:
+    int trade_id;
     int date;
     int hhmm;
     RecordAction action;
@@ -46,14 +48,15 @@ public:
     double fee;
     double price_stop_profit;
     double price_stop_loss;
-    explicit TradeRecordAtom() : date(0), action(RecordAction::OPEN), pos_type(PositionType::POS_LONG), quantity(0), price(0.0), profit(0.0), fee(0.0)
+    explicit TradeRecordAtom() : trade_id(-1), date(0), action(RecordAction::OPEN), pos_type(PositionType::POS_LONG), quantity(0), price(0.0), profit(0.0), fee(0.0)
         , price_stop_profit(MAGIC_STOP_PRICE), price_stop_loss(MAGIC_STOP_PRICE) { }
-    TradeRecordAtom(const TradeRecordAtom &lh) : date(lh.date), action(lh.action), pos_type(lh.pos_type), quantity(lh.quantity), price(lh.price), profit(lh.profit), fee(lh.fee)
+    TradeRecordAtom(const TradeRecordAtom &lh) : trade_id(lh.trade_id), date(lh.date), action(lh.action), pos_type(lh.pos_type), quantity(lh.quantity), price(lh.price), profit(lh.profit), fee(lh.fee)
         , price_stop_profit(lh.price_stop_profit), price_stop_loss(lh.price_stop_loss) { }
     TradeRecordAtom & operator = (const TradeRecordAtom &lh)
     {
         if( &lh == this ) 
             return *this;
+        trade_id = lh.trade_id;
         date = lh.date; action = lh.action; pos_type = lh.pos_type;
         quantity = lh.quantity; price = lh.price; profit = lh.profit; fee = lh.fee;
         price_stop_profit = lh.price_stop_profit; price_stop_loss = lh.price_stop_loss;
@@ -66,14 +69,15 @@ public:
 class PositionAtom
 {
 public:
-    PositionAtom() : price(0.0), stop_loss_price(MAGIC_STOP_PRICE), stop_profit_price(MAGIC_STOP_PRICE), qty(0){}
-    PositionAtom(const PositionAtom& lh) : price(lh.price),stop_loss_price(lh.stop_loss_price),stop_profit_price(lh.stop_profit_price), qty(lh.qty){}
+    PositionAtom() : trade_id(-1), price(0.0), stop_loss_price(MAGIC_STOP_PRICE), stop_profit_price(MAGIC_STOP_PRICE), qty(0){}
+    PositionAtom(const PositionAtom& lh) : trade_id(lh.trade_id), price(lh.price),stop_loss_price(lh.stop_loss_price),stop_profit_price(lh.stop_profit_price), qty(lh.qty){}
     PositionAtom& operator = (const PositionAtom& lh)
     { 
         if( this == &lh ) 
             return *this; 
         else 
         {
+            trade_id = lh.trade_id;
             price = lh.price; 
             stop_loss_price = lh.stop_loss_price;
             stop_profit_price = lh.stop_profit_price;
@@ -82,7 +86,7 @@ public:
         return *this; 
     }
 
-
+    int trade_id;
     double price;
     double stop_loss_price;   // if < 0.0 means not set
     double stop_profit_price; // if < 0.0 means not set
@@ -93,8 +97,9 @@ class PositionInfo
 {  
 public:
      
-    PositionInfo(){}
+    PositionInfo(){ max_trade_id_ = 0; }
 
+    int GenerateTradeId(){ return ++max_trade_id_; }
     unsigned int TotalPosition() { return LongPos() + ShortPos(); }
 
     unsigned int LongPos();
@@ -137,6 +142,8 @@ private:
 
     std::vector<std::shared_ptr<PositionAtom> >  long_positions_;
     std::vector<std::shared_ptr<PositionAtom> >  short_positions_;
+
+    std::atomic_int max_trade_id_;
     /* 
     double short_price_ave;*/
 };
