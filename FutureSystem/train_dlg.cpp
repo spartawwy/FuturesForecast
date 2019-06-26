@@ -505,11 +505,11 @@ void TrainDlg::OnTrade()
 
         account_info_.capital.avaliable -= capital_buy + fee;
 
-        PositionAtom  pos_atom;
-        pos_atom.price = final_fill_price;
-        pos_atom.qty = (unsigned int)quantity;
-        pos_atom.stop_profit_price = stop_profit_price;
-        pos_atom.stop_loss_price = stop_loss_price;
+        auto pos_atom = std::make_shared<PositionAtom>();
+        pos_atom->price = final_fill_price;
+        pos_atom->qty = (unsigned int)quantity;
+        pos_atom->stop_profit_price = stop_profit_price;
+        pos_atom->stop_loss_price = stop_loss_price;
         account_info_.position.PushBack(is_pos_type_long, pos_atom);
  
         TradeRecordAtom  trade_item;

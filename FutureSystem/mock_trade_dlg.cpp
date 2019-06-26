@@ -1,6 +1,6 @@
 #include "mock_trade_dlg.h"
 
-#include <qstring.h>
+#include <QString>
 #include <qstandarditemmodel.h>
 
 static int cst_column_long_short = 0;
@@ -39,7 +39,7 @@ MockTradeDlg::MockTradeDlg()
     model->setHorizontalHeaderItem(cst_column_float_profit, new QStandardItem(QString::fromLocal8Bit("¸¡Ó¯")));
     model->setHorizontalHeaderItem(cst_column_stop_loss_price, new QStandardItem(QString::fromLocal8Bit("Ö¹Ëð")));
     model->setHorizontalHeaderItem(cst_column_stop_profit_price, new QStandardItem(QString::fromLocal8Bit("Ö¹Ó¯")));
-    //model->setHorizontalHeaderItem(cst_column_data, new QStandardItem( QVaralData()));
+    //model->setHorizontalHeaderItem(cst_column_data, new QStandardItem("data"));
 
     ui.table_view_record->setModel(model);
      
@@ -66,56 +66,12 @@ void MockTradeDlg::slotHandleQuote(double sell1, double buy1, int sell_vol, int 
 
 void MockTradeDlg::slotOpenSell()
 {
-    if( ui.le_qty->text().trimmed().empty() || !IsNumber(ui.le_qty->text().trimmed()) )
-    {
-        return;
-    }
-    int qty = ui.le_qty->text().trimmed().toInt();
-    double quote_price = 0.0;
-    {
-    std::lock_guard<std::mutex> locker(quote_data_mutex_);
-    quote_price = quote_data_.buy_price;
-    }
-    PositionAtom  position_item;
-    position_item.price = quote_price;
-    position_item.qty = qty; 
-
-    account_info_.position.PushBack(false, position_item);
-
-    auto model = static_cast<QStandardItemModel *>(ui.table_view_record->model());
-    model->insertRow(model->rowCount());
-    int row_index = model->rowCount() - 1;
-    auto item = new QStandardItem(QString::fromLocal8Bit("¿Õ"));
-    model->setItem(row_index, cst_column_long_short, item);
-
-    item = new QStandardItem(QString::number(qty));
-    model->setItem(row_index, cst_column_qty, item);
-     
-    item = new QStandardItem(QString::number(quote_price));
-    model->setItem(row_index, cst_column_ava_price, item);
-
+    _OpenBuySell(false);
 }
 
 void MockTradeDlg::slotOpenBuy()
 {
-    int qty = ui.le_qty->text().trimmed().toInt();
-    double quote_price = 0.0;
-    {
-    std::lock_guard<std::mutex> locker(quote_data_mutex_);
-    quote_price = quote_data_.sell_price;
-    }
-
-    auto model = static_cast<QStandardItemModel *>(ui.table_view_record->model());
-    model->insertRow(model->rowCount());
-    int row_index = model->rowCount() - 1;
-    auto item = new QStandardItem(QString::fromLocal8Bit("¶à"));
-    model->setItem(row_index, cst_column_long_short, item);
-
-    item = new QStandardItem(QString::number(qty));
-    model->setItem(row_index, cst_column_qty, item);
-     
-    item = new QStandardItem(QString::number(quote_price));
-    model->setItem(row_index, cst_column_ava_price, item);
+   _OpenBuySell(true);
 }
 
 void MockTradeDlg::slotPositionClose()
@@ -126,4 +82,41 @@ void MockTradeDlg::slotPositionClose()
 void MockTradeDlg::slotBtnCondition()
 {
 
+}
+
+void MockTradeDlg::_OpenBuySell(bool is_buy)
+{
+    if( ui.le_qty->text().isEmpty() || !IsNumber(ui.le_qty->text().trimmed().toLocal8Bit().data()) )
+    {
+        return;
+    }
+    int qty = ui.le_qty->text().trimmed().toInt();
+    double quote_price = 0.0;
+    {
+    std::lock_guard<std::mutex> locker(quote_data_mutex_);
+    quote_price = quote_data_.buy_price;
+    }
+    auto position_item = std::make_shared<PositionAtom>();
+    position_item->price = quote_price;
+    position_item->qty = qty; 
+
+    account_info_.position.PushBack(is_buy, position_item);
+
+    auto model = static_cast<QStandardItemModel *>(ui.table_view_record->model());
+    model->insertRow(model->rowCount());
+    int row_index = model->rowCount() - 1;
+    auto item = new QStandardItem(is_buy ? QString::fromLocal8Bit("¶à") : QString::fromLocal8Bit("¿Õ"));
+    QVariant qvar_data;
+    qvar_data.setValue((void*)position_item.get());
+    item->setData(qvar_data);
+    item->setEditable(false);
+    model->setItem(row_index, cst_column_long_short, item);
+    
+    item = new QStandardItem(QString::number(qty));
+    item->setEditable(false);
+    model->setItem(row_index, cst_column_qty, item);
+     
+    item = new QStandardItem(QString::number(quote_price));
+    item->setEditable(false);
+    model->setItem(row_index, cst_column_ava_price, item);
 }

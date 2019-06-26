@@ -28,6 +28,9 @@ public slots:
     void slotBtnCondition();
 
 private:
+    void _OpenBuySell(bool is_buy);
+
+private:
 
     Ui::MockTradeForm  ui;
      

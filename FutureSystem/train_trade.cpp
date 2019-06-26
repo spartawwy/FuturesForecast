@@ -31,9 +31,9 @@ QString TradeRecordAtom::ToQStr()
 unsigned int PositionInfo::LongPos()
 {
     unsigned int qty = 0;
-    std::for_each( std::begin(long_positions_), std::end(long_positions_), [&qty](PositionAtom &entry)
+    std::for_each( std::begin(long_positions_), std::end(long_positions_), [&qty](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
     {
-        qty += entry.qty;
+        qty += entry->qty;
     });
     return qty;
 }
@@ -47,8 +47,8 @@ double PositionInfo::LongAveragePrice()
     int qty = 0;
     for( unsigned int i = 0; i < long_positions_.size(); ++i ) 
     {
-        amount += long_positions_.at(i).price * long_positions_.at(i).qty;
-        qty += long_positions_.at(i).qty;
+        amount += long_positions_.at(i)->price * long_positions_.at(i)->qty;
+        qty += long_positions_.at(i)->qty;
     }
     ave_price = amount / (double)qty;
     return ProcDecimal(ave_price, DEFAULT_DECIMAL);
@@ -58,9 +58,9 @@ double PositionInfo::LongAveragePrice()
 unsigned int PositionInfo::ShortPos()
 {
     unsigned int qty = 0;
-    std::for_each( std::begin(short_positions_), std::end(short_positions_), [&qty](PositionAtom &entry)
+    std::for_each( std::begin(short_positions_), std::end(short_positions_), [&qty](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
     {
-        qty += entry.qty;
+        qty += entry->qty;
     });
     return qty;
 }
@@ -74,8 +74,8 @@ double PositionInfo::ShortAveragePirce()
     int qty = 0;
     for( unsigned int i = 0; i < short_positions_.size(); ++i ) 
     {
-        amount += short_positions_.at(i).price * short_positions_.at(i).qty;
-        qty += short_positions_.at(i).qty;
+        amount += short_positions_.at(i)->price * short_positions_.at(i)->qty;
+        qty += short_positions_.at(i)->qty;
     }
     ave_price = amount / (double)qty;
     return ProcDecimal(ave_price, DEFAULT_DECIMAL);
@@ -85,13 +85,13 @@ double PositionInfo::FloatProfit(double price)
 {
     assert(price > 0.0);
     double profit = 0.0;
-    std::for_each(std::begin(long_positions_), std::end(long_positions_), [&](const PositionAtom& entry)
+    std::for_each(std::begin(long_positions_), std::end(long_positions_), [&](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
     {
-        profit += (price - entry.price) / cst_per_tick * cst_per_tick_capital * entry.qty;
+        profit += (price - entry->price) / cst_per_tick * cst_per_tick_capital * entry->qty;
     });
-    std::for_each(std::begin(short_positions_), std::end(short_positions_), [&](const PositionAtom& entry)
+    std::for_each(std::begin(short_positions_), std::end(short_positions_), [&](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
     {
-        profit += (entry.price - price) / cst_per_tick * cst_per_tick_capital * entry.qty;
+        profit += (entry->price - price) / cst_per_tick * cst_per_tick_capital * entry->qty;
     });
     return profit;
 }
@@ -150,19 +150,19 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int h
     //for( int i = long_positions_.size() - 1; !long_positions_.empty() && i >= 0 ; --i ) 
     for( auto iter = long_positions_.begin(); iter != long_positions_.end(); )
     {
-        if( iter->stop_profit_price > EPSINON && h_price > iter->stop_profit_price - EPSINON ) // >= stop profit price
+        if( (*iter)->stop_profit_price > EPSINON && h_price > (*iter)->stop_profit_price - EPSINON ) // >= stop profit price
         {
             TradeRecordAtom  trade_item;
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_LONG;
-            trade_item.quantity = iter->qty;
-            trade_item.price = iter->stop_profit_price - cst_per_tick;
-            trade_item.profit = (trade_item.price - iter->price) / cst_per_tick * cst_per_tick_capital;
+            trade_item.quantity = (*iter)->qty;
+            trade_item.price = (*iter)->stop_profit_price - cst_per_tick;
+            trade_item.profit = (trade_item.price - (*iter)->price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item);
-            capital_ret += cst_margin_capital * iter->qty;
+            capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
             iter = long_positions_.erase(iter);
         }else
@@ -184,19 +184,19 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int 
     //for( int i = short_positions_.size() - 1; !short_positions_.empty() && i >= 0 ; --i ) 
     for( auto iter = short_positions_.begin(); iter != short_positions_.end(); )
     {
-        if( iter->stop_profit_price > EPSINON && l_price + EPSINON < iter->stop_profit_price )
+        if( (*iter)->stop_profit_price > EPSINON && l_price + EPSINON < (*iter)->stop_profit_price )
         {
             TradeRecordAtom  trade_item;
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_SHORT;
-            trade_item.quantity = iter->qty;
-            trade_item.price = iter->stop_profit_price + cst_per_tick;
-            trade_item.profit = (iter->price - trade_item.price) / cst_per_tick * cst_per_tick_capital;
+            trade_item.quantity = (*iter)->qty;
+            trade_item.price = (*iter)->stop_profit_price + cst_per_tick;
+            trade_item.profit = ((*iter)->price - trade_item.price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item);
-            capital_ret += cst_margin_capital * iter->qty;
+            capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
 
             iter = short_positions_.erase(iter);
@@ -219,19 +219,19 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhm
     //for( int i = long_positions_.size() - 1; !long_positions_.empty() && i >= 0 ; --i ) 
     for( auto iter = long_positions_.begin(); iter != long_positions_.end(); )
     {
-        if( l_price < iter->stop_loss_price - EPSINON ) // <= stop loss price
+        if( l_price < (*iter)->stop_loss_price - EPSINON ) // <= stop loss price
         {
             TradeRecordAtom  trade_item;
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_LONG;
-            trade_item.quantity = iter->qty;
-            trade_item.price = iter->stop_loss_price - cst_per_tick;
-            trade_item.profit = (trade_item.price - iter->price) / cst_per_tick * cst_per_tick_capital;
+            trade_item.quantity = (*iter)->qty;
+            trade_item.price = (*iter)->stop_loss_price - cst_per_tick;
+            trade_item.profit = (trade_item.price - (*iter)->price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item);
-            capital_ret += cst_margin_capital * iter->qty;
+            capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
             iter = long_positions_.erase(iter);
         }else
@@ -253,19 +253,19 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossShortPos(int date, int hh
     //for( int i = short_positions_.size() - 1; !short_positions_.empty() && i >= 0 ; --i ) 
     for( auto iter = short_positions_.begin(); iter != short_positions_.end(); )
     {
-        if( iter->stop_loss_price > EPSINON && h_price + EPSINON > iter->stop_loss_price )
+        if( (*iter)->stop_loss_price > EPSINON && h_price + EPSINON > (*iter)->stop_loss_price )
         {
             TradeRecordAtom  trade_item;
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_SHORT;
-            trade_item.quantity = iter->qty;
-            trade_item.price = iter->stop_loss_price + cst_per_tick;
-            trade_item.profit = (iter->price - trade_item.price) / cst_per_tick * cst_per_tick_capital;
+            trade_item.quantity = (*iter)->qty;
+            trade_item.price = (*iter)->stop_loss_price + cst_per_tick;
+            trade_item.profit = ((*iter)->price - trade_item.price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item); 
-            capital_ret += cst_margin_capital * iter->qty;
+            capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
 
             iter = short_positions_.erase(iter);
@@ -392,23 +392,23 @@ std::vector<TradeRecordAtom> PositionInfo::CloseLong(int date, int hhmm, double 
     {
         double this_profit = 0.0;
         int this_qty = 0;
-        if( iter->qty >= remain_tgt_qty )
+        if( (*iter)->qty >= remain_tgt_qty )
         {
             this_qty = remain_tgt_qty;
-            this_profit = (price - iter->price) / cst_per_tick * cst_per_tick_capital * remain_tgt_qty;
+            this_profit = (price - (*iter)->price) / cst_per_tick * cst_per_tick_capital * remain_tgt_qty;
             capital_ret += cst_margin_capital * remain_tgt_qty;
-            if( iter->qty == remain_tgt_qty )
+            if( (*iter)->qty == remain_tgt_qty )
                 iter = long_positions_.erase(iter);
             else
             {
-                iter->qty -= remain_tgt_qty;
+                (*iter)->qty -= remain_tgt_qty;
                 ++iter;
             }
             remain_tgt_qty = 0; 
         }else
         {
-            this_qty = iter->qty;
-            this_profit = (price - iter->price) / cst_per_tick * cst_per_tick_capital * this_qty;
+            this_qty = (*iter)->qty;
+            this_profit = (price - (*iter)->price) / cst_per_tick * cst_per_tick_capital * this_qty;
             remain_tgt_qty -= this_qty;
             capital_ret += cst_margin_capital * this_qty;
             iter = long_positions_.erase(iter);
@@ -450,23 +450,23 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
     {
         double this_profit = 0.0;
         int this_qty = 0;
-        if( iter->qty >= remain_tgt_qty )
+        if( (*iter)->qty >= remain_tgt_qty )
         {
             this_qty = remain_tgt_qty;
-            this_profit = (iter->price - price) / cst_per_tick * cst_per_tick_capital * remain_tgt_qty;
+            this_profit = ((*iter)->price - price) / cst_per_tick * cst_per_tick_capital * remain_tgt_qty;
             capital_ret += cst_margin_capital * remain_tgt_qty;
-            if( iter->qty == remain_tgt_qty )
+            if( (*iter)->qty == remain_tgt_qty )
                 iter = short_positions_.erase(iter);
             else
             {
-                iter->qty -= remain_tgt_qty;
+                (*iter)->qty -= remain_tgt_qty;
                 ++iter;
             }
             remain_tgt_qty = 0;
         }else
         {
-            this_qty = iter->qty;
-            this_profit = (iter->price - price) / cst_per_tick * cst_per_tick_capital * this_qty;
+            this_qty = (*iter)->qty;
+            this_profit = ((*iter)->price - price) / cst_per_tick * cst_per_tick_capital * this_qty;
             capital_ret += cst_margin_capital * this_qty;
             remain_tgt_qty -= this_qty;
             iter = short_positions_.erase(iter);
@@ -492,9 +492,9 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
     return ret;
 }
 
-PositionAtom PositionInfo::PopBack(bool is_long)
+std::shared_ptr<PositionAtom> PositionInfo::PopBack(bool is_long)
 {
-    PositionAtom ret;
+    std::shared_ptr<PositionAtom> ret = nullptr;
     if( is_long ) 
     {
         assert( !long_positions_.empty() );

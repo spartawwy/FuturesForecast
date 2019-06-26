@@ -120,7 +120,7 @@ public:
     // return trades
     std::vector<TradeRecordAtom> CloseShort(int date, int hhmm, double price, unsigned int qty, double &capital_ret, double *p_profit);
 
-    void PushBack(bool is_long, const PositionAtom& item)
+    void PushBack(bool is_long, std::shared_ptr<PositionAtom> &item)
     {
         if( is_long )
             long_positions_.push_back(item);
@@ -128,16 +128,16 @@ public:
             short_positions_.push_back(item);
     }
 
-    PositionAtom PopBack(bool is_long);
+    std::shared_ptr<PositionAtom> PopBack(bool is_long);
 
 private:
 
     PositionInfo(const PositionInfo&);
     PositionInfo& operator = (const PositionInfo&);
 
-    std::vector<PositionAtom>  long_positions_;
-    std::vector<PositionAtom>  short_positions_;
-    /*int short_pos;
+    std::vector<std::shared_ptr<PositionAtom> >  long_positions_;
+    std::vector<std::shared_ptr<PositionAtom> >  short_positions_;
+    /* 
     double short_price_ave;*/
 };
 
