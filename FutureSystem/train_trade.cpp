@@ -28,11 +28,17 @@ QString TradeRecordAtom::ToQStr()
     return QString::fromLocal8Bit(buf);
 }
 
+//----------------------
+double PositionAtom::FloatProfit(double cur_price)
+{
+    return (cur_price - price) / cst_per_tick * cst_per_tick_capital * qty;
+}
 
+//----------------------
 unsigned int PositionInfo::LongPos()
 {
     unsigned int qty = 0;
-    std::for_each( std::begin(long_positions_), std::end(long_positions_), [&qty](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
+    std::for_each( std::begin(long_positions_), std::end(long_positions_), [&qty](T_PositionAtoms::reference entry)
     {
         qty += entry->qty;
     });
@@ -59,7 +65,7 @@ double PositionInfo::LongAveragePrice()
 unsigned int PositionInfo::ShortPos()
 {
     unsigned int qty = 0;
-    std::for_each( std::begin(short_positions_), std::end(short_positions_), [&qty](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
+    std::for_each( std::begin(short_positions_), std::end(short_positions_), [&qty](T_PositionAtoms::reference entry)
     {
         qty += entry->qty;
     });
@@ -86,11 +92,11 @@ double PositionInfo::FloatProfit(double price)
 {
     assert(price > 0.0);
     double profit = 0.0;
-    std::for_each(std::begin(long_positions_), std::end(long_positions_), [&](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
+    std::for_each(std::begin(long_positions_), std::end(long_positions_), [&](T_PositionAtoms::reference entry)
     {
         profit += (price - entry->price) / cst_per_tick * cst_per_tick_capital * entry->qty;
     });
-    std::for_each(std::begin(short_positions_), std::end(short_positions_), [&](std::vector<std::shared_ptr<PositionAtom> >::reference entry)
+    std::for_each(std::begin(short_positions_), std::end(short_positions_), [&](T_PositionAtoms::reference entry)
     {
         profit += (entry->price - price) / cst_per_tick * cst_per_tick_capital * entry->qty;
     });
@@ -494,9 +500,18 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
     return ret;
 }
 
-std::shared_ptr<PositionAtom> PositionInfo::PopBack(bool is_long)
+void PositionInfo::PushBack(bool is_long, std::shared_ptr<PositionAtom> &item)
 {
-    std::shared_ptr<PositionAtom> ret = nullptr;
+    position_holder_.insert(std::make_pair(item->trade_id, item));
+    if( is_long )
+        long_positions_.push_back(item.get());
+    else
+        short_positions_.push_back(item.get());
+}
+
+PositionAtom* PositionInfo::PopBack(bool is_long)
+{
+    PositionAtom *ret = nullptr;
     if( is_long ) 
     {
         assert( !long_positions_.empty() );
@@ -509,6 +524,15 @@ std::shared_ptr<PositionAtom> PositionInfo::PopBack(bool is_long)
         short_positions_.pop_back();
     }
     return ret;
+}
+
+PositionAtom * PositionInfo::FindPositionAtom(int id)
+{
+    auto iter = position_holder_.find(id);
+    if( iter != position_holder_.end() )
+        return iter->second.get();
+    else
+        return nullptr;
 }
 
 

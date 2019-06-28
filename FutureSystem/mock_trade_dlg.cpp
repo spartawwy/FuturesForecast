@@ -9,7 +9,7 @@ static int cst_column_ava_price = 2;
 static int cst_column_float_profit = 3;
 static int cst_column_stop_loss_price = 4;
 static int cst_column_stop_profit_price = 5;
-static int cst_column_data = 6;
+//static int cst_column_data = 6;
 
 MockTradeDlg::MockTradeDlg()
     : account_info_()
@@ -33,10 +33,10 @@ MockTradeDlg::MockTradeDlg()
     //------------------------- 
     QStandardItemModel * model = new QStandardItemModel(0, 6, this);
     
-
     model->setHorizontalHeaderItem(cst_column_long_short, new QStandardItem(QString::fromLocal8Bit("头寸"))); // 空 多
     model->setHorizontalHeaderItem(cst_column_qty, new QStandardItem(QString::fromLocal8Bit("数量")));
     model->setHorizontalHeaderItem(cst_column_ava_price, new QStandardItem(QString::fromLocal8Bit("成交均价")));
+
     model->setHorizontalHeaderItem(cst_column_float_profit, new QStandardItem(QString::fromLocal8Bit("浮盈")));
     model->setHorizontalHeaderItem(cst_column_stop_loss_price, new QStandardItem(QString::fromLocal8Bit("止损")));
     model->setHorizontalHeaderItem(cst_column_stop_profit_price, new QStandardItem(QString::fromLocal8Bit("止盈")));
@@ -73,6 +73,20 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         double asserts = cst_margin_capital * account_info_.position.TotalPosition() + avaliable_capital;
         ui.lab_assets->setText(QString::number(asserts));
     }
+
+    auto model = static_cast<QStandardItemModel*>(ui.table_view_record->model());
+
+    for( int i = 0; i < model->rowCount(); ++i )
+    {
+        auto item = model->item(i, cst_column_long_short);
+        int trade_id = item->data().toInt();
+        PositionAtom * atom = account_info_.position.FindPositionAtom(trade_id);
+        assert(atom);
+        double profit = atom->FloatProfit(cur_price);
+        auto item_profit = model->item(i, cst_column_float_profit);
+        item_profit->setText(QString::number(profit));
+    }
+    //account_info_.position.LongPos();
 }
 
 void MockTradeDlg::slotOpenSell()
@@ -117,7 +131,6 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
         return;
     }
     
-    
     auto position_item = std::make_shared<PositionAtom>();
     position_item->trade_id = account_info_.position.GenerateTradeId();
     position_item->price = quote_price;
@@ -132,10 +145,12 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     model->insertRow(model->rowCount());
     int row_index = model->rowCount() - 1;
     auto item = new QStandardItem(is_buy ? QString::fromLocal8Bit("多") : QString::fromLocal8Bit("空"));
+
     QVariant qvar_data;
-    qvar_data.setValue((void*)position_item.get());
+    qvar_data.setValue(position_item->trade_id);
     item->setData(qvar_data);
     item->setEditable(false);
+
     model->setItem(row_index, cst_column_long_short, item);
     
     item = new QStandardItem(QString::number(qty));
@@ -145,6 +160,18 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     item = new QStandardItem(QString::number(quote_price));
     item->setEditable(false);
     model->setItem(row_index, cst_column_ava_price, item);
+
+    item = new QStandardItem("");
+    item->setEditable(false);
+    model->setItem(row_index, cst_column_float_profit, item);
+
+    item = new QStandardItem("");
+    //item->setEditable(false);
+    model->setItem(row_index, cst_column_stop_loss_price, item);
+
+    item = new QStandardItem("");
+    //item->setEditable(false);
+    model->setItem(row_index, cst_column_stop_profit_price, item);
 }
 
 void MockTradeDlg::SetStatusBar(const QString & val)

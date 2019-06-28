@@ -86,6 +86,8 @@ public:
         return *this; 
     }
 
+    double FloatProfit(double price);
+
     int trade_id;
     double price;
     double stop_loss_price;   // if < 0.0 means not set
@@ -125,23 +127,22 @@ public:
     // return trades
     std::vector<TradeRecordAtom> CloseShort(int date, int hhmm, double price, unsigned int qty, double &capital_ret, double *p_profit);
 
-    void PushBack(bool is_long, std::shared_ptr<PositionAtom> &item)
-    {
-        if( is_long )
-            long_positions_.push_back(item);
-        else
-            short_positions_.push_back(item);
-    }
+    void PushBack(bool is_long, std::shared_ptr<PositionAtom> &item);
 
-    std::shared_ptr<PositionAtom> PopBack(bool is_long);
+    PositionAtom* PopBack(bool is_long);
+
+    PositionAtom * FindPositionAtom(int id);
 
 private:
 
     PositionInfo(const PositionInfo&);
     PositionInfo& operator = (const PositionInfo&);
 
-    std::vector<std::shared_ptr<PositionAtom> >  long_positions_;
-    std::vector<std::shared_ptr<PositionAtom> >  short_positions_;
+    std::unordered_map<int, std::shared_ptr<PositionAtom> > position_holder_;
+
+    typedef std::vector<PositionAtom*> T_PositionAtoms;
+    T_PositionAtoms  long_positions_;
+    T_PositionAtoms  short_positions_;
 
     std::atomic_int max_trade_id_;
     /* 
