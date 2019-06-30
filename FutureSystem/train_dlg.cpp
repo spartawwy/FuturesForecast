@@ -463,6 +463,7 @@ void TrainDlg::OnTrade()
         account_info_.capital.avaliable += profit - fee + capital_ret; 
 
         TradeRecordAtom  trade_item;
+        trade_item.trade_id = account_info_.position.GenerateTradeId();
         trade_item.date = trade_dlg_.date_;
         trade_item.hhmm = trade_dlg_.hhmm_;
         trade_item.action = RecordAction::CLOSE;
@@ -506,6 +507,7 @@ void TrainDlg::OnTrade()
         account_info_.capital.avaliable -= capital_buy + fee;
 
         auto pos_atom = std::make_shared<PositionAtom>();
+        pos_atom->trade_id = account_info_.position.GenerateTradeId();
         pos_atom->price = final_fill_price;
         pos_atom->qty = (unsigned int)quantity;
         pos_atom->stop_profit_price = stop_profit_price;
@@ -513,6 +515,7 @@ void TrainDlg::OnTrade()
         account_info_.position.PushBack(is_pos_type_long, pos_atom);
  
         TradeRecordAtom  trade_item;
+        trade_item.trade_id = pos_atom->trade_id;
         trade_item.date = trade_dlg_.date_;
         trade_item.hhmm = trade_dlg_.hhmm_;
         trade_item.action = RecordAction::OPEN;

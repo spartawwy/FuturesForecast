@@ -69,6 +69,9 @@ public:
     bool is_train_mode(){ return is_train_mode_; }
     void is_train_mode(bool val) { is_train_mode_ = val; }
 
+    bool is_mock_trade(){ return is_mock_trade_; }
+    void is_mock_trade(bool val) { is_mock_trade_ = val; }
+
     void UpdateStockData();
     void UpdateStockQuote();
 
@@ -117,6 +120,7 @@ private:
 
     TrainDlg *train_dlg_;
     volatile bool  is_train_mode_;
+    volatile bool  is_mock_trade_;
 
     MockTradeDlg *mock_trade_dlg_;
 

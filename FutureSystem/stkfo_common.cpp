@@ -1,4 +1,7 @@
 #include "stkfo_common.h"
+
+#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 
 #include <qtextcodec.h>
@@ -292,6 +295,21 @@ bool IsStrNum(const std::string& str)
         return false;
     }
 
+}
+bool IsDouble(const std::string& str)
+{
+    bool ret = true;
+    try
+    {
+        double val = boost::lexical_cast<double>(str.c_str());
+    }catch (boost::exception &)
+    {
+        ret = false;
+    }catch(...)
+    {
+        ret = false;
+    }
+    return ret;
 }
 
 double ProcDecimal(double val, unsigned int decimal)

@@ -347,6 +347,7 @@ void ToolBar::onClickedShowSubKwallBtn()
 
 void ToolBar::onShowMockTradeWin()
 {
+    m_main_window->is_mock_trade(true);
     m_main_window->PopMokeTradeDlg();
 }
 

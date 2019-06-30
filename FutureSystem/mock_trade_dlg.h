@@ -10,15 +10,20 @@
 
 #include "ui_mocktrade.h"
 
+class MainWindow;
 class MockTradeDlg : public QWidget
 {
     Q_OBJECT
 
 public:
 
-    MockTradeDlg();
+    MockTradeDlg(MainWindow *main_win);
 
     void SetStatusBar(const QString & val);
+     
+    void UpDateStopProfitOrLossIfNecessary(int row_index, bool is_profit);
+    double GetStopProfit(int trade_id);
+    double GetStopLoss(int trade_id);
 
 public slots:
 
@@ -30,12 +35,20 @@ public slots:
     void slotBtnCondition();
 
 private:
+
+    void closeEvent(QCloseEvent * /*event*/) override;
+
+    void ResetUi();
+
     void _OpenBuySell(bool is_buy);
+
+    bool JudgeDoForceClose(double price);
 
 private:
 
     Ui::MockTradeForm  ui;
-     
+    MainWindow *main_win_;
+
     AccountInfo  account_info_;
 
     T_Quote_Data  quote_data_;

@@ -1603,9 +1603,13 @@ void KLineWall::slotZoominSelect(bool)
 
 void KLineWall::UpdateStockQuote()
 {
+    if( is_resetting_stock_ || /*draw_action_ != DrawAction::NO_ACTION || */main_win_->is_train_mode() )
+        return;
     T_Quote_Data  quote_date;
     if( app_->stock_data_man().GetInstrumentQuote(stock_code_, nmarket_, quote_date) )
     {
+        if( is_resetting_stock_ ||/* draw_action_ != DrawAction::NO_ACTION || */main_win_->is_train_mode() )
+            return;
         main_win_->EmitSigQuoteData(quote_date.cur_price, quote_date.sell_price, quote_date.buy_price, quote_date.sell_vol, quote_date.buy_vol);
     }
 }

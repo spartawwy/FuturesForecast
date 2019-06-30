@@ -191,6 +191,15 @@
     <ClCompile Include="mock_trade_dlg.cpp">
       <Filter>win</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_position_records_table_view.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_position_records_table_view.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="position_records_table_view.cpp">
+      <Filter>moudle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.ui">
@@ -252,6 +261,9 @@
     </CustomBuild>
     <CustomBuild Include="mock_trade_dlg.h">
       <Filter>win</Filter>
+    </CustomBuild>
+    <CustomBuild Include="position_records_table_view.h">
+      <Filter>moudle</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

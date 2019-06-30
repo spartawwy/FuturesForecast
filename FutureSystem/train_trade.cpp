@@ -13,9 +13,10 @@
 QString TradeRecordAtom::ToQStr()
 {
     char buf[1024] = {'\0'};
-    sprintf_s(buf, "编号:%d 日期:%d %s %s 数量:%d 价格:%.2f (止赢价:%.2f 止损价:%.2f) 佣金税费:%.2f 盈亏:%.2f "
+    sprintf_s(buf, "编号:%d 时间:%d-%04d %s %s 数量:%d 价格:%.2f (止赢价:%.2f 止损价:%.2f) 佣金税费:%.2f 盈亏:%.2f "
         , this->trade_id
         , this->date
+        , this->hhmm
         , ToStr(this->action).c_str()
         , ToStr(this->pos_type).c_str()
         , this->quantity
@@ -160,7 +161,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int h
         if( (*iter)->stop_profit_price > EPSINON && h_price > (*iter)->stop_profit_price - EPSINON ) // >= stop profit price
         {
             TradeRecordAtom  trade_item;
-            trade_item.trade_id = (*iter)->trade_id;
+            trade_item.trade_id = GenerateTradeId();
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
@@ -195,6 +196,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int 
         if( (*iter)->stop_profit_price > EPSINON && l_price + EPSINON < (*iter)->stop_profit_price )
         {
             TradeRecordAtom  trade_item;
+            trade_item.trade_id = GenerateTradeId();
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
@@ -230,6 +232,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhm
         if( l_price < (*iter)->stop_loss_price - EPSINON ) // <= stop loss price
         {
             TradeRecordAtom  trade_item;
+            trade_item.trade_id = GenerateTradeId();
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
@@ -264,6 +267,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossShortPos(int date, int hh
         if( (*iter)->stop_loss_price > EPSINON && h_price + EPSINON > (*iter)->stop_loss_price )
         {
             TradeRecordAtom  trade_item;
+            trade_item.trade_id = GenerateTradeId();
             trade_item.date = date;
             trade_item.hhmm = hhmm;
             trade_item.action = RecordAction::CLOSE;
@@ -424,6 +428,7 @@ std::vector<TradeRecordAtom> PositionInfo::CloseLong(int date, int hhmm, double 
         profit += this_profit;
 
         TradeRecordAtom item;
+        item.trade_id = GenerateTradeId();
         item.date = date;
         item.hhmm = hhmm;
         item.action = RecordAction::CLOSE;
@@ -482,6 +487,7 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
         profit += this_profit;
 
         TradeRecordAtom item;
+        item.trade_id = GenerateTradeId();
         item.date = date;
         item.hhmm = hhmm;
         item.action = RecordAction::CLOSE;
@@ -502,11 +508,12 @@ std::vector<TradeRecordAtom> PositionInfo::CloseShort(int date, int hhmm, double
 
 void PositionInfo::PushBack(bool is_long, std::shared_ptr<PositionAtom> &item)
 {
-    position_holder_.insert(std::make_pair(item->trade_id, item));
+    assert(item->trade_id >= 0);
+    auto iter = position_holder_.insert(std::make_pair(item->trade_id, item)).first;
     if( is_long )
-        long_positions_.push_back(item.get());
+        long_positions_.push_back(iter->second.get());
     else
-        short_positions_.push_back(item.get());
+        short_positions_.push_back(iter->second.get());
 }
 
 PositionAtom* PositionInfo::PopBack(bool is_long)

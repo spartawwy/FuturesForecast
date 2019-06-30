@@ -49,6 +49,7 @@ MainWindow::MainWindow(FuturesForecastApp *app, QWidget *parent) :
     , timer_update_kwall_inter_(0)
     , train_dlg_(nullptr)
     , is_train_mode_(false)
+    , is_mock_trade_(false)
     , mock_trade_dlg_(nullptr)
     , show_sig_(false)
 {
@@ -135,7 +136,7 @@ bool MainWindow::Initialize()
     train_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
     train_dlg_->hide();
 
-    mock_trade_dlg_ = new MockTradeDlg();
+    mock_trade_dlg_ = new MockTradeDlg(this);
     mock_trade_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
     mock_trade_dlg_->hide();
 

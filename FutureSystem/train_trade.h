@@ -48,16 +48,17 @@ public:
     double fee;
     double price_stop_profit;
     double price_stop_loss;
-    explicit TradeRecordAtom() : trade_id(-1), date(0), action(RecordAction::OPEN), pos_type(PositionType::POS_LONG), quantity(0), price(0.0), profit(0.0), fee(0.0)
+    explicit TradeRecordAtom() : trade_id(-1), date(0), hhmm(0), action(RecordAction::OPEN), pos_type(PositionType::POS_LONG), quantity(0), price(0.0), profit(0.0), fee(0.0)
         , price_stop_profit(MAGIC_STOP_PRICE), price_stop_loss(MAGIC_STOP_PRICE) { }
-    TradeRecordAtom(const TradeRecordAtom &lh) : trade_id(lh.trade_id), date(lh.date), action(lh.action), pos_type(lh.pos_type), quantity(lh.quantity), price(lh.price), profit(lh.profit), fee(lh.fee)
+    TradeRecordAtom(const TradeRecordAtom &lh) : trade_id(lh.trade_id), date(lh.date), hhmm(lh.hhmm), action(lh.action), pos_type(lh.pos_type), quantity(lh.quantity), price(lh.price), profit(lh.profit), fee(lh.fee)
         , price_stop_profit(lh.price_stop_profit), price_stop_loss(lh.price_stop_loss) { }
     TradeRecordAtom & operator = (const TradeRecordAtom &lh)
     {
         if( &lh == this ) 
             return *this;
         trade_id = lh.trade_id;
-        date = lh.date; action = lh.action; pos_type = lh.pos_type;
+        date = lh.date; hhmm = lh.hhmm;
+        action = lh.action; pos_type = lh.pos_type;
         quantity = lh.quantity; price = lh.price; profit = lh.profit; fee = lh.fee;
         price_stop_profit = lh.price_stop_profit; price_stop_loss = lh.price_stop_loss;
         return *this;
