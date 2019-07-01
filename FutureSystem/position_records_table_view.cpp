@@ -5,21 +5,7 @@
 #include <QDebug>
 
 #include "mock_trade_dlg.h"
-//
-//bool PositionRecordsTableView::edit(const QModelIndex & index, EditTrigger trigger, QEvent * event)
-//{
-//    bool ret = QTableView::edit(index, trigger, event);
-//#if 0
-//    auto model = static_cast<QStandardItemModel*>(this->model());
-//
-//    auto item = model->item(index.row(), index.column());
-//    qDebug() << __FUNCTION__ << " " << index << " trigger:" << trigger;
-//    if( item )
-//        qDebug() << " text:" << item->text();
-//#endif
-//    //return state() == EditingState;
-//    return ret;
-//}
+
 
 PositionRecordsTableView::PositionRecordsTableView(MockTradeDlg * parent) : QTableView(parent)
     , parent_(parent)
@@ -32,7 +18,7 @@ void PositionRecordsTableView::keyPressEvent(QKeyEvent * event)
     qDebug() << __FUNCTION__ << " key:" << event->key() << " text:" << event->text() << " cur_index:" << currentIndex();
 
     auto key_val = event->key();
-    if( key_val == Qt::Key_Enter ||  key_val == Qt::Key_Escape ||  key_val == Qt::Key_Tab )
+    if( /*key_val == Qt::Key_Enter || */ key_val == Qt::Key_Escape ||  key_val == Qt::Key_Tab )
     {
         //this->focusPreviousChild(); 
 

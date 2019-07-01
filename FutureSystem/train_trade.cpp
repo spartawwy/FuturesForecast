@@ -516,7 +516,7 @@ void PositionInfo::PushBack(bool is_long, std::shared_ptr<PositionAtom> &item)
         short_positions_.push_back(iter->second.get());
 }
 
-PositionAtom* PositionInfo::PopBack(bool is_long)
+PositionAtom * PositionInfo::PopBack(bool is_long)
 {
     PositionAtom *ret = nullptr;
     if( is_long ) 

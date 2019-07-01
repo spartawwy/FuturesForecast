@@ -4,6 +4,8 @@
 #include <vector>
 #include <tuple>
 #include <atomic>
+#include <mutex>
+
 #include <QString>
 
 #include "stkfo_common.h"
@@ -101,6 +103,8 @@ class PositionInfo
 public:
      
     PositionInfo(){ max_trade_id_ = 0; }
+     
+    std::mutex mutex_;
 
     int GenerateTradeId(){ return ++max_trade_id_; }
     unsigned int TotalPosition() { return LongPos() + ShortPos(); }
@@ -130,7 +134,7 @@ public:
 
     void PushBack(bool is_long, std::shared_ptr<PositionAtom> &item);
 
-    PositionAtom* PopBack(bool is_long);
+    PositionAtom * PopBack(bool is_long);
 
     PositionAtom * FindPositionAtom(int id);
 

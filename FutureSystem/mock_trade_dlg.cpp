@@ -95,12 +95,19 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         return;
 
     cur_price_ = cur_price;
+    std::lock_guard<std::mutex>  pos_locker(account_info_.position.mutex_);
+
     auto model = static_cast<QStandardItemModel*>(ui.table_view_record->model());
 
     bool is_force_closed = JudgeDoForceClose(cur_price);
     if( is_force_closed )
     {
         model->clear();
+         
+        ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
+        double asserts = cst_margin_capital * account_info_.position.TotalPosition() + account_info_.capital.avaliable;
+        ui.lab_assets->setText(QString::number(asserts));
+
     }else
     { 
         // todo: do if stop profit
@@ -116,13 +123,14 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
             auto item_profit = model->item(i, cst_column_float_profit);
             item_profit->setText(QString::number(profit));
         } 
+
+        double avaliable_capital = account_info_.capital.avaliable + account_info_.position.FloatProfit(cur_price);
+
+        ui.le_cur_capital->setText(QString::number(avaliable_capital));
+        double asserts = cst_margin_capital * account_info_.position.TotalPosition() + avaliable_capital;
+        ui.lab_assets->setText(QString::number(asserts));
     }
-
-    double avaliable_capital = account_info_.capital.avaliable + account_info_.position.FloatProfit(cur_price);
-
-    ui.le_cur_capital->setText(QString::number(avaliable_capital));
-    double asserts = cst_margin_capital * account_info_.position.TotalPosition() + avaliable_capital;
-    ui.lab_assets->setText(QString::number(asserts));
+    
 }
 
 void MockTradeDlg::slotOpenSell()
@@ -160,6 +168,10 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     }
     int qty = ui.le_qty->text().trimmed().toInt();
 
+    int trade_id = 0;
+    {
+    std::lock_guard<std::mutex>  locker(account_info_.position.mutex_);
+
     int qty_can_open = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable, quote_price);
     if( qty > qty_can_open )
     {
@@ -168,17 +180,17 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     }
     
     auto position_item = std::make_shared<PositionAtom>();
-    position_item->trade_id = account_info_.position.GenerateTradeId();
+    trade_id = position_item->trade_id = account_info_.position.GenerateTradeId();
     position_item->price = quote_price;
     position_item->qty = qty; 
-
+     
     account_info_.position.PushBack(is_buy, position_item);
     account_info_.capital.avaliable -= cst_margin_capital * position_item->qty + CalculateFee(qty, quote_price, false);
-
+    
     auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
     force_close_low_ = std::get<0>(low_high);
     force_close_high_ = std::get<1>(low_high);
-
+    }
     //------------set ui-------------
     ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
 
@@ -188,7 +200,7 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     auto item = new QStandardItem(is_buy ? QString::fromLocal8Bit("¶à") : QString::fromLocal8Bit("¿Õ"));
 
     QVariant qvar_data;
-    qvar_data.setValue(position_item->trade_id);
+    qvar_data.setValue(trade_id);
     item->setData(qvar_data);
     item->setEditable(false);
 
@@ -229,6 +241,8 @@ void MockTradeDlg::UpDateStopProfitOrLossIfNecessary(int row_index, bool is_prof
 
     int trade_id = model->item(row_index, cst_column_long_short)->data().toInt();
     double stop_price = model->item(row_index, target_col)->text().trimmed().toDouble();
+
+    std::lock_guard<std::mutex>  locker(account_info_.position.mutex_);
 
     auto position_atom = account_info_.position.FindPositionAtom(trade_id);
     if( position_atom )
