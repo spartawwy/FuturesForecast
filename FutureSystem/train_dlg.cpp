@@ -186,20 +186,24 @@ void TrainDlg::OnMoveToNextK()
     {
         // close price is nearby low price: first high price then low price
         double profit_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_profit_long, &profit_long_pos);
+        std::vector<int> stop_profit_long_ids;
+        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_profit_long, stop_profit_long_ids, nullptr, &profit_long_pos);
         has_trade = (has_trade || !trades_stop_profit_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
         double loss_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_loss_short, &loss_short_pos);
+        std::vector<int> stop_loss_short_ids;
+        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_loss_short, stop_loss_short_ids, nullptr, &loss_short_pos);
         has_trade = (has_trade || !trades_stop_loss_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
 
         double profit_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_profit_short, &profit_short_pos);
+        std::vector<int> stop_profit_short_ids;
+        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_profit_short, stop_profit_short_ids, nullptr, &profit_short_pos);
         has_trade = (has_trade || !trades_stop_profit_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
         double loss_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, &loss_long_pos);
+        std::vector<int> stop_loss_long_ids;
+        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, stop_loss_long_ids, nullptr, &loss_long_pos);
         has_trade = (has_trade || !trades_stop_loss_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
 
@@ -207,20 +211,24 @@ void TrainDlg::OnMoveToNextK()
     }else
     { // close price is nearby high price: first low price then high price
         double profit_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_profit_short, &profit_short_pos);
+        std::vector<int> stop_profit_short_ids;
+        std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_profit_short, stop_profit_short_ids, nullptr, &profit_short_pos);
         has_trade = (has_trade || !trades_stop_profit_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
         double loss_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, &loss_long_pos);
+        std::vector<int> stop_loss_long_ids;
+        std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(stock_item.date, stock_item.hhmmss, stock_item.low_price, capital_ret_stop_loss_long, stop_loss_long_ids, nullptr, &loss_long_pos);
         has_trade = (has_trade || !trades_stop_loss_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
 
         double profit_long_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_profit_long, &profit_long_pos);
+        std::vector<int> stop_profit_long_ids;
+        std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_profit_long, stop_profit_long_ids, nullptr, &profit_long_pos);
         has_trade = (has_trade || !trades_stop_profit_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
         double loss_short_pos = 0.0;
-        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_loss_short, &loss_short_pos);
+        std::vector<int> stop_loss_short_ids;
+        std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(stock_item.date, stock_item.hhmmss, stock_item.high_price, capital_ret_stop_loss_short, stop_loss_short_ids, nullptr, &loss_short_pos);
         has_trade = (has_trade || !trades_stop_loss_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
 

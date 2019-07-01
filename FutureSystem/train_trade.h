@@ -13,7 +13,7 @@
 static const double cst_per_tick = 0.1; // pow(0.1, DEFAULT_DECIMAL)
 static const double cst_per_tick_capital = 100.00;
 static const double cst_margin_capital = 6000.00;
-static const double cst_default_ori_capital = 12000.00;
+static const double cst_default_ori_capital = 20000.00;
 static const double cst_default_fee_rate_percent = 0.025;
 
 enum PositionType : unsigned char
@@ -72,8 +72,8 @@ public:
 class PositionAtom
 {
 public:
-    PositionAtom() : trade_id(-1), price(0.0), stop_loss_price(MAGIC_STOP_PRICE), stop_profit_price(MAGIC_STOP_PRICE), qty(0){}
-    PositionAtom(const PositionAtom& lh) : trade_id(lh.trade_id), price(lh.price),stop_loss_price(lh.stop_loss_price),stop_profit_price(lh.stop_profit_price), qty(lh.qty){}
+    PositionAtom() : trade_id(-1), price(0.0), is_long(false), stop_loss_price(MAGIC_STOP_PRICE), stop_profit_price(MAGIC_STOP_PRICE), qty(0){}
+    PositionAtom(const PositionAtom& lh) : trade_id(lh.trade_id), price(lh.price), is_long(lh.is_long), stop_loss_price(lh.stop_loss_price),stop_profit_price(lh.stop_profit_price), qty(lh.qty){}
     PositionAtom& operator = (const PositionAtom& lh)
     { 
         if( this == &lh ) 
@@ -82,6 +82,7 @@ public:
         {
             trade_id = lh.trade_id;
             price = lh.price; 
+            is_long = lh.is_long;
             stop_loss_price = lh.stop_loss_price;
             stop_profit_price = lh.stop_profit_price;
             qty = lh.qty;
@@ -93,6 +94,7 @@ public:
 
     int trade_id;
     double price;
+    bool is_long;
     double stop_loss_price;   // if < 0.0 means not set
     double stop_profit_price; // if < 0.0 means not set
     unsigned int qty;
@@ -105,6 +107,8 @@ public:
     PositionInfo(){ max_trade_id_ = 0; }
      
     std::mutex mutex_;
+
+    void Clear(){ long_positions_.clear(); short_positions_.clear(); position_holder_.clear(); max_trade_id_ = 0;}
 
     int GenerateTradeId(){ return ++max_trade_id_; }
     unsigned int TotalPosition() { return LongPos() + ShortPos(); }
@@ -119,10 +123,10 @@ public:
     // ret <low, high>
     std::tuple<double, double> GetForceClosePrices(double capital);
 
-    std::vector<TradeRecordAtom> DoIfStopProfitLongPos(int date, int hhmm, double h_price, double &capital_ret, double *p_profit);
-    std::vector<TradeRecordAtom> DoIfStopProfitShortPos(int date, int hhmm, double l_price, double &capital_ret, double *p_profit);
-    std::vector<TradeRecordAtom> DoIfStopLossLongPos(int date, int hhmm, double l_price, double &capital_ret, double *p_profit);
-    std::vector<TradeRecordAtom> DoIfStopLossShortPos(int date, int hhmm, double h_price, double &capital_ret, double *p_profit);
+    std::vector<TradeRecordAtom> DoIfStopProfitLongPos(int date, int hhmm, double h_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit);
+    std::vector<TradeRecordAtom> DoIfStopProfitShortPos(int date, int hhmm, double l_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit);
+    std::vector<TradeRecordAtom> DoIfStopLossLongPos(int date, int hhmm, double l_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit);
+    std::vector<TradeRecordAtom> DoIfStopLossShortPos(int date, int hhmm, double h_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit);
 #if 0
     std::vector<TradeRecordAtom> DoIfStopProfit(int date, int hhmm, double h_price, double l_price, double *p_profit);
     std::vector<TradeRecordAtom> DoIfStopLoss(int date, int hhmm, double h_price, double l_price, double *p_profit);

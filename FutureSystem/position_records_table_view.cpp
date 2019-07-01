@@ -15,16 +15,17 @@ PositionRecordsTableView::PositionRecordsTableView(MockTradeDlg * parent) : QTab
 
 void PositionRecordsTableView::keyPressEvent(QKeyEvent * event)
 {
+    if( parent_->is_closed() )
+        return;
     qDebug() << __FUNCTION__ << " key:" << event->key() << " text:" << event->text() << " cur_index:" << currentIndex();
-
+    auto model = static_cast<QStandardItemModel *>(this->model());
+    if( !model || model->rowCount() <= 0 )
+        return;
     auto key_val = event->key();
     if( /*key_val == Qt::Key_Enter || */ key_val == Qt::Key_Escape ||  key_val == Qt::Key_Tab )
-    {
-        //this->focusPreviousChild(); 
-
+    { 
         this->update(currentIndex());
         
-        auto model = static_cast<QStandardItemModel *>(this->model());
         int trade_id = model->item(currentIndex().row(), cst_column_long_short)->data().toInt();
         if ( currentIndex().column() == cst_column_stop_profit_price )
         {
@@ -56,8 +57,12 @@ void PositionRecordsTableView::keyPressEvent(QKeyEvent * event)
 void PositionRecordsTableView::currentChanged(const QModelIndex & current, const QModelIndex & previous)
 {
     qDebug() << "current :" << current << " previous:" << previous;
-
+    if( parent_->is_closed() )
+        return;
     auto model = static_cast<QStandardItemModel *>(this->model());
+    if( !model || model->rowCount() <= 0 )
+        return;
+
     int trade_id = model->item(currentIndex().row(), cst_column_long_short)->data().toInt();
 
     if( previous.column() == cst_column_stop_profit_price )

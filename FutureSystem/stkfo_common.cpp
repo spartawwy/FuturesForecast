@@ -315,13 +315,22 @@ bool IsDouble(const std::string& str)
 double ProcDecimal(double val, unsigned int decimal)
 {
     int temp = pow(10, decimal);
-    int64_t big_val = int64_t(val * temp + 0.5); //4…·5»Î
+    int64_t big_val = int64_t(fabs(val * temp) + 0.5) * (val < 0 ? - 1 : 1); //4…·5»Î
     return double(big_val) / temp;
 }
 
 bool Equal(double lh, double rh)
 {
     return fabs(lh-rh) < 0.0001;
+}
+
+int cur_hhmm()
+{
+    time_t rawtime;
+    struct tm timeinfo;
+    time( &rawtime );
+    localtime_s(&timeinfo, &rawtime); 
+    return timeinfo.tm_hour * 100 + timeinfo.tm_min;
 }
 
 void utf8ToGbk(std::string& strUtf8)

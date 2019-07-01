@@ -25,6 +25,8 @@ public:
     double GetStopProfit(int trade_id);
     double GetStopLoss(int trade_id);
 
+    bool is_closed();
+
 public slots:
 
     void slotHandleQuote(double /*cur_price*/, double /*sell1*/, double /*bull1*/, int /*sell_vol1*/, int /*bull_vol1*/);
@@ -62,6 +64,7 @@ private:
     std::vector<TradeRecordAtom>  trade_records_;
 
     std::mutex quote_data_mutex_;
+    
 };
 
 #endif // MOCK_TRADE_DLG_DSFS3SDFSD_H_

@@ -32,7 +32,9 @@ QString TradeRecordAtom::ToQStr()
 //----------------------
 double PositionAtom::FloatProfit(double cur_price)
 {
-    return (cur_price - price) / cst_per_tick * cst_per_tick_capital * qty;
+    double dis_price = is_long ? cur_price - price : price - cur_price;
+    double val = dis_price / cst_per_tick * cst_per_tick_capital * qty;
+    return ProcDecimal(val, 0);
 }
 
 //----------------------
@@ -147,7 +149,7 @@ std::tuple<double, double> PositionInfo::GetForceClosePrices(double capital)
 }
 
 // return profit of close action
-std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int hhmm, double h_price, double &capital_ret, double *p_profit)
+std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int hhmm, double h_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit)
 {
     assert(date > 0);
     assert(h_price > EPSINON);
@@ -167,12 +169,16 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int h
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_LONG;
             trade_item.quantity = (*iter)->qty;
-            trade_item.price = (*iter)->stop_profit_price - cst_per_tick;
+            if( p_cur_price )
+                trade_item.price = *p_cur_price - cst_per_tick;
+            else
+                trade_item.price = (*iter)->stop_profit_price - cst_per_tick;
             trade_item.profit = (trade_item.price - (*iter)->price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item);
             capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
+            ret_ids.push_back((*iter)->trade_id);
             iter = long_positions_.erase(iter);
         }else
             ++iter;
@@ -183,7 +189,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int h
 }
 
 // return profit of close action
-std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int hhmm, double l_price, double &capital_ret, double *p_profit)
+std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int hhmm, double l_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit)
 {
     assert(l_price > EPSINON);
 
@@ -202,12 +208,16 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int 
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_SHORT;
             trade_item.quantity = (*iter)->qty;
-            trade_item.price = (*iter)->stop_profit_price + cst_per_tick;
+            if( p_cur_price )
+                trade_item.price = *p_cur_price + cst_per_tick;
+            else
+                trade_item.price = (*iter)->stop_profit_price + cst_per_tick;
             trade_item.profit = ((*iter)->price - trade_item.price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item);
             capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
+            ret_ids.push_back((*iter)->trade_id);
 
             iter = short_positions_.erase(iter);
         }else
@@ -219,7 +229,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int 
 }
 
 // return profit of close action
-std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhmm, double l_price, double &capital_ret, double *p_profit)
+std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhmm, double l_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit)
 {
     assert(l_price > EPSINON); 
 
@@ -238,12 +248,17 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhm
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_LONG;
             trade_item.quantity = (*iter)->qty;
-            trade_item.price = (*iter)->stop_loss_price - cst_per_tick;
+            if( p_cur_price )
+                trade_item.price = *p_cur_price - cst_per_tick;
+            else
+                trade_item.price = (*iter)->stop_loss_price - cst_per_tick;
             trade_item.profit = (trade_item.price - (*iter)->price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item);
             capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
+            ret_ids.push_back((*iter)->trade_id);
+
             iter = long_positions_.erase(iter);
         }else
             ++iter;
@@ -254,7 +269,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhm
 }
 
 // return profit(include fee) of close action 
-std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossShortPos(int date, int hhmm, double h_price, double &capital_ret, double *p_profit)
+std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossShortPos(int date, int hhmm, double h_price, double &capital_ret, std::vector<int> &ret_ids, double *p_cur_price, double *p_profit)
 {
     assert(h_price > EPSINON);  
 
@@ -273,12 +288,16 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossShortPos(int date, int hh
             trade_item.action = RecordAction::CLOSE;
             trade_item.pos_type = PositionType::POS_SHORT;
             trade_item.quantity = (*iter)->qty;
-            trade_item.price = (*iter)->stop_loss_price + cst_per_tick;
+            if( p_cur_price )
+                trade_item.price = *p_cur_price + cst_per_tick;
+            else
+                trade_item.price = (*iter)->stop_loss_price + cst_per_tick;
             trade_item.profit = ((*iter)->price - trade_item.price) / cst_per_tick * cst_per_tick_capital;
             trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
             ret.push_back(trade_item); 
             capital_ret += cst_margin_capital * (*iter)->qty;
             profit += trade_item.profit - trade_item.fee;
+            ret_ids.push_back((*iter)->trade_id);
 
             iter = short_positions_.erase(iter);
         }else

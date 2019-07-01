@@ -347,6 +347,8 @@ void ClearBtmFractal(T_KlineDataItem &k_data_item);
 double ProcDecimal(double val, unsigned int decimal);
 bool Equal(double lh, double rh);
 
+int cur_hhmm();
+
 KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_period);
 
 #define  EPSINON  0.0001
