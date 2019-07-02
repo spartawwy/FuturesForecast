@@ -16,6 +16,7 @@
 #include <QtWidgets/QComboBox>
 #include <QMessageBox>
 #include <QTimer>
+#include <qdesktopwidget.h>
 
 #include <qdebug.h>
 
@@ -157,6 +158,16 @@ bool MainWindow::Initialize()
     ui->statusBar->showMessage("hello",2000); 
     ui->statusBar->addPermanentWidget(ui->labelCurrentTime);
 #endif
+
+    auto desktop_wid = QApplication::desktop();
+    //获取设备屏幕大小
+    QRect screenRect = desktop_wid->screenGeometry();
+
+    this->setGeometry(0, 0, screenRect.width() * 0.8, screenRect.height() * 0.8);
+
+    /*g_nActScreenX = screenRect.width();
+    g_nActScreenY = screenRect.height();*/
+
     return true;
 }
 

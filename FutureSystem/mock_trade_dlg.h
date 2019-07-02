@@ -27,10 +27,16 @@ public:
 
     bool is_closed();
 
+    double GetTargetPrice(bool is_buy);
+
+    
+    TradeRecordAtom  ClosePositionAtom(int id); 
+
 public slots:
 
     void slotHandleQuote(double /*cur_price*/, double /*sell1*/, double /*bull1*/, int /*sell_vol1*/, int /*bull_vol1*/);
 
+    void slotBtnInit();
     void slotOpenSell();
     void slotOpenBuy();
     void slotPositionClose();
@@ -45,6 +51,12 @@ private:
     void _OpenBuySell(bool is_buy);
 
     bool JudgeDoForceClose(double price);
+
+    void RefreshCapitalAssertsUi();
+
+    void PrintTradeRecords();
+    void AppendStrToRecordsUi(const QString &str);
+    void AppendTradesToRecordsUi(std::vector<TradeRecordAtom> &trades);
 
 private:
 

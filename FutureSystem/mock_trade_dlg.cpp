@@ -20,6 +20,8 @@ MockTradeDlg::MockTradeDlg(MainWindow *main_win)
     memset(&quote_data_, 0, sizeof(quote_data_));
      
     bool ret = false;
+    ret = QObject::connect(ui.pbtnInit, SIGNAL(clicked()), this, SLOT(slotBtnInit()));
+
     ret = QObject::connect(ui.pbtnSell, SIGNAL(clicked()), this, SLOT(slotOpenSell()));
     ret = QObject::connect(ui.pbtnBuy, SIGNAL(clicked()), this, SLOT(slotOpenBuy()));
     ret = QObject::connect(ui.pbtnClose, SIGNAL(clicked()), this, SLOT(slotPositionClose()));
@@ -38,9 +40,9 @@ MockTradeDlg::MockTradeDlg(MainWindow *main_win)
     //model->setHorizontalHeaderItem(cst_column_data, new QStandardItem("data"));
     
     delete ui.table_view_record; 
-    ui.table_view_record = new PositionRecordsTableView(this);
-    ui.table_view_record->setObjectName(QStringLiteral("table_view_record"));
-    ui.table_view_record->setGeometry(QRect(10, 190, 561, 341));
+    ui.table_view_record = new PositionRecordsTableView(ui.tab_position, this);
+    ui.table_view_record->setObjectName(QStringLiteral("table_view_record")); 
+    ui.table_view_record->setGeometry(QRect(10, 10, 571, 291));
 
     ui.table_view_record->setModel(model);
      
@@ -67,6 +69,16 @@ bool MockTradeDlg::is_closed()
 {
     return !main_win_->is_mock_trade();
 }
+
+double MockTradeDlg::GetTargetPrice(bool is_buy)
+ {
+    std::lock_guard<std::mutex> locker(quote_data_mutex_);
+    if( is_buy )
+        return quote_data_.sell_price;
+    else
+        return quote_data_.buy_price;
+}
+
 
 void MockTradeDlg::ResetUi()
 {
@@ -111,11 +123,9 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
     if( is_force_closed )
     {
         model->clear();
+        RefreshCapitalAssertsUi();
          
-        ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
-        double asserts = cst_margin_capital * account_info_.position.TotalPosition() + account_info_.capital.avaliable;
-        ui.lab_assets->setText(QString::number(asserts));
-
+        PrintTradeRecords();
     }else
     { 
         //   do force stop profit or loss ---------- 
@@ -153,6 +163,7 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         std::unordered_map<int, bool> ret_ids;
         if( has_trade )
         {
+            PrintTradeRecords();
             account_info_.capital.avaliable += profit + capital_ret_stop_profit_short + capital_ret_stop_loss_long + capital_ret_stop_profit_long + capital_ret_stop_loss_short;
             auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
             force_close_low_ = std::get<0>(low_high);
@@ -163,11 +174,12 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
             std::for_each( stop_loss_long_ids.begin(), stop_loss_long_ids.end(), [&ret_ids](int id){ ret_ids.insert(std::make_pair(id, true)); } );
         } 
         account_info_.capital.float_profit = account_info_.position.FloatProfit(cur_price);
-        account_info_.capital.avaliable += account_info_.capital.float_profit;
+        account_info_.capital.avaliable = cst_margin_capital * account_info_.position.TotalPosition() + account_info_.capital.float_profit;
 
-        ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
+        RefreshCapitalAssertsUi();
+        /*ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
         double asserts = cst_margin_capital * account_info_.position.TotalPosition() + account_info_.capital.avaliable;
-        ui.lab_assets->setText(QString::number(asserts));
+        ui.lab_assets->setText(QString::number(asserts));*/
 
         for( int i = 0; i < model->rowCount(); ++i )
         {
@@ -190,6 +202,11 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
     }
 }
 
+void MockTradeDlg::slotBtnInit()
+{
+
+}
+
 void MockTradeDlg::slotOpenSell()
 {
     _OpenBuySell(false);
@@ -202,7 +219,35 @@ void MockTradeDlg::slotOpenBuy()
 
 void MockTradeDlg::slotPositionClose()
 {
+    int row_index = ui.table_view_record->currentIndex().row();
+    if( row_index < 0 )
+        return;
+    /*if( ui.le_qty->text().isEmpty() || !IsNumber(ui.le_qty->text().trimmed().toLocal8Bit().data()) )
+    {
+        SetStatusBar(QString::fromLocal8Bit("数量非法!"));
+        ui.le_qty->setFocus();
+        return;
+    }*/
+    auto model = static_cast<QStandardItemModel*>(ui.table_view_record->model());
+    int trade_id = model->item(row_index, cst_column_long_short)->data().toInt();
+    assert(trade_id > 0);
 
+    double capital_ret = 0.0;
+    PositionAtom * atom = account_info_.position.FindPositionAtom(trade_id);
+    assert(atom);
+    double target_price = GetTargetPrice(atom->is_long);
+    auto trade_item = account_info_.position.ClosePositionAtom(trade_id, target_price, &capital_ret);
+    if( trade_item.trade_id > 0 )
+    {
+        trade_records_.push_back(trade_item);
+        account_info_.capital.avaliable += capital_ret;
+
+        model->removeRows(row_index, 1);
+
+        RefreshCapitalAssertsUi();
+        PrintTradeRecords();
+    }
+     
 }
 
 void MockTradeDlg::slotBtnCondition()
@@ -218,36 +263,48 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
         ui.le_qty->setFocus();
         return;
     }
-    double quote_price = 0.0;
-    {
-        std::lock_guard<std::mutex> locker(quote_data_mutex_);
-        quote_price = quote_data_.buy_price;
-    }
+    double target_price = GetTargetPrice(is_buy);
+    
     int qty = ui.le_qty->text().trimmed().toInt();
 
     int trade_id = 0;
+
     {
     std::lock_guard<std::mutex>  locker(account_info_.position.mutex_);
 
-    int qty_can_open = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable, quote_price);
+    int qty_can_open = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable, target_price);
     if( qty > qty_can_open )
     {
         SetStatusBar(QString::fromLocal8Bit("资金不足!"));
         return;
     }
     
+    trade_id = account_info_.position.GenerateTradeId();
+
+    TradeRecordAtom  trade_item;
+    trade_item.trade_id = trade_id;
+    trade_item.date = TSystem::Today();
+    trade_item.hhmm = cur_hhmm();
+    trade_item.action = RecordAction::OPEN;
+    trade_item.pos_type = is_buy ? PositionType::POS_LONG : PositionType::POS_SHORT;
+    trade_item.quantity = qty;
+    trade_item.price = target_price; 
+    trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
+    trade_records_.push_back(trade_item);
+    //position ---------
     auto position_item = std::make_shared<PositionAtom>();
-    trade_id = position_item->trade_id = account_info_.position.GenerateTradeId();
-    position_item->price = quote_price;
+    position_item->trade_id = trade_id;
+    position_item->price = target_price;
     position_item->is_long = is_buy;
     position_item->qty = qty; 
      
     account_info_.position.PushBack(is_buy, position_item);
-    account_info_.capital.avaliable -= cst_margin_capital * position_item->qty + CalculateFee(qty, quote_price, false);
+    account_info_.capital.avaliable -= cst_margin_capital * position_item->qty + CalculateFee(qty, target_price, false);
     
     auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
     force_close_low_ = std::get<0>(low_high);
     force_close_high_ = std::get<1>(low_high);
+    PrintTradeRecords();
     }
     //------------set ui-------------
     ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
@@ -268,7 +325,7 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     //item->setEditable(false);
     model->setItem(row_index, cst_column_qty, item);
      
-    item = new QStandardItem(QString::number(quote_price));
+    item = new QStandardItem(QString::number(target_price));
     item->setEditable(false);
     model->setItem(row_index, cst_column_ava_price, item);
 
@@ -369,4 +426,41 @@ bool MockTradeDlg::JudgeDoForceClose(double price)
         return true;
     }else 
         return false;
+}
+
+void MockTradeDlg::RefreshCapitalAssertsUi()
+{
+    ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
+    double asserts = cst_margin_capital * account_info_.position.TotalPosition() + account_info_.capital.avaliable;
+    ui.lab_assets->setText(QString::number(asserts));
+}
+
+void MockTradeDlg::PrintTradeRecords()
+{
+    ui.pe_trade_records->clear();
+
+    QString records_str;
+    for(unsigned int i = 0; i < trade_records_.size(); ++i )
+    {
+        records_str.append(trade_records_.at(i).ToQStr());
+        records_str.append("\n");
+    }
+    ui.pe_trade_records->setPlainText(records_str);
+    
+}
+
+void MockTradeDlg::AppendStrToRecordsUi(const QString &str)
+{
+    ui.pe_trade_records->setPlainText(str);
+}
+
+void MockTradeDlg::AppendTradesToRecordsUi(std::vector<TradeRecordAtom> &trades)
+{
+    QString records_str;
+    for(unsigned int i = 0; i < trades.size(); ++i )
+    {
+        records_str.append(trades.at(i).ToQStr());
+        records_str.append("\n");
+    }
+    ui.pe_trade_records->setPlainText(records_str);
 }

@@ -5,8 +5,10 @@
 #include <cmath>
 #include <algorithm>
 
-
 #include <QString>
+
+#include <TLib/core/tsystem_time.h>
+
 #include "stkfo_common.h"
 
 
@@ -103,7 +105,7 @@ double PositionInfo::FloatProfit(double price)
     {
         profit += (entry->price - price) / cst_per_tick * cst_per_tick_capital * entry->qty;
     });
-    return profit;
+    return ProcDecimal(profit, 0);
 }
 
 // return <low, high> ;  capital is remain capital
@@ -559,6 +561,55 @@ PositionAtom * PositionInfo::FindPositionAtom(int id)
         return iter->second.get();
     else
         return nullptr;
+}
+
+
+TradeRecordAtom  PositionInfo::ClosePositionAtom(int id, double price, double *capital_ret)
+{
+    //capital_ret = 0.0;
+    PositionType  pos_type;
+    bool is_find = false;
+    auto iter = std::find_if(short_positions_.begin(), short_positions_.end(), [id](T_PositionAtoms::reference pos){ return pos->trade_id == id; });
+    if( iter != short_positions_.end() )
+    {
+        pos_type = PositionType::POS_SHORT;
+        is_find = true;
+    }else
+    {
+        iter = std::find_if(long_positions_.begin(), long_positions_.end(), [id](T_PositionAtoms::reference pos){ return pos->trade_id == id; });
+        if( iter != long_positions_.end() )
+        {
+            pos_type = PositionType::POS_LONG;
+            is_find = true;
+        }
+    }
+
+    if( is_find )
+    {
+        TradeRecordAtom trade_item;
+        trade_item.trade_id = GenerateTradeId();
+        trade_item.date = TSystem::Today();
+        trade_item.hhmm = cur_hhmm();
+        trade_item.action = RecordAction::CLOSE;
+        trade_item.pos_type = pos_type;
+        trade_item.price = price;
+        trade_item.quantity = (*iter)->qty;  // close all position of this record 
+        trade_item.profit =(*iter)->FloatProfit(trade_item.price);
+
+        trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, trade_item.action);
+         
+        if( capital_ret )
+            *capital_ret = cst_margin_capital * trade_item.quantity + trade_item.profit - trade_item.fee;
+
+        if( pos_type == PositionType::POS_SHORT )
+            short_positions_.erase(iter);
+        else
+            long_positions_.erase(iter);
+
+        return trade_item;
+    }else
+        return TradeRecordAtom();
+
 }
 
 

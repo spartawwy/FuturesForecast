@@ -17,7 +17,7 @@ class PositionRecordsTableView : public QTableView
     Q_OBJECT
 
 public:
-    PositionRecordsTableView(MockTradeDlg * parent);
+    PositionRecordsTableView(QWidget *wid_parent, MockTradeDlg * parent);
 
 protected:
 

@@ -7,7 +7,7 @@
 #include "mock_trade_dlg.h"
 
 
-PositionRecordsTableView::PositionRecordsTableView(MockTradeDlg * parent) : QTableView(parent)
+PositionRecordsTableView::PositionRecordsTableView(QWidget *wid_parent, MockTradeDlg * parent) : QTableView(wid_parent)
     , parent_(parent)
 {
 
@@ -19,7 +19,7 @@ void PositionRecordsTableView::keyPressEvent(QKeyEvent * event)
         return;
     qDebug() << __FUNCTION__ << " key:" << event->key() << " text:" << event->text() << " cur_index:" << currentIndex();
     auto model = static_cast<QStandardItemModel *>(this->model());
-    if( !model || model->rowCount() <= 0 )
+    if( !model || model->rowCount() <= 0 || currentIndex().row() < 0 )
         return;
     auto key_val = event->key();
     if( /*key_val == Qt::Key_Enter || */ key_val == Qt::Key_Escape ||  key_val == Qt::Key_Tab )
@@ -60,7 +60,7 @@ void PositionRecordsTableView::currentChanged(const QModelIndex & current, const
     if( parent_->is_closed() )
         return;
     auto model = static_cast<QStandardItemModel *>(this->model());
-    if( !model || model->rowCount() <= 0 )
+    if( !model || model->rowCount() <= 0 || currentIndex().row() < 0 )
         return;
 
     int trade_id = model->item(currentIndex().row(), cst_column_long_short)->data().toInt();

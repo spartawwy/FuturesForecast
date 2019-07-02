@@ -104,8 +104,11 @@ class PositionInfo
 {  
 public:
      
-    PositionInfo(){ max_trade_id_ = 0; }
+    //PositionInfo(double open_fee=100.0, double close_fee=300.0) : open_fee_(open_fee), close_fee_(close_fee) { max_trade_id_ = 0; }
+    PositionInfo() : open_fee_(100.0), close_fee_(300.0) { max_trade_id_ = 0; }
      
+    void open_fee(double fee) { open_fee_ = fee; }
+    void close_fee(double fee) { close_fee_ = fee; }
     std::mutex mutex_;
 
     void Clear(){ long_positions_.clear(); short_positions_.clear(); position_holder_.clear(); max_trade_id_ = 0;}
@@ -141,12 +144,15 @@ public:
     PositionAtom * PopBack(bool is_long);
 
     PositionAtom * FindPositionAtom(int id);
+    TradeRecordAtom  ClosePositionAtom(int id, double price, double *capital_ret);
 
 private:
-
+     
     PositionInfo(const PositionInfo&);
     PositionInfo& operator = (const PositionInfo&);
 
+    double open_fee_;
+    double close_fee_;
     std::unordered_map<int, std::shared_ptr<PositionAtom> > position_holder_;
 
     typedef std::vector<PositionAtom*> T_PositionAtoms;
@@ -154,8 +160,7 @@ private:
     T_PositionAtoms  short_positions_;
 
     std::atomic_int max_trade_id_;
-    /* 
-    double short_price_ave;*/
+    
 };
 
 struct AccountInfo
