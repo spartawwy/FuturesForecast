@@ -333,6 +333,7 @@ typedef std::unordered_map<std::string, T_StructData> T_CodeMapStructDataContain
 bool IsStrAlpha(const std::string& str);
 bool IsStrNum(const std::string& str);
 bool IsDouble(const std::string& str);
+bool TransToDouble(const std::string& str, double &ret_val);
 
 void utf8ToGbk(std::string& strUtf8);
 void gbkToUtf8(std::string& strGbk);

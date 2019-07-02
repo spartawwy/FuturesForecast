@@ -311,9 +311,19 @@ void MainWindow::PopTrainDlg()
     train_dlg_->showNormal();
 }
 
+void MainWindow::MinimizeTrainDlg()
+{
+    train_dlg_->showMinimized();
+}
+
 void MainWindow::PopMokeTradeDlg()
 {
     mock_trade_dlg_->showNormal();
+}
+
+void MainWindow::MinimizeMockTradeDlg()
+{
+    mock_trade_dlg_->showMinimized();
 }
 
 void MainWindow::changeEvent(QEvent *e)

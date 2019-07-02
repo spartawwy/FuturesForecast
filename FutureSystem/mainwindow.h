@@ -65,6 +65,7 @@ public:
     void StockInputDlgRet();
 
     void PopTrainDlg();
+    void MinimizeTrainDlg();
 
     bool is_train_mode(){ return is_train_mode_; }
     void is_train_mode(bool val) { is_train_mode_ = val; }
@@ -79,6 +80,7 @@ public:
     bool show_sig() { return show_sig_; }
 
     void PopMokeTradeDlg();
+    void MinimizeMockTradeDlg();
 
     void EmitSigQuoteData(double price, double sell1, double buy1, int sell_vol, int buy_vol) { emit sigQuoteData(price, sell1, buy1, sell_vol, buy_vol); }
 
@@ -117,7 +119,7 @@ private:
     WallIndex cur_kline_index_;
 
     StockInputDlg  stock_input_dlg_;
-
+    
     TrainDlg *train_dlg_;
     volatile bool  is_train_mode_;
     volatile bool  is_mock_trade_;

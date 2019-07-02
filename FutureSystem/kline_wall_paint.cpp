@@ -841,15 +841,6 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
                 {
                     right_clicked_k_date_ = iter->get()->stk_item.date;
                     right_clicked_k_hhmm_ = iter->get()->stk_item.hhmmss;
-#if 0
-                    if( right_clicked_k_hhmm_ > 0 )
-                    {
-                        int hour = right_clicked_k_hhmm_ / 100;
-                        int minute = right_clicked_k_hhmm_ % 100;
-
-                        right_clicked_k_hhmm_ -= 5;
-                    }
-#endif
                     break;
                 } 
             }
@@ -861,6 +852,11 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
     {
         if( cur_select_forcast_ )
         {
+            if( main_win_->is_train_mode() )
+                main_win_->MinimizeTrainDlg();
+
+            if( main_win_->is_mock_trade() )
+                main_win_->MinimizeMockTradeDlg();
             auto ret = QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("是否删除该预测?"), QMessageBox::Yes, QMessageBox::No);
             if( ret == QMessageBox::Yes )
             {

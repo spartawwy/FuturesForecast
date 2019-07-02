@@ -58,6 +58,8 @@ public:
     QLabel *label_9;
     QLabel *label;
     QPushButton *pbtnInit;
+    QLabel *le_cur_price;
+    QLabel *label_5;
 
     void setupUi(QWidget *MockTradeForm)
     {
@@ -106,22 +108,22 @@ public:
         le_qty->setGeometry(QRect(30, 120, 71, 31));
         label_2 = new QLabel(MockTradeForm);
         label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setGeometry(QRect(430, 120, 21, 16));
+        label_2->setGeometry(QRect(420, 120, 21, 16));
         label_4 = new QLabel(MockTradeForm);
         label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setGeometry(QRect(430, 140, 21, 16));
+        label_4->setGeometry(QRect(420, 180, 21, 16));
         le_sell_price = new QLabel(MockTradeForm);
         le_sell_price->setObjectName(QStringLiteral("le_sell_price"));
         le_sell_price->setGeometry(QRect(460, 120, 46, 13));
         le_buy_price = new QLabel(MockTradeForm);
         le_buy_price->setObjectName(QStringLiteral("le_buy_price"));
-        le_buy_price->setGeometry(QRect(460, 140, 46, 13));
+        le_buy_price->setGeometry(QRect(460, 180, 46, 13));
         le_sell_vol = new QLabel(MockTradeForm);
         le_sell_vol->setObjectName(QStringLiteral("le_sell_vol"));
         le_sell_vol->setGeometry(QRect(520, 120, 46, 13));
         le_buy_vol = new QLabel(MockTradeForm);
         le_buy_vol->setObjectName(QStringLiteral("le_buy_vol"));
-        le_buy_vol->setGeometry(QRect(520, 140, 46, 13));
+        le_buy_vol->setGeometry(QRect(520, 180, 46, 13));
         tabPosRecord = new QTabWidget(MockTradeForm);
         tabPosRecord->setObjectName(QStringLiteral("tabPosRecord"));
         tabPosRecord->setGeometry(QRect(0, 200, 631, 331));
@@ -175,6 +177,12 @@ public:
         pbtnInit->setObjectName(QStringLiteral("pbtnInit"));
         pbtnInit->setGeometry(QRect(540, 25, 71, 23));
         pbtnInit->setFont(font);
+        le_cur_price = new QLabel(MockTradeForm);
+        le_cur_price->setObjectName(QStringLiteral("le_cur_price"));
+        le_cur_price->setGeometry(QRect(460, 150, 46, 13));
+        label_5 = new QLabel(MockTradeForm);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setGeometry(QRect(420, 150, 31, 20));
 
         retranslateUi(MockTradeForm);
 
@@ -208,6 +216,8 @@ public:
         label_9->setText(QApplication::translate("MockTradeForm", "\345\271\263\344\273\223\346\211\213\347\273\255\350\264\271:", 0));
         label->setText(QApplication::translate("MockTradeForm", "\345\210\235\345\247\213\350\265\204\351\207\221:", 0));
         pbtnInit->setText(QApplication::translate("MockTradeForm", "\350\256\276\347\275\256", 0));
+        le_cur_price->setText(QApplication::translate("MockTradeForm", "\344\273\267\346\240\2742", 0));
+        label_5->setText(QApplication::translate("MockTradeForm", "\345\275\223\345\211\215:", 0));
     } // retranslateUi
 
 };

@@ -186,7 +186,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitLongPos(int date, int h
             ++iter;
     }
     if( p_profit )
-        *p_profit = profit;
+        *p_profit = ProcDecimal(profit, 0);
     return ret;
 }
 
@@ -226,7 +226,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int 
             ++iter;
     }
     if( p_profit )
-        *p_profit = profit;
+        *p_profit = ProcDecimal(profit, 0);
     return ret;
 }
 
@@ -266,7 +266,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhm
             ++iter;
     }
     if( p_profit )
-        *p_profit = profit;
+        *p_profit = ProcDecimal(profit, 0);
     return ret;
 }
 
@@ -306,7 +306,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossShortPos(int date, int hh
             ++iter;
     }
     if( p_profit )
-        *p_profit = profit;
+        *p_profit = ProcDecimal(profit, 0);
     return ret;
 }
 
@@ -652,12 +652,12 @@ int CalculateMaxQtyAllowOpen(double capital, double price)
     if( qty < 1 )
         return 0;
     double fee = CalculateFee(qty, price, false);
-    if( qty == 1 && qty * cst_margin_capital + fee + 100.0 < capital )
+    if( qty == 1 && qty * cst_margin_capital + fee + cst_per_tick_capital > capital )
         return 0;
 
     for( int i = 0; i < 100; ++i )
     {
-        if( qty > 1 && qty * cst_margin_capital + fee + 99.0 > capital )
+        if( qty > 1 && qty * cst_margin_capital + fee + cst_per_tick_capital > capital ) // capital is not enough
         {
             qty -= 1;
             fee = CalculateFee(qty, price, false);

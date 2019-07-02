@@ -29,7 +29,9 @@ public:
 
     double GetTargetPrice(bool is_buy);
 
-    
+    double CurPrice();
+    bool IsLegalStopPrice(int trade_id, double price, bool is_stop_profit);
+
     TradeRecordAtom  ClosePositionAtom(int id); 
 
 public slots:

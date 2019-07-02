@@ -312,6 +312,23 @@ bool IsDouble(const std::string& str)
     return ret;
 }
 
+bool TransToDouble(const std::string& str, double &ret_val)
+{
+    ret_val = 0.0;
+    bool ret = true;
+    try
+    {
+        ret_val = boost::lexical_cast<double>(str.c_str());
+    }catch (boost::exception &)
+    {
+        ret = false;
+    }catch(...)
+    {
+        ret = false;
+    }
+    return ret;
+}
+
 double ProcDecimal(double val, unsigned int decimal)
 {
     int temp = pow(10, decimal);
