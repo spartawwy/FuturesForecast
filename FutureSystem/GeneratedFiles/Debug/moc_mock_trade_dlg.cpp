@@ -58,15 +58,15 @@ static const uint qt_meta_data_MockTradeDlg[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    5,   44,    2, 0x0a,
-       3,    0,   55,    2, 0x0a,
-       4,    0,   56,    2, 0x0a,
-       5,    0,   57,    2, 0x0a,
-       6,    0,   58,    2, 0x0a,
-       7,    0,   59,    2, 0x0a,
+       1,    6,   44,    2, 0x0a,
+       3,    0,   57,    2, 0x0a,
+       4,    0,   58,    2, 0x0a,
+       5,    0,   59,    2, 0x0a,
+       6,    0,   60,    2, 0x0a,
+       7,    0,   61,    2, 0x0a,
 
  // slots: parameters
-    QMetaType::Void, QMetaType::Double, QMetaType::Double, QMetaType::Double, QMetaType::Int, QMetaType::Int,    2,    2,    2,    2,    2,
+    QMetaType::Void, QMetaType::Double, QMetaType::Double, QMetaType::Double, QMetaType::Int, QMetaType::Int, QMetaType::Int,    2,    2,    2,    2,    2,    2,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -81,7 +81,7 @@ void MockTradeDlg::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
     if (_c == QMetaObject::InvokeMetaMethod) {
         MockTradeDlg *_t = static_cast<MockTradeDlg *>(_o);
         switch (_id) {
-        case 0: _t->slotHandleQuote((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])),(*reinterpret_cast< int(*)>(_a[5]))); break;
+        case 0: _t->slotHandleQuote((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])),(*reinterpret_cast< int(*)>(_a[5])),(*reinterpret_cast< int(*)>(_a[6]))); break;
         case 1: _t->slotBtnInit(); break;
         case 2: _t->slotOpenSell(); break;
         case 3: _t->slotOpenBuy(); break;

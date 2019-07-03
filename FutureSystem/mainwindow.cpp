@@ -141,7 +141,7 @@ bool MainWindow::Initialize()
     mock_trade_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
     mock_trade_dlg_->hide();
 
-    bool result = connect(this, SIGNAL(sigQuoteData(double, double, double, int, int)), mock_trade_dlg_, SLOT(slotHandleQuote(double, double, double, int, int)));
+    bool result = connect(this, SIGNAL(sigQuoteData(double, double, double, int, int, int)), mock_trade_dlg_, SLOT(slotHandleQuote(double, double, double, int, int, int)));
 
     //-------------------------
 

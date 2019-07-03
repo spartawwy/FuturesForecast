@@ -111,7 +111,7 @@ void MockTradeDlg::ResetUi()
     ui.lab_assets->setText(QString::number(account_info_.capital.avaliable));
 }
 
-void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, int sell_vol, int buy_vol)
+void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, int vol, int sell_vol, int buy_vol)
 {
     if( !main_win_->is_mock_trade() )
         return;
@@ -120,6 +120,7 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         std::lock_guard<std::mutex> locker(quote_data_mutex_);
 
         quote_data_.cur_price = cur_price;
+        quote_data_.vol = vol;
         quote_data_.sell_price = sell1;
         quote_data_.buy_price = buy1;
         quote_data_.sell_vol = sell_vol;
@@ -127,7 +128,7 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         ui.le_sell_price->setText(QString::number(sell1));
         ui.le_cur_price->setText(QString::number(cur_price));
         ui.le_buy_price->setText(QString::number(buy1));
-
+        ui.le_cur_vol->setText(QString::number(vol));
         ui.le_sell_vol->setText(QString::number(sell_vol));
         ui.le_buy_vol->setText(QString::number(buy_vol));
     //}
@@ -289,7 +290,7 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     {
     std::lock_guard<std::mutex>  locker(account_info_.position.mutex_);
 
-    int qty_can_open = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable + account_info_.capital.float_profit, target_price);
+    int qty_can_open = CalculateMaxQtyAllowOpen(account_info_.capital.avaliable/* + account_info_.capital.float_profit*/, target_price);
     if( qty > qty_can_open )
     {
         SetStatusBar(QString::fromLocal8Bit("×Ê½ð²»×ã!"));

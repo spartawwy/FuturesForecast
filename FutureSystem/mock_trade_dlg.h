@@ -36,7 +36,7 @@ public:
 
 public slots:
 
-    void slotHandleQuote(double /*cur_price*/, double /*sell1*/, double /*bull1*/, int /*sell_vol1*/, int /*bull_vol1*/);
+    void slotHandleQuote(double /*cur_price*/, double /*sell1*/, double /*bull1*/, int /*vol*/, int /*sell_vol1*/, int /*bull_vol1*/);
 
     void slotBtnInit();
     void slotOpenSell();

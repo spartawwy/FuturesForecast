@@ -82,11 +82,11 @@ public:
     void PopMokeTradeDlg();
     void MinimizeMockTradeDlg();
 
-    void EmitSigQuoteData(double price, double sell1, double buy1, int sell_vol, int buy_vol) { emit sigQuoteData(price, sell1, buy1, sell_vol, buy_vol); }
+    void EmitSigQuoteData(double price, double sell1, double buy1, int vol, int sell_vol, int buy_vol) { emit sigQuoteData(price, sell1, buy1, vol, sell_vol, buy_vol); }
 
 signals:
 
-    void sigQuoteData(double, double, double, int, int);
+    void sigQuoteData(double, double, double, int, int, int);
 
 protected:
 

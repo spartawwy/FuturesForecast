@@ -281,6 +281,7 @@ typedef struct _t_k_data
 typedef struct _t_quote_data
 {
     double cur_price;
+    double vol;
     double sell_price;
     double buy_price;
     int sell_vol;

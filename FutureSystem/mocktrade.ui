@@ -469,6 +469,19 @@
     <string>当前:</string>
    </property>
   </widget>
+  <widget class="QLabel" name="le_cur_vol">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>150</y>
+     <width>46</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>量</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

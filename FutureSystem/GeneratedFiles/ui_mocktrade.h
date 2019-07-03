@@ -60,6 +60,7 @@ public:
     QPushButton *pbtnInit;
     QLabel *le_cur_price;
     QLabel *label_5;
+    QLabel *le_cur_vol;
 
     void setupUi(QWidget *MockTradeForm)
     {
@@ -183,6 +184,9 @@ public:
         label_5 = new QLabel(MockTradeForm);
         label_5->setObjectName(QStringLiteral("label_5"));
         label_5->setGeometry(QRect(420, 150, 31, 20));
+        le_cur_vol = new QLabel(MockTradeForm);
+        le_cur_vol->setObjectName(QStringLiteral("le_cur_vol"));
+        le_cur_vol->setGeometry(QRect(520, 150, 46, 13));
 
         retranslateUi(MockTradeForm);
 
@@ -218,6 +222,7 @@ public:
         pbtnInit->setText(QApplication::translate("MockTradeForm", "\350\256\276\347\275\256", 0));
         le_cur_price->setText(QApplication::translate("MockTradeForm", "\344\273\267\346\240\2742", 0));
         label_5->setText(QApplication::translate("MockTradeForm", "\345\275\223\345\211\215:", 0));
+        le_cur_vol->setText(QApplication::translate("MockTradeForm", "\351\207\217", 0));
     } // retranslateUi
 
 };
