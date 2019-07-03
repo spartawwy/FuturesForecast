@@ -277,13 +277,19 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
 {
     if( ui.le_qty->text().isEmpty() || !IsNumber(ui.le_qty->text().trimmed().toLocal8Bit().data()) )
     {
-        SetStatusBar(QString::fromLocal8Bit("数量非法!"));
+        SetStatusBar(QString::fromLocal8Bit("数量输入非法!"));
         ui.le_qty->setFocus();
         return;
     }
     double target_price = GetTargetPrice(is_buy);
     
     int qty = ui.le_qty->text().trimmed().toInt();
+    if( qty < 0 || qty > 500 )
+     {
+        SetStatusBar(QString::fromLocal8Bit("数量必须大于0,小于等于500"));
+        ui.le_qty->setFocus();
+        return;
+    }
 
     int trade_id = 0;
 
