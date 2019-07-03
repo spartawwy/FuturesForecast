@@ -1,8 +1,9 @@
 #ifndef TDX_EXHQ_WRAPPER_H_SDFDS34FFSDDS
 #define TDX_EXHQ_WRAPPER_H_SDFDS34FFSDDS
-
-//#include <memory>
+ 
 #include <vector>
+#include <mutex>
+
 #include "stkfo_common.h"
 
 class ExchangeCalendar;
@@ -13,8 +14,6 @@ public:
     ~TdxExHqWrapper();
 
     bool Init();
-    bool ConnectServer();
-    void DisConnect();
 
     bool GetHisKBars(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, int start_date, int end_date, std::vector<T_StockHisDataItem> &items);
 
@@ -23,9 +22,20 @@ public:
     bool GetInstrumentQuote(const std::string &code, int nmarket, T_Quote_Data &ret_quote_data);
 
 private:
+
     bool __GetHisKBars(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, short start, short &count, std::vector<T_StockHisDataItem> &items);
      
+    bool ConnectServer();
+    void DisConnect();
+    bool ReconnectServer();
+
+    bool IsConnhandleValid();
+
+    int _ConnectServer();
+
     int conn_handle_;
+    std::mutex  conn_handle_mutext_;
+
     ExchangeCalendar  *exchange_calendar_;
 };
 

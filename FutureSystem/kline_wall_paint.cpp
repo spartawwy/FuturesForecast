@@ -1686,7 +1686,7 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     {
         int a_pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
         p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, a_pre_date, cur_date, is_index);
-        //app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index);
+        
     }
 	
     if( !p_hisdata_container_ )
@@ -1776,17 +1776,9 @@ void KLineWall::UpdateIfNecessary()
 #endif
 
     std::lock_guard<std::mutex> locker(painting_mutex_);
-
-    //auto date_time = GetKDataTargetStartTime(k_type_, QDate::currentDate(), QTime::currentTime());
-    //int start_date = std::get<0>(date_time);
+     
     int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);
     
-    
-    // find if pre his k data  exists --------------
-    //int pre_start_date = QDate::currentDate().addDays(-8).toString("yyyyMMdd").toInt();
-    //int pre_end_date = QDate::currentDate().addDays(-7).toString("yyyyMMdd").toInt();
-    //auto p_pre_data_container = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, pre_start_date, pre_end_date);
-
     T_HisDataItemContainer &container = app_->stock_data_man().GetHisDataContainer(ToPeriodType(k_type_), stock_code_);
     if( !container.empty() )
     {
@@ -1795,9 +1787,11 @@ void KLineWall::UpdateIfNecessary()
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
-            int ret = app_->stock_data_man().UpdateLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
+            int ret = app_->stock_data_man().UpdateOrAppendLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
             if( ret == 1 )
                 TraverSetSignale(k_type_, container, true);
+            else if( ret == 2 )
+                TraverSetSignale(k_type_, container, false);
             is_need_updated = ret > 0;
             
         }else
@@ -1869,7 +1863,7 @@ void KLineWall::SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm)
     
 }
 
-// return hhmm of next k
+// return <data, hhmm> of next k
 std::tuple<int, int> KLineWall::MoveRightEndToNextK()
 {
     if( p_hisdata_container_->empty() || k_rend_index_for_train_ <= 0 )
@@ -2017,19 +2011,11 @@ void KLineWall::Set_Cursor(Qt::CursorShape sp)
 
 T_KlineDataItem * KLineWall::GetKLineDataItemByXpos(int x)
 {
-#ifdef DRAW_FROM_LEFT
-    int j = 0;
-    for( auto iter = p_hisdata_container_->begin();
-        iter != p_hisdata_container_->end() && j < k_num_; 
-        ++iter, ++j)
-    { 
-#else
     int j = k_num_;
     for( auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
         iter != p_hisdata_container_->rend() && j > 0; 
         ++iter, --j)
     { 
-#endif
         T_KlinePosData &pos_data = iter->get()->kline_posdata(wall_index_);
         if( pos_data.x_left == CST_MAGIC_POINT.x() )
             continue;

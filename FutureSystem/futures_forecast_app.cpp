@@ -71,9 +71,10 @@ bool FuturesForecastApp::Init()
     this->task_pool().PostTask([this]()
     {
         int count = 0;
+        int milli_second = 500;
         while( !exit_flag_ )
         {
-            Delay(1000);
+            Delay(milli_second);
             if( exit_flag_ )
                 break;
             if( ++count % 5 == 0 )

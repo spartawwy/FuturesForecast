@@ -43,7 +43,7 @@ public:
     T_HisDataItemContainer* FindStockData(PeriodType period_type, const std::string &stk_code, int start_date, int end_date, bool is_index=false);
     T_HisDataItemContainer* AppendStockData(PeriodType period_type, int nmarket, const std::string &stk_code, int start_date, int end_date, bool is_index=false);
 	     
-    int UpdateLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index=false);
+    int UpdateOrAppendLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index=false);
     void TraverseGetBi(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
 
     void TraverseGetStuctLines(PeriodType period_type, const std::string &code, std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);

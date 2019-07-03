@@ -201,7 +201,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopProfitShortPos(int date, int 
     //for( int i = short_positions_.size() - 1; !short_positions_.empty() && i >= 0 ; --i ) 
     for( auto iter = short_positions_.begin(); iter != short_positions_.end(); )
     {
-        if( (*iter)->stop_profit_price > EPSINON && l_price + EPSINON < (*iter)->stop_profit_price )
+        if( (*iter)->stop_profit_price > EPSINON && l_price < (*iter)->stop_profit_price + EPSINON ) // <= profit price
         {
             TradeRecordAtom  trade_item;
             trade_item.trade_id = GenerateTradeId();
@@ -241,7 +241,7 @@ std::vector<TradeRecordAtom> PositionInfo::DoIfStopLossLongPos(int date, int hhm
     //for( int i = long_positions_.size() - 1; !long_positions_.empty() && i >= 0 ; --i ) 
     for( auto iter = long_positions_.begin(); iter != long_positions_.end(); )
     {
-        if( l_price < (*iter)->stop_loss_price - EPSINON ) // <= stop loss price
+        if( l_price < (*iter)->stop_loss_price + EPSINON ) // <= stop loss price
         {
             TradeRecordAtom  trade_item;
             trade_item.trade_id = GenerateTradeId();

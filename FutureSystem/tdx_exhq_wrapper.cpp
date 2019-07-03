@@ -14,7 +14,8 @@
 #pragma comment(lib, "TradeX2-M.lib")
 
 TdxExHqWrapper::TdxExHqWrapper(ExchangeCalendar  *exchange_calendar)
-    : conn_handle_(0)
+    : conn_handle_(-1)
+    , conn_handle_mutext_()
     , exchange_calendar_(exchange_calendar)
 {
 
@@ -22,7 +23,7 @@ TdxExHqWrapper::TdxExHqWrapper(ExchangeCalendar  *exchange_calendar)
 
 TdxExHqWrapper::~TdxExHqWrapper() 
 { 
-    if( conn_handle_ ) 
+    if( conn_handle_ > -1 ) 
         TdxExHq_Disconnect(conn_handle_); 
 }
 
@@ -32,9 +33,43 @@ bool TdxExHqWrapper::Init()
 }
 
 bool TdxExHqWrapper::ConnectServer()
-{
-    //开始获取行情数据
+{ 
+    std::lock_guard<std::mutex> locker(conn_handle_mutext_);
+    conn_handle_ = _ConnectServer();
+    return conn_handle_ > -1;
+}
 
+void TdxExHqWrapper::DisConnect()
+{
+    std::lock_guard<std::mutex> locker(conn_handle_mutext_);
+
+    if( conn_handle_ > -1 )
+        TdxExHq_Disconnect(conn_handle_);
+    conn_handle_ = -1;
+}
+
+bool TdxExHqWrapper::ReconnectServer()
+{ 
+    std::lock_guard<std::mutex> locker(conn_handle_mutext_);
+
+    if( conn_handle_ > -1 )
+        TdxExHq_Disconnect(conn_handle_);
+
+    conn_handle_ = _ConnectServer();
+    return conn_handle_ > -1;
+}
+
+bool TdxExHqWrapper::IsConnhandleValid()
+{
+    std::lock_guard<std::mutex> locker(conn_handle_mutext_);
+    return conn_handle_ > -1;
+}
+
+
+int TdxExHqWrapper::_ConnectServer()
+{
+    //开始获取行情数据 
+    int handle = -1;
     const int cst_result_len = 1024 * 1024;
     const int cst_err_len = 1024; 
 
@@ -43,31 +78,24 @@ bool TdxExHqWrapper::ConnectServer()
 
     memset(m_szResult, 0, cst_result_len);
     memset(m_szErrInfo, 0, cst_err_len);
-     
+
     //连接服务器
     char * servers[] = {
         "59.175.238.38"};
     for( int i = 0; i < sizeof(servers)/sizeof(servers[0]); ++i )
     {
-        conn_handle_ = TdxExHq_Connect(servers[i], 7727, m_szResult, m_szErrInfo);
-        if( conn_handle_ < 0 )
+        handle = TdxExHq_Connect(servers[i], 7727, m_szResult, m_szErrInfo);
+        if( handle < 0 )
         {
             std::cout << m_szErrInfo << std::endl;
             continue;
         }else
         {
             std::cout << m_szResult << std::endl;
-            return true;
+            return handle;
         }
     } 
-    return false;
-}
-
-void TdxExHqWrapper::DisConnect()
-{
-    if( conn_handle_ > -1 )
-        TdxExHq_Disconnect(conn_handle_);
-    conn_handle_ = -1;
+    return handle;
 }
 
 // items date is from small to big
@@ -94,7 +122,7 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
     auto tuple_index_len = exchange_calendar_->GetStartIndexAndLen_backforward(kbar_type, start_date, end_date);
     
     //const short max_count = MAX_K_COUNT;
-    short start = std::get<0>(tuple_index_len);  // back forward
+    short start = std::get<0>(tuple_index_len);  // back forward : <---
     const short count = std::get<1>(tuple_index_len);
  
     short local_count = MAX_K_COUNT;
@@ -165,21 +193,8 @@ bool TdxExHqWrapper::__GetHisKBars(const std::string &code, bool is_index, int n
 
     memset(m_szResult, 0, cst_result_len);
     memset(m_szErrInfo, 0, cst_err_len);
-
-    /*int market_type = MARKET_TYPE_SH;
-    if( is_index )
-    {
-        if( code.at(0) == '3' )
-            market_type = MARKET_TYPE_SZ;
-        else
-            market_type = MARKET_TYPE_SH;
-    }else if( code.at(0) == '6' )
-        market_type = MARKET_TYPE_SH;
-    else 
-        market_type = MARKET_TYPE_SZ;*/
-   
-    //获取股票K线数据 
-    //数据种类, 0->5分钟K线    1->15分钟K线    2->30分钟K线  3->1小时K线    4->日K线  5->周K线  6->月K线  7->1分钟K线  8->1分钟K线  9->日K线  10->季K线  11->年K线
+    
+    //K线数据数据种类, 0->5分钟K线    1->15分钟K线    2->30分钟K线  3->1小时K线    4->日K线  5->周K线  6->月K线  7->1分钟K线  8->1分钟K线  9->日K线  10->季K线  11->年K线
     int ktype = 4;
     switch(kbar_type)
     {
@@ -209,12 +224,18 @@ bool TdxExHqWrapper::__GetHisKBars(const std::string &code, bool is_index, int n
 do 
 { 
     //bool1 = TdxExHq_GetInstrumentBars(nConn, 4, 30, "SC1907", 0, &Count, Result, ErrInfo);
-
+    if( !IsConnhandleValid() )
+    {
+        if( !IsConnhandleValid() ) // judge again
+        {
+           if( !ReconnectServer() )
+               break;
+        }
+    }
     bool bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
     if( !bool1 )
     { 
-        DisConnect();
-        if( ConnectServer() )
+        if( ReconnectServer() )
         {
             bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
             if( !bool1 )
@@ -351,12 +372,22 @@ bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_
     bool result = true;
     do 
     {  
+        if( !IsConnhandleValid() )
+        {
+            if( !IsConnhandleValid() ) // judge again
+            {
+                if( !ReconnectServer() )
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
         // bool1 = TdxExHq_GetInstrumentQuote(nConn, 30, "SC1908",  Result, ErrInfo);
         bool bool1 = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
         if( !bool1 )
         { 
-            DisConnect();
-            if( ConnectServer() )
+            if( ReconnectServer() )
             {
                 bool1 = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
                 if( !bool1 )

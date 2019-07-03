@@ -175,37 +175,40 @@ T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, cons
     return nullptr;
 }
 
-// date is save from older(smaller) date to newer(bigger). ps: data in container is series trade date
+// date is save from older(smaller) date to newer(bigger). ps: data in container is series trade date time
 T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, int nmarket, const std::string &stk_code, int start_date, int end_date, bool is_index)
 {
     assert( !stk_code.empty() );
-    int count = 0;
+     
     T_HisDataItemContainer & items_in_container = GetHisDataContainer(period_type, stk_code);
    
     std::string code = stk_code;
     if( is_index )
         code = TransIndex2TusharedCode(stk_code);
+
     auto p_stk_hisdata_item_vector = new std::vector<T_StockHisDataItem>();
-    std::vector<T_StockHisDataItem> &p_data_items = *p_stk_hisdata_item_vector;  
     bool ret = tdx_exhq_wrapper_.GetHisKBars(code, is_index, nmarket, ToTypePeriod(period_type), start_date, end_date, *p_stk_hisdata_item_vector);
-    if( !ret || p_data_items.empty() )
+    if( !ret || p_stk_hisdata_item_vector->empty() ) // fail
     {
+        delete p_stk_hisdata_item_vector; 
+        p_stk_hisdata_item_vector = nullptr;
         return std::addressof(items_in_container);
     }
-    count = p_stk_hisdata_item_vector->size();
+    std::vector<T_StockHisDataItem> &p_data_items = *p_stk_hisdata_item_vector;  
+    const int count = p_data_items.size();
     
-    // save data to day_stock_his_items_ and sort it ---------------------------
+    // save data to items_in_container (notice: only can insert to back or front ) ---------------------------
    
-    // only can insert to back or front  
-    if( !items_in_container.empty() )
+    if( !items_in_container.empty() ) // old data is exists
     {
 #if 1
         if( p_data_items[p_data_items.size()-1].date < items_in_container.back()->stk_item.date 
             || p_data_items[0].date < items_in_container.back()->stk_item.date )
         { 
             for( int k = count; k > 0; --k )
-            {
+            {  
                 //auto ck_val = p_data_items[k-1].date;
+                // push old to front
                 if( p_data_items[k-1].date < items_in_container.front()->stk_item.date || 
                     (p_data_items[k-1].date == items_in_container.front()->stk_item.date &&
                     p_data_items[k-1].hhmmss < items_in_container.front()->stk_item.hhmmss) )
@@ -229,8 +232,8 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
                 }
             }
         }
-        //items_in_container.front()->stk_item.date;
-    }else
+         
+    }else // first insert
     {
         for( int k = 0; k < count; ++k )
         {
@@ -278,7 +281,8 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
 
 }
 
-int StockDataMan::UpdateLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index)
+// ret 0: unupdated; 1: updated last item; 2: appended an item
+int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int nmarket, const std::string &stk_code, bool is_index)
 {
     assert( !stk_code.empty() );
     int ret = 0;
@@ -289,7 +293,6 @@ int StockDataMan::UpdateLatestItemStockData(PeriodType period_type, int nmarket,
     tdx_exhq_wrapper_.GetLatestKBar(stk_code, is_index, nmarket, ToTypePeriod(period_type), item);
     if( items_in_container.back()->stk_item.date <= item.date )
     {
-
         if( items_in_container.back()->stk_item.date == item.date )
         {
             if( items_in_container.back()->stk_item.hhmmss == item.hhmmss )
@@ -1774,10 +1777,12 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
     int count_when_only_set_tail = 50;
     while( index > 0 )
     {
+        // clear sig
         if( (data_items_in_container[index]->tag & (int)TagType::BUY) == (int)TagType::BUY )
             data_items_in_container[index]->tag ^= (int)TagType::BUY;
         if( (data_items_in_container[index]->tag & (int)TagType::SELL) == (int)TagType::SELL )
             data_items_in_container[index]->tag ^= (int)TagType::SELL;
+        // judge to set sig
         proc_if_face(type_period, data_items_in_container, index);
         if( is_only_set_tail )
         {
