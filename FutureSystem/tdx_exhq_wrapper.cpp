@@ -67,8 +67,7 @@ bool TdxExHqWrapper::IsConnhandleValid()
 
 
 int TdxExHqWrapper::_ConnectServer()
-{
-    //开始获取行情数据 
+{ 
     int handle = -1;
     const int cst_result_len = 1024 * 1024;
     const int cst_err_len = 1024; 
@@ -167,7 +166,7 @@ bool TdxExHqWrapper::GetLatestKBar(const std::string &code, bool is_index, int n
 // items date is from small to big; // get data from start index to left(oldest date):     <---len---0 
 bool TdxExHqWrapper::__GetHisKBars(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, short start, short &count, std::vector<T_StockHisDataItem> &items)
 {  
-    bool result = true;
+    bool result = false;
   
     // 获取指定品种的K线数据 
     bool (WINAPI* pFuncGetInstrumentBars)(
@@ -232,27 +231,36 @@ do
                break;
         }
     }
-    bool bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
-    if( !bool1 )
+
+    bool ret = false;
+
+    do
+    {
+        std::lock_guard<std::mutex>  locker(conn_handle_mutext_);
+        if( conn_handle_ < 0 ) 
+            break;
+        ret = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
+    }while(0);
+
+    if( !ret )
     { 
         if( ReconnectServer() )
         {
-            bool1 = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
-            if( !bool1 )
+            do
             {
-                result = false;
+                std::lock_guard<std::mutex>  locker(conn_handle_mutext_);
+                if( conn_handle_ < 0 ) 
+                    break;
+                ret = pFuncGetInstrumentBars(conn_handle_, ktype, nmarket, const_cast<char*>(code.c_str()), start, &count, m_szResult, m_szErrInfo);
+            }while(0);
+            if( !ret )
                 break;
-            }
         } else
-        {
-            result = false;
             break;
-        }
     }
     if( strlen(m_szResult) < 1 )
     {
         std::cout << " result empty !" << std::endl;
-        result = false;
         break;
     }
     qDebug() << m_szResult << "\n";
@@ -369,7 +377,7 @@ bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_
     char m_szErrInfo[1024] = {'\0'};
       
     memset(&ret_quote_data, 0, sizeof(ret_quote_data));
-    bool result = true;
+    bool result = false;
     do 
     {  
         if( !IsConnhandleValid() )
@@ -377,34 +385,37 @@ bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_
             if( !IsConnhandleValid() ) // judge again
             {
                 if( !ReconnectServer() )
-                {
-                    result = false;
                     break;
-                }
             }
         }
         // bool1 = TdxExHq_GetInstrumentQuote(nConn, 30, "SC1908",  Result, ErrInfo);
-        bool bool1 = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
-        if( !bool1 )
+        bool ret = false;
+        do
+        {
+            std::lock_guard<std::mutex>  locker(conn_handle_mutext_);
+            if( conn_handle_ < 0 ) 
+                break;
+            ret = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
+        }while(0);
+        if( !ret )
         { 
             if( ReconnectServer() )
             {
-                bool1 = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
-                if( !bool1 )
+                do
                 {
-                    result = false;
+                    std::lock_guard<std::mutex>  locker(conn_handle_mutext_);
+                    if( conn_handle_ < 0 ) 
+                       break;
+                    ret = pFuncGetInstrumentQuote(conn_handle_, nmarket, const_cast<char*>(code.c_str()), m_szResult, m_szErrInfo);
+                }while(0);
+                if( !ret )
                     break;
-                }
             } else
-            {
-                result = false;
                 break;
-            }
         }
         if( strlen(m_szResult) < 1 )
         {
             std::cout << " result empty !" << std::endl;
-            result = false;
             break;
         }
         //qDebug() << m_szResult << "\n";
@@ -429,6 +440,7 @@ bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_
             //cout << "sell1:" <<  match_result[24] << " sell1_vol:" << match_result[29] << std::endl;
             ret_quote_data.sell_price = boost::lexical_cast<double>(match_result[24]);
             ret_quote_data.sell_vol = boost::lexical_cast<int>(match_result[29]);
+            result = true;
         }else
             result = false;
 
