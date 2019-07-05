@@ -190,7 +190,7 @@ public:
 
         retranslateUi(MockTradeForm);
 
-        tabPosRecord->setCurrentIndex(1);
+        tabPosRecord->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MockTradeForm);
@@ -214,7 +214,7 @@ public:
         le_sell_vol->setText(QApplication::translate("MockTradeForm", "\351\207\2171", 0));
         le_buy_vol->setText(QApplication::translate("MockTradeForm", "\351\207\2172", 0));
         tabPosRecord->setTabText(tabPosRecord->indexOf(tab_position), QApplication::translate("MockTradeForm", "\344\273\223\344\275\215\350\256\260\345\275\225", 0));
-        tabPosRecord->setTabText(tabPosRecord->indexOf(tab_2), QApplication::translate("MockTradeForm", "\346\210\220\344\272\244\350\256\260\345\275\225", 0));
+        tabPosRecord->setTabText(tabPosRecord->indexOf(tab_2), QApplication::translate("MockTradeForm", "\346\227\245\345\277\227\350\256\260\345\275\225", 0));
         groupBox->setTitle(QApplication::translate("MockTradeForm", "\350\256\276\347\275\256", 0));
         label_3->setText(QApplication::translate("MockTradeForm", "\345\274\200\344\273\223\346\211\213\347\273\255\350\264\271:", 0));
         label_9->setText(QApplication::translate("MockTradeForm", "\345\271\263\344\273\223\346\211\213\347\273\255\350\264\271:", 0));

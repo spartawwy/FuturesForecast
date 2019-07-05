@@ -91,6 +91,7 @@ bool MockTradeDlg::IsLegalStopPrice(int trade_id, double price, bool is_stop_pro
 
     auto iterm = account_info_.position.FindPositionAtom(trade_id);
     assert( iterm );
+#if 0 
     if( iterm->is_long )
     {
         return is_stop_profit ? price > iterm->price : price < iterm->price;
@@ -98,6 +99,19 @@ bool MockTradeDlg::IsLegalStopPrice(int trade_id, double price, bool is_stop_pro
     {
         return is_stop_profit ? price < iterm->price : price > iterm->price;
     }
+#else
+    
+    std::lock_guard<std::mutex> locker(quote_data_mutex_);
+    //double cur_price = quote_data_.cur_price;
+
+    if( iterm->is_long )
+    {
+        return is_stop_profit ? price > quote_data_.cur_price : price < quote_data_.cur_price;
+    }else
+    {
+        return is_stop_profit ? price < quote_data_.cur_price : price > quote_data_.cur_price;
+    }
+#endif
 }
 
 void MockTradeDlg::ResetUi()
@@ -109,6 +123,12 @@ void MockTradeDlg::ResetUi()
     ui.dbspbBegCapital->setValue(account_info_.capital.avaliable);
     ui.le_cur_capital->setText(QString::number(account_info_.capital.avaliable));
     ui.lab_assets->setText(QString::number(account_info_.capital.avaliable));
+}
+
+T_Quote_Data  MockTradeDlg::QuoteData()
+{
+    std::lock_guard<std::mutex> locker(quote_data_mutex_);
+    return quote_data_;
 }
 
 void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, int vol, int sell_vol, int buy_vol)
@@ -147,7 +167,7 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         model->clear();
         RefreshCapitalAssertsUi();
          
-        PrintTradeRecords();
+        //PrintTradeRecords();
     }else
     { 
         //   do force stop profit or loss ---------- 
@@ -258,12 +278,13 @@ void MockTradeDlg::slotPositionClose()
     if( trade_item.trade_id > 0 )
     {
         trade_records_.push_back(trade_item);
+        AppendStrToRecordsUi(trade_item.ToQStr());
         account_info_.capital.avaliable += capital_ret;
 
         model->removeRows(row_index, 1);
 
         RefreshCapitalAssertsUi();
-        PrintTradeRecords();
+        //PrintTradeRecords();
     }
      
 }
@@ -315,6 +336,7 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     trade_item.price = target_price; 
     trade_item.fee = CalculateFee(trade_item.quantity, trade_item.price, false);
     trade_records_.push_back(trade_item);
+    AppendStrToRecordsUi(trade_item.ToQStr());
     //position ---------
     auto position_item = std::make_shared<PositionAtom>();
     position_item->trade_id = trade_id;
@@ -329,7 +351,7 @@ void MockTradeDlg::_OpenBuySell(bool is_buy)
     auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
     force_close_low_ = std::get<0>(low_high);
     force_close_high_ = std::get<1>(low_high);
-    PrintTradeRecords();
+    //PrintTradeRecords();
     }
     //------------set ui-------------
     RefreshCapitalAssertsUi();
@@ -389,8 +411,19 @@ void MockTradeDlg::UpDateStopProfitOrLossIfNecessary(int row_index, bool is_prof
     if( position_atom )
     {
         double *p_stop_price = is_profit ? &position_atom->stop_profit_price : &position_atom->stop_loss_price;
+        char buf0[128] = {0};
+        if( is_profit ) 
+            sprintf(buf0, "调整止赢价为:%.1f ", position_atom->stop_profit_price);
+        else
+            sprintf(buf0, "调整止损价为:%.1f ", position_atom->stop_loss_price);
+
+        char buf[1024] = {0};
+        sprintf(buf, "任务:%d %s", trade_id, buf0);
+
+        QString log_str = QString::fromLocal8Bit(buf);
         if( !Equal(*p_stop_price, stop_price) )
         {
+            AppendStrToRecordsUi(log_str);
             *p_stop_price = stop_price;
         }
     }
@@ -428,6 +461,7 @@ bool MockTradeDlg::JudgeDoForceClose(double price)
         {
             double capital_ret = 0.0;
             std::vector<TradeRecordAtom> trades_close_long = account_info_.position.CloseLong(today, hhmm, force_close_low_, unsigned int(long_pos), capital_ret, &profit_close_long);
+            AppendTradesToRecordsUi(trades_close_long);
             trade_records_.insert(trade_records_.end(), trades_close_long.begin(), trades_close_long.end());
         }
 
@@ -437,6 +471,7 @@ bool MockTradeDlg::JudgeDoForceClose(double price)
         {
             double capital_ret = 0.0;
             std::vector<TradeRecordAtom> trades_close_short = account_info_.position.CloseShort(today, hhmm, force_close_low_, unsigned int(short_pos), capital_ret, &profit_close_short);
+            AppendTradesToRecordsUi(trades_close_short);
             trade_records_.insert(trade_records_.end(), trades_close_short.begin(), trades_close_short.end());
         }
 
@@ -478,7 +513,8 @@ void MockTradeDlg::PrintTradeRecords()
 
 void MockTradeDlg::AppendStrToRecordsUi(const QString &str)
 {
-    ui.pe_trade_records->setPlainText(str);
+    ui.pe_trade_records->appendPlainText(str);
+    ui.pe_trade_records->appendPlainText("\n");
 }
 
 void MockTradeDlg::AppendTradesToRecordsUi(std::vector<TradeRecordAtom> &trades)
@@ -486,8 +522,9 @@ void MockTradeDlg::AppendTradesToRecordsUi(std::vector<TradeRecordAtom> &trades)
     QString records_str;
     for(unsigned int i = 0; i < trades.size(); ++i )
     {
+        records_str.append("\n");
         records_str.append(trades.at(i).ToQStr());
         records_str.append("\n");
     }
-    ui.pe_trade_records->setPlainText(records_str);
+    ui.pe_trade_records->appendPlainText(records_str);
 }

@@ -265,7 +265,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab_position">
     <attribute name="title">
@@ -284,7 +284,7 @@
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
-     <string>成交记录</string>
+     <string>日志记录</string>
     </attribute>
     <widget class="QPlainTextEdit" name="pe_trade_records">
      <property name="geometry">

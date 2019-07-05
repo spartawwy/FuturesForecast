@@ -34,6 +34,8 @@ public:
 
     TradeRecordAtom  ClosePositionAtom(int id); 
 
+    T_Quote_Data  QuoteData();
+
 public slots:
 
     void slotHandleQuote(double /*cur_price*/, double /*sell1*/, double /*bull1*/, int /*vol*/, int /*sell_vol1*/, int /*bull_vol1*/);

@@ -38,6 +38,7 @@ void PositionRecordsTableView::keyPressEvent(QKeyEvent * event)
                 {
                     is_illegal_price = true;
                     parent_->SetStatusBar(QString::fromLocal8Bit("价格为非法字符!"));
+                
                 }else if( !parent_->IsLegalStopPrice(trade_id, stop_price, true) )
                 {
                     is_illegal_price = true;

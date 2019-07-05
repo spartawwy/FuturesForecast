@@ -481,7 +481,6 @@ void TrainDlg::OnTrade()
         trade_item.fee = fee;
         trade_item.profit = profit; 
         trade_records_.push_back(trade_item);
-
     }else // open 
     { 
         if( quantity < 1 )
