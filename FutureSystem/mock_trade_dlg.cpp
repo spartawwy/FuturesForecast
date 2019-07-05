@@ -180,32 +180,35 @@ void MockTradeDlg::slotHandleQuote(double cur_price, double sell1, double buy1, 
         std::vector<int> stop_profit_long_ids;
         double capital_ret_stop_profit_long = 0.0, capital_ret_stop_loss_short = 0.0, capital_ret_stop_profit_short = 0.0, capital_ret_stop_loss_long = 0.0;
         std::vector<TradeRecordAtom> trades_stop_profit_long = account_info_.position.DoIfStopProfitLongPos(today, hhmm, cur_price_, capital_ret_stop_profit_long, stop_profit_long_ids, &cur_price_, &profit_long_pos);
+        AppendTradesToRecordsUi(trades_stop_profit_long);
         has_trade = (has_trade || !trades_stop_profit_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_long.begin(), trades_stop_profit_long.end());
         
         double loss_short_pos = 0.0;
         std::vector<int> stop_loss_short_ids;
         std::vector<TradeRecordAtom> trades_stop_loss_short = account_info_.position.DoIfStopLossShortPos(today, hhmm, cur_price_, capital_ret_stop_loss_short, stop_loss_short_ids, &cur_price_, &loss_short_pos);
+        AppendTradesToRecordsUi(trades_stop_loss_short);
         has_trade = (has_trade || !trades_stop_loss_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_short.begin(), trades_stop_loss_short.end());
 
         double profit_short_pos = 0.0;
         std::vector<int> stop_profit_short_ids;
         std::vector<TradeRecordAtom> trades_stop_profit_short = account_info_.position.DoIfStopProfitShortPos(today, hhmm, cur_price_, capital_ret_stop_profit_short, stop_profit_short_ids, &cur_price_, &profit_short_pos);
+        AppendTradesToRecordsUi(trades_stop_profit_short);
         has_trade = (has_trade || !trades_stop_profit_short.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_profit_short.begin(), trades_stop_profit_short.end());
         
         double loss_long_pos = 0.0;
         std::vector<int> stop_loss_long_ids;
         std::vector<TradeRecordAtom> trades_stop_loss_long = account_info_.position.DoIfStopLossLongPos(today, hhmm, cur_price_, capital_ret_stop_loss_long, stop_loss_long_ids, &cur_price_, &loss_long_pos);
+        AppendTradesToRecordsUi(trades_stop_loss_long);
         has_trade = (has_trade || !trades_stop_loss_long.empty());
         trade_records_.insert(trade_records_.end(), trades_stop_loss_long.begin(), trades_stop_loss_long.end());
 
         profit = profit_long_pos + loss_short_pos + profit_short_pos + loss_long_pos;
         std::unordered_map<int, bool> ret_ids;
         if( has_trade )
-        {
-            PrintTradeRecords();
+        { 
             account_info_.capital.avaliable += profit + capital_ret_stop_profit_short + capital_ret_stop_loss_long + capital_ret_stop_profit_long + capital_ret_stop_loss_short;
             auto low_high = account_info_.position.GetForceClosePrices(account_info_.capital.avaliable + account_info_.capital.float_profit);
             force_close_low_ = std::get<0>(low_high);
@@ -411,19 +414,16 @@ void MockTradeDlg::UpDateStopProfitOrLossIfNecessary(int row_index, bool is_prof
     if( position_atom )
     {
         double *p_stop_price = is_profit ? &position_atom->stop_profit_price : &position_atom->stop_loss_price;
-        char buf0[128] = {0};
-        if( is_profit ) 
-            sprintf(buf0, "调整止赢价为:%.1f ", position_atom->stop_profit_price);
-        else
-            sprintf(buf0, "调整止损价为:%.1f ", position_atom->stop_loss_price);
-
-        char buf[1024] = {0};
-        sprintf(buf, "任务:%d %s", trade_id, buf0);
-
-        QString log_str = QString::fromLocal8Bit(buf);
+         
         if( !Equal(*p_stop_price, stop_price) )
         {
+            char buf0[128] = {0};
+            sprintf(buf0, "%s:%.1f ", (is_profit ? "调整止赢价为" : "调整止损价为"), stop_price);
+            char buf[1024] = {0};
+            sprintf(buf, "任务:%d %s", trade_id, buf0);
+            QString log_str = QString::fromLocal8Bit(buf);
             AppendStrToRecordsUi(log_str);
+
             *p_stop_price = stop_price;
         }
     }
@@ -507,8 +507,8 @@ void MockTradeDlg::PrintTradeRecords()
         records_str.append(trade_records_.at(i).ToQStr());
         records_str.append("\n");
     }
-    ui.pe_trade_records->setPlainText(records_str);
-    
+    if( !records_str.isEmpty() )
+        ui.pe_trade_records->setPlainText(records_str);
 }
 
 void MockTradeDlg::AppendStrToRecordsUi(const QString &str)
@@ -521,10 +521,10 @@ void MockTradeDlg::AppendTradesToRecordsUi(std::vector<TradeRecordAtom> &trades)
 {
     QString records_str;
     for(unsigned int i = 0; i < trades.size(); ++i )
-    {
-        records_str.append("\n");
+    { 
         records_str.append(trades.at(i).ToQStr());
         records_str.append("\n");
     }
-    ui.pe_trade_records->appendPlainText(records_str);
+    if( !records_str.isEmpty() )
+        ui.pe_trade_records->appendPlainText(records_str);
 }
