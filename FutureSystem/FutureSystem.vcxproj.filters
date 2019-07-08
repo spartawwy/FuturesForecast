@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
     <Filter Include="Generated Files">
       <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
       <Extensions>moc;h;cpp</Extensions>
@@ -36,11 +41,6 @@
     </Filter>
     <Filter Include="tdx">
       <UniqueIdentifier>{c4450e83-7e8b-4e08-80b7-4f9a3e2b6786}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Resource Files">
-      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
-      <Extensions>qrc;*</Extensions>
-      <ParseFiles>false</ParseFiles>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -206,7 +206,7 @@
       <Filter>Form</Filter>
     </CustomBuild>
     <CustomBuild Include="mainwindow.qrc">
-      <Filter>src\Resource Files</Filter>
+      <Filter>Resource Files</Filter>
     </CustomBuild>
     <CustomBuild Include="codelistwall.ui">
       <Filter>Form</Filter>
