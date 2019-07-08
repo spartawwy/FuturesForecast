@@ -1716,6 +1716,7 @@ bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date)
 
 void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, bool is_only_set_tail)
 { 
+#if 0 
     static auto proc_if_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
     {
         const unsigned int max_inner_count = 5;
@@ -1769,7 +1770,16 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
                 data_items_in_container[index]->tag |= (int)TagType::SELL;
         }
     };
-      
+#else
+    static auto proc_if_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
+    {
+        if( data_items_in_container[index]->stk_item.close_price < data_items_in_container[index]->stk_item.open_price )
+            data_items_in_container[index]->tag |= (int)TagType::SELL;
+        else
+            data_items_in_container[index]->tag |= (int)TagType::BUY;
+    };
+#endif
+
     if( data_items_in_container.size() < 3 )
         return;
     int index = data_items_in_container.size() - 2;
@@ -1778,10 +1788,12 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
     while( index > 0 )
     {
         // clear sig
+#if 0 
         if( (data_items_in_container[index]->tag & (int)TagType::BUY) == (int)TagType::BUY )
             data_items_in_container[index]->tag ^= (int)TagType::BUY;
         if( (data_items_in_container[index]->tag & (int)TagType::SELL) == (int)TagType::SELL )
             data_items_in_container[index]->tag ^= (int)TagType::SELL;
+#endif
         // judge to set sig
         proc_if_face(type_period, data_items_in_container, index);
         if( is_only_set_tail )
