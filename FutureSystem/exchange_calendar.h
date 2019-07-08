@@ -24,6 +24,7 @@ public:
 
     bool IsTradeDate(int date); // yyyymmdd
     bool IsTradeTime(int hhmm); // HHMM
+    bool IsMidNightTradeTime(int hhmm); // HHMM
     int CeilingTradeDate(int date);
     int FloorTradeDate(int date);
     int PreTradeDate(int date, unsigned int n);

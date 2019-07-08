@@ -1061,7 +1061,8 @@ void KLineWall::paintEvent(QPaintEvent*)
         if( pos_data.date != iter->get()->stk_item.date )
         printf("error");*/
         // end -----------
-        // fengxin relate ------------------- 
+
+        // ------------fengxin relate ------------------- 
         if( (*iter)->type != (int)FractalType::UNKNOW_FRACTAL )
         {
             QPen fractal_pen;
@@ -1088,29 +1089,33 @@ void KLineWall::paintEvent(QPaintEvent*)
                 if( FindBtmItem_TowardLeft(*p_hisdata_container_, iter, j, left_pos_data) > 0 )
                     painter.drawLine(pos_data.top.x(), pos_data.top.y(), left_pos_data->bottom.x(), left_pos_data->bottom.y());
             }
-            //----------------draw signal -----------------------
+            
+
+        }// if fenxin
+        //----------------draw signal -----------------------
 #if 1 
-            if( main_win_->show_sig() && (*iter)->tag != (int)TagType::UNKNOW_TAG )
+        if( main_win_->show_sig() && (*iter)->tag != (int)TagType::UNKNOW_TAG )
+        {
+            QPen old_pen = painter.pen();
+            if( ((*iter)->tag & (int)TagType::BUY) == (int)TagType::BUY )
             {
-                QPen old_pen = painter.pen();
-                if( ((*iter)->tag & (int)TagType::BUY) == (int)TagType::BUY )
-                {
-                    pen.setColor(Qt::red); 
-                    const auto font_size = painter.font().pointSizeF();
-                    painter.setPen(pen);
-                    painter.drawText(pos_data.bottom.x() - item_w/3, pos_data.bottom.y() + item_w, "B");
-                }
-                if( ((*iter)->tag & (int)TagType::SELL) == (int)TagType::SELL )
-                {
-                    pen.setColor(Qt::green); 
-                    const auto font_size = painter.font().pointSizeF();
-                    painter.setPen(pen);
-                    painter.drawText(pos_data.top.x() - item_w/3, pos_data.top.y() - item_w/2, "S");
-                }
-                painter.setPen(old_pen);
+                pen.setColor(Qt::red); 
+                const auto font_size = painter.font().pointSizeF();
+                painter.setPen(pen);
+                painter.drawText(pos_data.bottom.x() - item_w/3, pos_data.bottom.y() + item_w, "B");
+                qDebug() << "draw signal " <<  (*iter)->stk_item.hhmmss << " B";
             }
-#endif 
+            if( ((*iter)->tag & (int)TagType::SELL) == (int)TagType::SELL )
+            {
+                pen.setColor(Qt::green); 
+                const auto font_size = painter.font().pointSizeF();
+                painter.setPen(pen);
+                painter.drawText(pos_data.top.x() - item_w/3, pos_data.top.y() - item_w/2, "S");
+                qDebug() << "draw signal " <<  (*iter)->stk_item.hhmmss << " S";
+            }
+            painter.setPen(old_pen);
         }
+#endif 
       }  // for all k bar 
 
         if( is_draw_bi_ )
@@ -1770,9 +1775,25 @@ void KLineWall::UpdateIfNecessary()
 
     int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
     int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
-#if 1
+    int target_date = 0;
+#if 0
     if( !app_->exchange_calendar()->IsTradeDate(cur_date) || !app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
         return;
+#else
+    int pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
+    bool is_trade_time = false;
+    if( app_->exchange_calendar()->IsTradeDate(cur_date) && app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
+    {
+        is_trade_time = true;
+        target_date = cur_date;
+    }else if( app_->exchange_calendar()->IsTradeDate(pre_date) && app_->exchange_calendar()->IsMidNightTradeTime(cur_hhmm) )
+    {
+        is_trade_time = true;
+        target_date = app_->exchange_calendar()->NextTradeDate(cur_date, 1);
+    }
+    if( !is_trade_time )
+        return;
+
 #endif
 
     std::lock_guard<std::mutex> locker(painting_mutex_);
@@ -1782,7 +1803,7 @@ void KLineWall::UpdateIfNecessary()
     T_HisDataItemContainer &container = app_->stock_data_man().GetHisDataContainer(ToPeriodType(k_type_), stock_code_);
     if( !container.empty() )
     {
-        auto p_contain = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, cur_date, cur_date, hhmm/*, bool is_index*/);
+        auto p_contain = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, target_date, target_date, hhmm/*, bool is_index*/);
         if( p_contain ) // current time k data exists
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
@@ -1798,9 +1819,9 @@ void KLineWall::UpdateIfNecessary()
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
-            auto date_time = GetKDataTargetDateTime(*app_->exchange_calendar(), k_type_, cur_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
-            auto p_cur_time_contain = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, std::get<0>(date_time), cur_date, is_index_);
-            
+            auto date_time = GetKDataTargetDateTime(*app_->exchange_calendar(), k_type_, target_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
+            auto p_cur_time_contain = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, std::get<0>(date_time), target_date, is_index_);
+
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
             if( p_cur_time_contain )

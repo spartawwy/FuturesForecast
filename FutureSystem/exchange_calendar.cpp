@@ -19,9 +19,16 @@ bool ExchangeCalendar::IsTradeDate(int date)
 }
 
 bool ExchangeCalendar::IsTradeTime(int hhmm)
-{
-    return (hhmm >= 915 &&  hhmm <= 1500) || hhmm >= 2100 || hhmm <= 230;
+{ 
+    //return (hhmm >= 915 &&  hhmm <= 1500) || IsMidNightTradeTime(hhmm);
+    return (hhmm >= 915 &&  hhmm <= 1130) || (hhmm >= 1330 && hhmm <= 1500) || IsMidNightTradeTime(hhmm);
 }
+
+bool ExchangeCalendar::IsMidNightTradeTime(int hhmm)
+{
+    return hhmm >= 2100 || hhmm <= 230;
+}
+
 
 // ps: ceiling trade date may be bigger then param date. if fail return 0
 int ExchangeCalendar::CeilingTradeDate(int date)

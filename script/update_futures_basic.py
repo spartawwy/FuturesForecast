@@ -106,7 +106,9 @@ class STOCKBASIC:
                        ,('SC1907', '上海原油1907', 'SHYYYJLQ', 30) 
                        ,('SC1908', '上海原油1908', 'SHYYYJLB', 30)
                        ,('SC1909', '上海原油1909', 'SHYYYJLJ', 30)
-                       ]
+                       ,('I1909', '铁矿石1909', 'TKSYJLJ', 29)
+                       ,('IF1907', '股指期货1907', 'GZQHYJLQ', 47)
+                       ,('IF300', '股指期货300', 'GZQHSLL', 47)]
         for i in range(0, len(index_array)):
             sql = "INSERT OR REPLACE INTO stock VALUES(?, ?, ?, ?, 0, '', '', '', ?)"
             self.cur.execute(sql, (index_array[i][0], type, index_array[i][1], index_array[i][2], index_array[i][3]))
