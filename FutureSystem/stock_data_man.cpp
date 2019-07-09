@@ -1760,8 +1760,8 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
                 && right_gr_type >= KGreenRedType::SMALL_RED && right_gr_type < KGreenRedType::SMALL_GREEN )
             {
                 data_items_in_container[index]->tag |= (int)TagType::BUY;
-                data_items_in_container[index]->type |= int(FractalType::BTM_AXIS_T_3);
             }
+            data_items_in_container[index]->type |= int(FractalType::BTM_AXIS_T_3);
         }
         else if( data_items_in_container[target_follow_index]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price 
             && data_items_in_container[target_follow_index]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price 
@@ -1772,8 +1772,9 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
                 && left_gr_type >= KGreenRedType::SMALL_RED && left_gr_type < KGreenRedType::SMALL_GREEN)
             {
                 data_items_in_container[index]->tag |= (int)TagType::SELL;
-                data_items_in_container[index]->type |= int(FractalType::TOP_AXIS_T_3);
             }
+            data_items_in_container[index]->type |= int(FractalType::TOP_AXIS_T_3);
+
         }
     };
 #else
