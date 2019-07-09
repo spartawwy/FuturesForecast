@@ -1717,53 +1717,50 @@ bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date)
 void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, bool is_only_set_tail)
 { 
 #if 1
-    static auto proc_if_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
+    static auto proc_if_top_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
     {
         const unsigned int max_inner_count = 5;
+        // find left red k
         int target_front_index = -1;
         int k = index - 1;
-        for( ; k >= 0 && k >= index - 1 - max_inner_count; --k )
-        {
+        for( ; k >= 0 && k >= index - 1 - max_inner_count; --k ) // toward left
+        { 
             if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price - EPSINON
-                || data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price + EPSINON  )
+                && data_items_in_container[k]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price - EPSINON  )
             {
-                target_front_index = k;
+                if( data_items_in_container[k]->stk_item.close_price > data_items_in_container[k]->stk_item.open_price ) // red
+                {
+                    target_front_index = k;
+                    break;
+                }
+            }else if( data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price - EPSINON )
                 break;
-            } 
         }
         if( target_front_index == -1 )
             return;
-
+        // find right green k
         int target_follow_index = -1;
         k = index + 1;
         for( ; k < data_items_in_container.size() && k <= index + max_inner_count; ++k )
         {
             if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price - EPSINON
-                || data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price + EPSINON  )
+                && data_items_in_container[k]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price - EPSINON  )
             {
-                target_follow_index = k;
+                if( data_items_in_container[k]->stk_item.close_price < data_items_in_container[k]->stk_item.open_price ) // green
+                {
+                    target_follow_index = k;
+                    break;
+                }
+            }else if( data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price - EPSINON )
                 break;
-            } 
         }
         if( target_follow_index == -1 )
             return;
+
         KGreenRedType left_gr_type = KGGetGreenRedType(data_items_in_container[target_front_index]->stk_item, type_period);
         KGreenRedType right_gr_type = KGGetGreenRedType(data_items_in_container[target_follow_index]->stk_item, type_period);
-
-        if( data_items_in_container[target_follow_index]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price 
-            && data_items_in_container[target_follow_index]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price 
-            && data_items_in_container[target_front_index]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price 
-            && data_items_in_container[target_front_index]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price )
-        {
-            
-            if( left_gr_type >= KGreenRedType::SMALL_GREEN
-                && right_gr_type >= KGreenRedType::SMALL_RED && right_gr_type < KGreenRedType::SMALL_GREEN )
-            {
-                data_items_in_container[index]->tag |= (int)TagType::BUY;
-            }
-            data_items_in_container[index]->type |= int(FractalType::BTM_AXIS_T_3);
-        }
-        else if( data_items_in_container[target_follow_index]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price 
+#if 0 
+        if( data_items_in_container[target_follow_index]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price 
             && data_items_in_container[target_follow_index]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price 
             && data_items_in_container[target_front_index]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price 
             && data_items_in_container[target_front_index]->stk_item.high_price < data_items_in_container[index]->stk_item.high_price )
@@ -1776,6 +1773,72 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
             data_items_in_container[index]->type |= int(FractalType::TOP_AXIS_T_3);
 
         }
+#else
+        data_items_in_container[index]->tag |= (int)TagType::SELL;
+        data_items_in_container[index]->type |= int(FractalType::TOP_AXIS_T_3);
+
+#endif
+    };
+    static auto proc_if_down_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
+    {
+        const unsigned int max_inner_count = 5;
+        // find toward left 
+        int target_front_index = -1;
+        int k = index - 1;
+        for( ; k >= 0 && k >= index - 1 - max_inner_count; --k )
+        {
+            if( data_items_in_container[k]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price
+                && data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price  )
+            {
+                if( data_items_in_container[k]->stk_item.close_price < data_items_in_container[k]->stk_item.open_price ) // GREEN
+                {
+                    target_front_index = k;
+                    break;
+                }
+            }else if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price + EPSINON )
+                break;
+        }
+        if( target_front_index == -1 )
+            return;
+
+        // find right red k
+        int target_follow_index = -1;
+        k = index + 1;
+        for( ; k < data_items_in_container.size() && k <= index + max_inner_count; ++k )
+        {
+            if( data_items_in_container[k]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price
+                && data_items_in_container[k]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price )
+            {
+                if( data_items_in_container[k]->stk_item.close_price > data_items_in_container[k]->stk_item.open_price ) // red
+                {
+                    target_follow_index = k;
+                    break;
+                }
+            }else if( data_items_in_container[k]->stk_item.low_price < data_items_in_container[index]->stk_item.low_price + EPSINON )
+                break;
+        }
+        if( target_follow_index == -1 )
+            return;
+        KGreenRedType left_gr_type = KGGetGreenRedType(data_items_in_container[target_front_index]->stk_item, type_period);
+        KGreenRedType right_gr_type = KGGetGreenRedType(data_items_in_container[target_follow_index]->stk_item, type_period);
+#if 0 
+        if( data_items_in_container[target_follow_index]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price 
+            && data_items_in_container[target_follow_index]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price 
+            && data_items_in_container[target_front_index]->stk_item.low_price > data_items_in_container[index]->stk_item.low_price 
+            && data_items_in_container[target_front_index]->stk_item.high_price > data_items_in_container[index]->stk_item.high_price )
+        {
+
+            if( left_gr_type >= KGreenRedType::SMALL_GREEN
+                && right_gr_type >= KGreenRedType::SMALL_RED && right_gr_type < KGreenRedType::SMALL_GREEN )
+            {
+                data_items_in_container[index]->tag |= (int)TagType::BUY;
+            }
+            data_items_in_container[index]->type |= int(FractalType::BTM_AXIS_T_3);
+        }
+#else
+        data_items_in_container[index]->tag |= (int)TagType::BUY;
+        data_items_in_container[index]->type |= int(FractalType::BTM_AXIS_T_3);
+#endif
     };
 #else
     static auto proc_if_face = [](TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, int index)
@@ -1800,7 +1863,8 @@ void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items
         if( (data_items_in_container[index]->tag & (int)TagType::SELL) == (int)TagType::SELL )
             data_items_in_container[index]->tag ^= (int)TagType::SELL;
         // judge to set sig
-        proc_if_face(type_period, data_items_in_container, index);
+        proc_if_top_face(type_period, data_items_in_container, index);
+        proc_if_down_face(type_period, data_items_in_container, index);
         if( is_only_set_tail )
         {
             if( --count_when_only_set_tail == 0 )
