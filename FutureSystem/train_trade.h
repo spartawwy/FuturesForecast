@@ -16,6 +16,9 @@ static const double cst_margin_capital = 6000.00;
 static const double cst_default_ori_capital = 20000.00;
 static const double cst_default_fee_rate_percent = 0.025;
 
+static const double cst_per_hand_open_fee = 100.0;
+static const double cst_per_hand_close_fee = 0.0;
+
 enum PositionType : unsigned char
 {
     POS_LONG  = 0, // ×ö¶à
@@ -105,7 +108,7 @@ class PositionInfo
 public:
      
     //PositionInfo(double open_fee=100.0, double close_fee=300.0) : open_fee_(open_fee), close_fee_(close_fee) { max_trade_id_ = 0; }
-    PositionInfo() : open_fee_(100.0), close_fee_(300.0) { max_trade_id_ = 0; }
+    PositionInfo() : open_fee_(cst_per_hand_open_fee), close_fee_(cst_per_hand_close_fee) { max_trade_id_ = 0; }
      
     void open_fee(double fee) { open_fee_ = fee; }
     void close_fee(double fee) { close_fee_ = fee; }

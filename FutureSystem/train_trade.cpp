@@ -641,7 +641,7 @@ double CalculateFee(int quantity, double price, bool is_close)
 {
     assert(quantity > 0.0);
     //assert(price > 0.0);
-    return is_close ? quantity * 300.0 : quantity * 100.0;
+    return is_close ? quantity * cst_per_hand_close_fee : quantity * cst_per_hand_open_fee;
 }
 
 int CalculateMaxQtyAllowOpen(double capital, double price)
