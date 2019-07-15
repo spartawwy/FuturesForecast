@@ -296,8 +296,10 @@ void ToolBar::onClicked()
 
 void ToolBar::onClickedClearBtn()
 {
-    m_main_window->MinimizeMockTradeDlg();
-    m_main_window->MinimizeTrainDlg();
+    if( m_main_window->is_mock_trade() )
+        m_main_window->MinimizeMockTradeDlg();
+    if( m_main_window->is_train_mode() )
+        m_main_window->MinimizeTrainDlg();
     auto ret = QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("是否删除所有手动预测画线?"), QMessageBox::Yes, QMessageBox::No); 
     if( QMessageBox::Yes == ret )
     {
