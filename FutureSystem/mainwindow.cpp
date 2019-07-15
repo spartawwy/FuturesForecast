@@ -53,6 +53,7 @@ MainWindow::MainWindow(FuturesForecastApp *app, QWidget *parent) :
     , is_mock_trade_(false)
     , mock_trade_dlg_(nullptr)
     , show_sig_(false)
+    , cur_quote_price_(0.0)
 {
     ui->setupUi(this); 
 }
@@ -418,10 +419,10 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 
 void MainWindow::onTimer()
 {
-    // updateDateTime();
-    //QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss");
-    //QTime::currentTime().toString("HHMMDD")
-    statusBar()->showMessage(QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss"));
+    // updateDateTime(); 
+    QString content = QString("%1                                         %2").arg(QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss")).arg(QString::number(cur_quote_price(), 'f', 1));
+    statusBar()->showMessage(content);
+
 }
 
 void MainWindow::on_actionExit_triggered()

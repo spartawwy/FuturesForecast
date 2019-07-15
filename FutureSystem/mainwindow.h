@@ -84,6 +84,9 @@ public:
 
     void EmitSigQuoteData(double price, double sell1, double buy1, int vol, int sell_vol, int buy_vol) { emit sigQuoteData(price, sell1, buy1, vol, sell_vol, buy_vol); }
 
+    double cur_quote_price() { return cur_quote_price_; }
+    void cur_quote_price(double val) { cur_quote_price_ = val; }
+
 signals:
 
     void sigQuoteData(double, double, double, int, int, int);
@@ -127,6 +130,8 @@ private:
     MockTradeDlg *mock_trade_dlg_;
 
     bool show_sig_;
+
+    double cur_quote_price_;
 
 private slots:
 
