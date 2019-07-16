@@ -20,8 +20,8 @@ bool ExchangeCalendar::IsTradeDate(int date)
 
 bool ExchangeCalendar::IsTradeTime(int hhmm)
 { 
-    //return (hhmm >= 915 &&  hhmm <= 1500) || IsMidNightTradeTime(hhmm);
-    return (hhmm >= 915 &&  hhmm <= 1130) || (hhmm >= 1330 && hhmm <= 1500) || IsMidNightTradeTime(hhmm);
+    //return (hhmm >= 900 &&  hhmm <= 1500) || IsMidNightTradeTime(hhmm);
+    return (hhmm >= 900 &&  hhmm <= 1130) || (hhmm >= 1330 && hhmm <= 1500) || IsMidNightTradeTime(hhmm);
 }
 
 bool ExchangeCalendar::IsMidNightTradeTime(int hhmm)
