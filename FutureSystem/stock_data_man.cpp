@@ -1694,6 +1694,23 @@ TypePeriod ToTypePeriod(PeriodType src)
     return TypePeriod::PERIOD_DAY;
 }
 
+PeriodType ToPeriodType(TypePeriod src)
+{
+    switch(src)
+    {
+     case TypePeriod::PERIOD_1M:     return PeriodType::PERIOD_1M;  
+     case TypePeriod::PERIOD_5M:     return PeriodType::PERIOD_5M; 
+     case TypePeriod::PERIOD_15M:    return PeriodType::PERIOD_15M;
+     case TypePeriod::PERIOD_30M:   return PeriodType::PERIOD_30M; 
+     case TypePeriod::PERIOD_HOUR:  return PeriodType::PERIOD_HOUR;
+     case TypePeriod::PERIOD_DAY:   return PeriodType::PERIOD_DAY; 
+     case TypePeriod::PERIOD_WEEK:  return PeriodType::PERIOD_WEEK;
+     case TypePeriod::PERIOD_MON:   return PeriodType::PERIOD_MON; 
+     assert(false);
+    }
+    return PeriodType::PERIOD_DAY;
+}
+
 // < 0 : meaning no related data
 int FindDataIndex(T_HisDataItemContainer &data_items_in_container, int date, int cur_hhmm)
 {

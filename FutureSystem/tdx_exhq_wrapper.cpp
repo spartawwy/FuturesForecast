@@ -389,7 +389,7 @@ bool TdxExHqWrapper::GetInstrumentQuote(const std::string &code, int nmarket, T_
                     break;
             }
         }
-        // bool1 = TdxExHq_GetInstrumentQuote(nConn, 30, "SC1908",  Result, ErrInfo);
+        
         bool ret = false;
         do
         {

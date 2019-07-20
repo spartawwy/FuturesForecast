@@ -38,6 +38,7 @@ public:
     MainWindow * main_window() { return main_window_.get(); }
 
     void UpdateStockData();
+    void UpdateStockData(TypePeriod  type_period);
 
     void UpdateStockQuote();
 

@@ -1612,7 +1612,7 @@ void KLineWall::UpdateStockQuote()
         if( is_resetting_stock_ ||/* draw_action_ != DrawAction::NO_ACTION || */main_win_->is_train_mode() )
             return;
 
-        main_win_->EmitSigQuoteData(quote_date.cur_price, quote_date.sell_price, quote_date.buy_price, quote_date.vol, quote_date.sell_vol, quote_date.buy_vol);
+        main_win_->EmitSigQuoteData(quote_date.cur_price, quote_date.sell_price, quote_date.buy_price, quote_date.vol, quote_date.sell_vol, quote_date.buy_vol); // => slotHandleQuote
         main_win_->cur_quote_price(quote_date.cur_price);
     }
 }
@@ -1778,10 +1778,7 @@ void KLineWall::UpdateIfNecessary()
     int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
     int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
     int target_date = 0;
-#if 0
-    if( !app_->exchange_calendar()->IsTradeDate(cur_date) || !app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
-        return;
-#else
+ 
     int pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
     bool is_trade_time = false;
     if( app_->exchange_calendar()->IsTradeDate(cur_date) && app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
@@ -1795,8 +1792,6 @@ void KLineWall::UpdateIfNecessary()
     }
     if( !is_trade_time )
         return;
-
-#endif
 
     std::lock_guard<std::mutex> locker(painting_mutex_);
      

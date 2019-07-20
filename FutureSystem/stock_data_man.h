@@ -20,6 +20,7 @@
 #include "kline_wall.h"
 
 TypePeriod ToTypePeriod(PeriodType src);
+PeriodType ToPeriodType(TypePeriod src);
 
 class KLineWall;
 class ExchangeCalendar;
@@ -57,6 +58,11 @@ public:
 	double GetHisDataHighestMaxPrice(PeriodType period_type, const std::string& code, int start_date, int end_date);
 
 public: 
+
+    T_HisDataItemContainer &GetHisDataContainer(TypePeriod type_period, const std::string& code)
+    {
+        return GetHisDataContainer(ToPeriodType(type_period), code);
+    }
 
     T_HisDataItemContainer &GetHisDataContainer(PeriodType period_type, const std::string& code);
     T_BiContainer &GetBiContainer(PeriodType period_type, const std::string& code);

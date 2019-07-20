@@ -53,10 +53,14 @@ public:
     void SetShowStructLine(bool val);
     void SetShowSection(bool val);
 
+    std::string stock_code() { return stock_code_; }
+
     void ResetTypePeriod(TypePeriod  type);
 
     PeriodType ToPeriodType(TypePeriod src);
     
+    TypePeriod k_type() { return k_type_; }
+
     bool ResetStock(const QString& code, TypePeriod type_period, bool is_index, int nmarket);
     bool ResetStock(const QString& code, const QString& code_name, TypePeriod type_period, bool is_index, int nmarket);
     bool ResetStock(const QString& code, const QString& code_name, bool is_index, int nmarket)
