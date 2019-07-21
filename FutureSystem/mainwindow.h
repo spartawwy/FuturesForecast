@@ -73,7 +73,7 @@ public:
     bool is_mock_trade(){ return is_mock_trade_; }
     void is_mock_trade(bool val) { is_mock_trade_ = val; }
 
-    void UpdateStockData();
+    void UpdateStockData(int target_date, int cur_hhmm);
     void UpdateStockQuote();
 
     void show_sig(bool val) { show_sig_ = val; }

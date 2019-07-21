@@ -60,6 +60,7 @@ public:
     PeriodType ToPeriodType(TypePeriod src);
     
     TypePeriod k_type() { return k_type_; }
+    int nmarket() { return nmarket_; }
 
     bool ResetStock(const QString& code, TypePeriod type_period, bool is_index, int nmarket);
     bool ResetStock(const QString& code, const QString& code_name, TypePeriod type_period, bool is_index, int nmarket);
@@ -77,7 +78,7 @@ public:
 
     void ShowDurationKlines(int date, int hhmm);
 
-    void UpdateIfNecessary();
+    void UpdateIfNecessary(int target_date, int cur_hhmm);
     // train mode --------
     void SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm);
     std::tuple<int, int> MoveRightEndToNextK();

@@ -278,14 +278,15 @@ void MainWindow::StockInputDlgRet()
         kline_wall_sub->ResetStock(stock_code_changed, stock_name, is_index, nmakert);
 }
  
-void MainWindow::UpdateStockData()
+void MainWindow::UpdateStockData(int target_date, int cur_hhmm)
 {
     if( kline_wall_main )
-        kline_wall_main->UpdateIfNecessary();
+        kline_wall_main->UpdateIfNecessary(target_date, cur_hhmm);
     if( kline_wall_sub )
-        kline_wall_sub->UpdateIfNecessary();
+        kline_wall_sub->UpdateIfNecessary(target_date, cur_hhmm);
 }
 
+// ps : cause 1m is updated high frequent, so only update main k line wall
 void MainWindow::UpdateStockQuote()
 {
     if( kline_wall_main )

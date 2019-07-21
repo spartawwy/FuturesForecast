@@ -3,6 +3,7 @@
 #include <thread>
 
 #include <qmessageBox>
+#include <QDateTime>
 #include <qdebug.h>
 
 #include <Tlib/core/tsystem_core_common.h>
@@ -95,9 +96,26 @@ void FuturesForecastApp::Stop()
 
 void FuturesForecastApp::UpdateStockData()
 { 
-     main_window()->UpdateStockData();
-     
+    int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
+    int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
+    int target_date = 0;
 
+    int pre_date = exchange_calendar()->PreTradeDate(cur_date, 1);
+    bool is_trade_time = false;
+    if( exchange_calendar()->IsTradeDate(cur_date) && exchange_calendar()->IsTradeTime(cur_hhmm) )
+    {
+        is_trade_time = true;
+        target_date = cur_date;
+    }else if( exchange_calendar()->IsTradeDate(pre_date) && exchange_calendar()->IsMidNightTradeTime(cur_hhmm) )
+    {
+        is_trade_time = true;
+        target_date = exchange_calendar()->NextTradeDate(cur_date, 1);
+    }
+    if( !is_trade_time )
+        return;
+
+     main_window()->UpdateStockData(target_date, cur_hhmm);
+     
      ////////////////////////////////////
      TypePeriod  type_periods_to_judge[] = {TypePeriod::PERIOD_1M, TypePeriod::PERIOD_5M, TypePeriod::PERIOD_15M, TypePeriod::PERIOD_30M, TypePeriod::PERIOD_HOUR
          , TypePeriod::PERIOD_DAY, TypePeriod::PERIOD_WEEK}; 
@@ -107,7 +125,8 @@ void FuturesForecastApp::UpdateStockData()
 
      std::vector<TypePeriod> target_periods;
 
-     // update other k period stock data
+     // update other k period stock data which has been opened----------------
+
      for( int i = 0; i < sizeof(type_periods_to_judge)/sizeof(type_periods_to_judge[0]); ++i )
      {
          if( main_window()->MainKlineWall()->k_type() == type_periods_to_judge[i] )
@@ -116,76 +135,44 @@ void FuturesForecastApp::UpdateStockData()
              continue; 
 
          T_HisDataItemContainer &container = stock_data_man_->GetHisDataContainer(type_periods_to_judge[i], main_window()->MainKlineWall()->stock_code());
-
-         if( container.empty() ) // has no opened
+         if( container.empty() ) // has not opened
              continue;
 
          target_periods.push_back(type_periods_to_judge[i]);
-
      }
 
+     std::string code = main_window()->MainKlineWall()->stock_code();
+     int nmarket = main_window()->MainKlineWall()->nmarket();
      
+     for( int j = 0; j < target_periods.size(); ++j )
+     {
+         UpdateStockData(target_date, cur_hhmm, code, target_periods[j], nmarket);
+     }
 }
 
-void FuturesForecastApp::UpdateStockData(TypePeriod  type_period)
+void FuturesForecastApp::UpdateStockData(int target_date, int cur_hhmm, const std::string &code, TypePeriod type_period, int nmarket)
 {
-    bool is_need_updated = false;
-
-    int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
-    int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
-    int target_date = 0;
- 
-    int pre_date = exchange_calendar()->PreTradeDate(cur_date, 1);
-    bool is_trade_time = false;
-    if( exchange_calendar()->IsTradeDate(cur_date) && exchange_calendar()->IsTradeTime(cur_hhmm) )
-    {
-        is_trade_time = true;
-        target_date = cur_date;
-    }else if( exchange_calendar()->IsTradeDate(pre_date) && app_->exchange_calendar()->IsMidNightTradeTime(cur_hhmm) )
-    {
-        is_trade_time = true;
-        target_date = app_->exchange_calendar()->NextTradeDate(cur_date, 1);
-    }
-    if( !is_trade_time )
-        return;
-
-    //std::lock_guard<std::mutex> locker(painting_mutex_);
-     
-    int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);
+    //bool is_need_updated = false;
+    int hhmm = GetKDataTargetStartTime(type_period, cur_hhmm);
     
-    T_HisDataItemContainer &container = app_->stock_data_man().GetHisDataContainer(ToPeriodType(k_type_), stock_code_);
+    T_HisDataItemContainer &container = stock_data_man().GetHisDataContainer(ToPeriodType(type_period), code);
     if( !container.empty() )
     {
-        auto p_contain = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, target_date, target_date, hhmm/*, bool is_index*/);
+        auto p_contain = stock_data_man().FindStockData(ToPeriodType(type_period), code, target_date, target_date, hhmm/*, bool is_index*/);
         if( p_contain ) // current time k data exists
-        {
-            if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
-                return;
-            int ret = app_->stock_data_man().UpdateOrAppendLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
+        { 
+            int ret = stock_data_man().UpdateOrAppendLatestItemStockData(ToPeriodType(type_period), nmarket, code, false);
             if( ret == 1 )
-                TraverSetSignale(k_type_, container, true);
+                TraverSetSignale(type_period, container, true);
             else if( ret == 2 )
-                TraverSetSignale(k_type_, container, false);
-            is_need_updated = ret > 0;
+                TraverSetSignale(type_period, container, false);
+            //is_need_updated = ret > 0;
             
         }else
         {
-             
-            auto date_time = GetKDataTargetDateTime(*app_->exchange_calendar(), k_type_, target_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
-            auto p_cur_time_contain = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, std::get<0>(date_time), target_date, is_index_);
-
-            if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
-                return;
-            if( p_cur_time_contain )
-            {
-                p_hisdata_container_ = p_cur_time_contain;
-                is_need_updated = true;
-            }
+            auto date_time = GetKDataTargetDateTime(*exchange_calendar(), type_period, target_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
+            auto p_cur_time_contain = stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket, code, std::get<0>(date_time), target_date, false);
         }
-       /* if( is_need_updated )
-        {
-            Emit_UpdateKwall(); 
-        }*/
     }
 }
 

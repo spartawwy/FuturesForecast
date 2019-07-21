@@ -1769,12 +1769,13 @@ void KLineWall::ShowDurationKlines(int date, int hhmm)
     update();
 }
 
-void KLineWall::UpdateIfNecessary()
+void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
 {  
     if( is_resetting_stock_ || draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
         return;
-    bool is_need_updated = false;
 
+    bool is_need_updated = false;
+#if 0
     int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
     int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
     int target_date = 0;
@@ -1792,7 +1793,7 @@ void KLineWall::UpdateIfNecessary()
     }
     if( !is_trade_time )
         return;
-
+#endif
     std::lock_guard<std::mutex> locker(painting_mutex_);
      
     int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);

@@ -38,8 +38,7 @@ public:
     MainWindow * main_window() { return main_window_.get(); }
 
     void UpdateStockData();
-    void UpdateStockData(TypePeriod  type_period);
-
+     
     void UpdateStockQuote();
 
 protected:
@@ -47,6 +46,9 @@ protected:
     virtual void HandleNodeHandShake(TSystem::communication::Connection* , const TSystem::Message& ) override {};
     virtual void HandleNodeDisconnect(std::shared_ptr<TSystem::communication::Connection>& 
         , const TSystem::TError& ) override {};
+
+private:
+    void UpdateStockData(int target_date, int cur_hhmm, const std::string &code, TypePeriod  type_period, int nmarket);
 
 private:
 
