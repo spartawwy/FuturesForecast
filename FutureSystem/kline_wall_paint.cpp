@@ -19,8 +19,7 @@
 #include "stkfo_common.h"
 #include "futures_forecast_app.h"
 #include "exchange_calendar.h"
-
- 
+  
 static const int cst_default_year = 2017;
 static const Qt::CursorShape cst_cur_del_forcst_line = Qt::ClosedHandCursor;
 const double KLineWall::cst_k_mm_enlarge_times = 1.02; 
@@ -672,8 +671,8 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             bool is_down = true;
             if( forcast_man_.Find2pForcast(stock_code_, k_type_, is_down, *item_a, *item_b) )
                 return ResetDrawState(draw_action_);  
-            if( item_a->stk_item.high_price > item_b->stk_item.high_price )
-            {
+            //if( item_a->stk_item.high_price > item_b->stk_item.high_price )
+            //{
                 T_Data2pForcast data_2pdown_fcst(is_down);
                 data_2pdown_fcst.stock_code = stock_code_;
                 data_2pdown_fcst.date_a = item_a->stk_item.date; 
@@ -686,8 +685,8 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
                 data_2pdown_fcst.c2 = std::get<1>(c1_c2_c3);
                 data_2pdown_fcst.c3 = std::get<2>(c1_c2_c3);
                 forcast_man_.Append(k_type_, stock_code_, is_down, data_2pdown_fcst);
-            }else
-                QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("下降反弹预测,B点最高价不能大于等于A点最高价!")); 
+            //}else
+            //    QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("下降反弹预测,B点最高价不能大于等于A点最高价!")); 
             return ResetDrawState(draw_action_); 
 
         }else if( draw_action_ == DrawAction::DRAWING_FOR_2PUP_C ) 
@@ -695,8 +694,8 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             bool is_down = false;
             if( forcast_man_.Find2pForcast(stock_code_, k_type_, is_down, *item_a, *item_b) )
                 return ResetDrawState(draw_action_);  
-            if( item_a->stk_item.high_price < item_b->stk_item.high_price )
-            {
+            //if( item_a->stk_item.high_price < item_b->stk_item.high_price )
+            //{
                 T_Data2pForcast data_2pup_fcst(is_down);
                 data_2pup_fcst.stock_code = stock_code_; 
                 data_2pup_fcst.date_a = item_a->stk_item.date; 
@@ -709,8 +708,8 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
                 data_2pup_fcst.c2 = std::get<1>(c1_c2_c3);
                 data_2pup_fcst.c3 = std::get<2>(c1_c2_c3);
                 forcast_man_.Append(k_type_, stock_code_, is_down, data_2pup_fcst);
-            }else
-                QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("上升反弹预测,B点最高价不能小于等于A点最高价!")); 
+            //}else
+            //    QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("上升反弹预测,B点最高价不能小于等于A点最高价!")); 
             return ResetDrawState(draw_action_);  
 
         }else if( draw_action_ == DrawAction::DRAWING_FOR_3PDOWN_D )
@@ -732,15 +731,15 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             if( forcast_man_.Find3pForcast(stock_code_, k_type_, false, *item_a, *item_b) ) // already exist
                 return ResetDrawState(draw_action_);  
 
-            if( item_a->stk_item.high_price < item_b->stk_item.high_price )
-            { 
+            //if( item_a->stk_item.high_price < item_b->stk_item.high_price )
+            //{ 
                 drawing_line_B_ = item_b->kline_posdata(wall_index_).top; 
                 append_3pforcast_data(this, false, *item_a, *item_b);
                 return;
-            }else
-            {
+            //}else
+            //{
                 //QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("上升3点预测,B点最高价不能小于等于A点最高价!")); 
-            }
+            //}
         }
     } // if( drawing_line_B_ == CST_MAGIC_POINT )
     else if( drawing_line_C_ == CST_MAGIC_POINT ) // if to generate point C
