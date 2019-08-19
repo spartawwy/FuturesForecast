@@ -102,10 +102,10 @@ class STOCKBASIC:
         #    num += 1
          
         type = 2; # 0--stock ; 1--index ; 2--futures
-        index_array = [('SC1906', '上海原油1906', 'SHYYYJLL', 30)
-                       ,('SC1907', '上海原油1907', 'SHYYYJLQ', 30) 
-                       ,('SC1908', '上海原油1908', 'SHYYYJLB', 30)
-                       ,('SC1909', '上海原油1909', 'SHYYYJLJ', 30)
+        index_array = [('SC1909', '上海原油1908', 'SHYYYJLB', 30)
+                       ,('SC1910', '上海原油1909', 'SHYYYJLJ', 30)
+                       ,('SC1911', '上海原油1909', 'SHYYYJLJ', 30)
+                       ,('SC1912', '上海原油1909', 'SHYYYJLJ', 30)
                        ,('I1909', '铁矿石1909', 'TKSYJLJ', 29)
                        ,('IF1907', '股指期货1907', 'GZQHYJLQ', 47)
                        ,('IF300', '股指期货300', 'GZQHSLL', 47)]
