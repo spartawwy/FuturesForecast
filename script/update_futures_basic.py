@@ -102,12 +102,11 @@ class STOCKBASIC:
         #    num += 1
          
         type = 2; # 0--stock ; 1--index ; 2--futures
-        index_array = [('SC1909', '上海原油1908', 'SHYYYJLB', 30)
-                       ,('SC1910', '上海原油1909', 'SHYYYJLJ', 30)
-                       ,('SC1911', '上海原油1909', 'SHYYYJLJ', 30)
-                       ,('SC1912', '上海原油1909', 'SHYYYJLJ', 30)
-                       ,('I1909', '铁矿石1909', 'TKSYJLJ', 29)
-                       ,('IF1907', '股指期货1907', 'GZQHYJLQ', 47)
+        index_array = [ ('SC1910', '原油1910', 'SHYYYJYL', 30)
+                       ,('SC1911', '原油1911', 'SHYYYJYY', 30)
+                       ,('SC1912', '原油1912', 'SHYYYJYL', 30)
+                       ,('I1910', '铁矿石1910', 'TKSYJYL', 29)
+                       ,('IF1910', '股指期货1910', 'GZQHYJLQ', 47)
                        ,('IF300', '股指期货300', 'GZQHSLL', 47)]
         for i in range(0, len(index_array)):
             sql = "INSERT OR REPLACE INTO stock VALUES(?, ?, ?, ?, 0, '', '', '', ?)"

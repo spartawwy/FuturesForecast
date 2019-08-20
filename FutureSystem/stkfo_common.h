@@ -370,6 +370,6 @@ KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_
 
 #define MARKET_SH_FUTURES  30
 
-#define DEFAULT_CODE  "SC1909"
+#define DEFAULT_CODE  "SC1910"
 
 #endif // STKFO_COMMON_SDF3DSF_H_
