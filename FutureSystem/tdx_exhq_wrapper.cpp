@@ -80,7 +80,8 @@ int TdxExHqWrapper::_ConnectServer()
 
     //连接服务器
     char * servers[] = {
-        "59.175.238.38"
+        "106.14.95.149"
+        , "59.175.238.38"
         , "112.74.214.43"};
     for( int i = 0; i < sizeof(servers)/sizeof(servers[0]); ++i )
     {
