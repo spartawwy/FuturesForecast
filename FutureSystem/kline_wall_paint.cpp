@@ -1806,6 +1806,14 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
             int ret = app_->stock_data_man().UpdateOrAppendLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
+            if( ret > 0 )
+            {
+                int backward_size = p_contain->size() < 5 ? p_contain->size() : 5;
+                TraverseClearFractalType(container, backward_size);
+                TraverseSetUpwardFractal(container, backward_size);
+                TraverseSetDownwardFractal(container, backward_size);
+                TraverseAjustFractal(container, backward_size);
+            }
             if( ret == 1 )
                 TraverSetSignale(k_type_, container, true);
             else if( ret == 2 )

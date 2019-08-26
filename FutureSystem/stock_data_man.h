@@ -121,6 +121,15 @@ private:
 int FindDataIndex(T_HisDataItemContainer &data_items_in_container, int date, int cur_hhmm);
 bool IsDataIn(T_HisDataItemContainer &data_items_in_container, int date);
 
+// 下分形遍历
+void TraverseSetUpwardFractal(T_HisDataItemContainer &kline_data_items, int backward_size = 0);
+// 上分形遍历
+void TraverseSetDownwardFractal(T_HisDataItemContainer &kline_data_items, int backward_size = 0);
+
+void TraverseClearFractalType(T_HisDataItemContainer &kline_data_items, int backward_size = 0);
+
+void TraverseAjustFractal(T_HisDataItemContainer &kline_data_items, int backward_size = 0);
+
 void TraverSetSignale(TypePeriod type_period, T_HisDataItemContainer &data_items_in_container, bool is_only_set_tail);
 
 #endif // STOCK_DATA_MAN_H

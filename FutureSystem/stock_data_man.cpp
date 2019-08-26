@@ -43,14 +43,6 @@ static bool bompare(const T_KlineDataItem &lh, const T_KlineDataItem &rh)
     return (lh.stk_item.date < rh.stk_item.date) || (lh.stk_item.date == rh.stk_item.date && lh.stk_item.hhmmss < rh.stk_item.hhmmss);
 }
 
-// 下分形遍历
-void TraverseSetUpwardFractal(std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
-// 上分形遍历
-void TraverseSetDownwardFractal(std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
-
-void TraverseClearFractalType(std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
-
-void TraverseAjustFractal(std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items);
  
 
 StockDataMan::StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar)
@@ -512,11 +504,17 @@ std::tuple<int, int> StockDataMan::GetDateIndexFromContainer(PeriodType period_t
  
 /*   \/ 
     kline_data_items[0] is smallest time  */
-void TraverseSetUpwardFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items)
+void TraverseSetUpwardFractal(T_HisDataItemContainer &kline_data_items, int backward_size/*= 0 */)
 {
+    assert( backward_size <= kline_data_items.size() );
     if( kline_data_items.size() < 1 )
         return;
+    // begin from left
     unsigned int index = 1;
+    if( backward_size > 0 )
+    {
+        index = kline_data_items.size() - backward_size + 1;
+    }
     while( index < kline_data_items.size() - 1 )
     {
         //debug -------
@@ -607,11 +605,17 @@ void TraverseSetUpwardFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kl
 
 /*   /\ 
     kline_data_items[0] is smallest time  */
-void TraverseSetDownwardFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items)
+void TraverseSetDownwardFractal( T_HisDataItemContainer &kline_data_items, int backward_size/* = 0*/)
 {
+    assert( backward_size <= kline_data_items.size() );
     if( kline_data_items.size() < 1 )
         return;
+
     unsigned int index = 1;
+    if( backward_size > 0 )
+    {
+        index = kline_data_items.size() - backward_size + 1;
+    }
     while( index < kline_data_items.size() - 1 )
     { 
         //debug -------
@@ -713,18 +717,28 @@ void TraverseSetDownwardFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &
     }//while
 }
 
-void TraverseClearFractalType(std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items)
+void TraverseClearFractalType(T_HisDataItemContainer &kline_data_items, int backward_size/* = 0*/)
 {
     if( kline_data_items.size() < 1 )
         return;
     unsigned int index = kline_data_items.size();
-    while( --index > 0 )
+    if( backward_size == 0 )
     {
-        kline_data_items[index]->type = (int)FractalType::UNKNOW_FRACTAL;
+        while( --index > 0 )
+        {
+            kline_data_items[index]->type = (int)FractalType::UNKNOW_FRACTAL;
+        }
+    }else
+    {
+        int num = backward_size;
+        while( --index > 0 && num-- > 0 )
+        {
+            kline_data_items[index]->type = (int)FractalType::UNKNOW_FRACTAL;
+        }
     }
 }
 
-void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items)
+void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items, int backward_size/* = 0*/)
 {
     static auto find_left_btm_frac = [](std::deque<std::shared_ptr<T_KlineDataItem> > &kline_data_items, int index)->int
     {
@@ -817,10 +831,19 @@ void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_
         }
         return std::make_tuple(tmp_min_price, target_min_index, tmp_max_price, target_max_index);
     };
+
+    
     if( kline_data_items.size() < 1 )
         return;
+    assert(backward_size <= kline_data_items.size());
+     
     unsigned int index = kline_data_items.size();
-    while( --index > 0 )
+
+    int num = kline_data_items.size();
+    if( backward_size > 0 )
+        num = backward_size;
+
+    while( --index > 0 && num-- > 0 )
     {
         int frac_date = kline_data_items[index]->stk_item.date; 
         int frac_hhmmss = kline_data_items[index]->stk_item.hhmmss; 
