@@ -105,7 +105,8 @@ class STOCKBASIC:
         index_array = [ ('SC1910', '原油1910', 'SHYYYJYL', 30)
                        ,('SC1911', '原油1911', 'SHYYYJYY', 30)
                        ,('SC1912', '原油1912', 'SHYYYJYL', 30)
-                       ,('I1910', '铁矿石1910', 'TKSYJYL', 29)
+                       ,('I2001', '铁矿石2001', 'TKSELLY', 29)
+                       ,('I1911', '铁矿石1910', 'TKSYJYL', 29)
                        ,('IF1910', '股指期货1910', 'GZQHYJLQ', 47)
                        ,('IF300', '股指期货300', 'GZQHSLL', 47)]
         for i in range(0, len(index_array)):

@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QtWidgets/QApplication>
 #include <QDesktopWidget>
+#include <qprocess.h>
 
 #include "title_bar.h"
 
@@ -35,6 +36,11 @@ TitleBar::TitleBar(QWidget *parent)
     m_pTitleLabel->setObjectName("whiteLabel");
     m_pTitleLabel->setText("FuturesForcast.sparta.ver.1.0"); // titile 
 
+    m_psystemButton = new QPushButton("system", this);
+    m_psystemButton->setFixedSize(50, 22);
+    m_psystemButton->setObjectName("systemButton");
+    m_psystemButton->setToolTip("system");
+
     m_pMinimizeButton = new QPushButton("-", this);
     m_pMinimizeButton->setFixedSize(27, 22);
     m_pMinimizeButton->setObjectName("minimizeButton");
@@ -56,6 +62,8 @@ TitleBar::TitleBar(QWidget *parent)
     pLayout->addSpacing(5);
 #endif
     pLayout->addWidget(m_pTitleLabel);
+
+    pLayout->addWidget(m_psystemButton);
     pLayout->addWidget(m_pMinimizeButton);
     pLayout->addWidget(m_pMaximizeButton);
     pLayout->addWidget(m_pCloseButton);
@@ -64,6 +72,7 @@ TitleBar::TitleBar(QWidget *parent)
 
     setLayout(pLayout);
 
+    connect(m_psystemButton, SIGNAL(clicked(bool)), this, SLOT(onClicked()));
     connect(m_pMinimizeButton, SIGNAL(clicked(bool)), this, SLOT(onClicked()));
     connect(m_pMaximizeButton, SIGNAL(clicked(bool)), this, SLOT(onClicked()));
     connect(m_pCloseButton, SIGNAL(clicked(bool)), this, SLOT(onClicked()));
@@ -153,6 +162,11 @@ void TitleBar::onClicked()
         else if (pButton == m_pCloseButton)
         {
             pWindow->close();
+        }else if( pButton == m_psystemButton )
+        {
+            QProcess  start_forcast_tool;
+            start_forcast_tool.startDetached("forcasttool.exe");
+            start_forcast_tool.waitForStarted();
         }
     }
 }

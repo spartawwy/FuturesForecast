@@ -38,6 +38,7 @@ private:
 private:
     QLabel *m_pIconLabel;
     QLabel *m_pTitleLabel;
+    QPushButton *m_psystemButton;
     QPushButton *m_pMinimizeButton;
     QPushButton *m_pMaximizeButton;
     QPushButton *m_pCloseButton;
