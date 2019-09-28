@@ -165,8 +165,10 @@ void FuturesForecastApp::UpdateStockData(int target_date, int cur_hhmm, const st
             if( ret == 1 )
                 TraverSetSignale(type_period, container, true);
             else if( ret == 2 )
+            {
                 TraverSetSignale(type_period, container, false);
-            //is_need_updated = ret > 0;
+                stock_data_man().TraverseGetStuctLines(ToPeriodType(type_period), code, container);
+            }
             
         }else
         {

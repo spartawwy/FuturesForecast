@@ -88,8 +88,16 @@ int TdxExHqWrapper::_ConnectServer()
         handle = TdxExHq_Connect(servers[i], 7727, m_szResult, m_szErrInfo);
         if( handle < 0 )
         {
-            std::cout << m_szErrInfo << std::endl;
-            continue;
+            handle = TdxExHq_Connect(servers[i], 7727, m_szResult, m_szErrInfo);
+            if( handle < 0 )
+            {
+                std::cout << m_szErrInfo << std::endl;
+                continue;
+            }else
+            {
+                std::cout << m_szResult << std::endl;
+                return handle;
+            }
         }else
         {
             std::cout << m_szResult << std::endl;

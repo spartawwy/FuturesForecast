@@ -1817,7 +1817,10 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
             if( ret == 1 )
                 TraverSetSignale(k_type_, container, true);
             else if( ret == 2 )
+            {
                 TraverSetSignale(k_type_, container, false);
+                app_->stock_data_man().TraverseGetStuctLines(ToPeriodType(k_type_), stock_code_, container);
+            }
             is_need_updated = ret > 0;
             
         }else
