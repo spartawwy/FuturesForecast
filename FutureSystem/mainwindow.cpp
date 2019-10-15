@@ -420,8 +420,32 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 
 void MainWindow::onTimer()
 {
-    // updateDateTime(); 
-    QString content = QString("%1                                         %2").arg(QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss")).arg(QString::number(cur_quote_price(), 'f', 1));
+    // updateDateTime();  1015-1030
+    //int hhmmss = QDateTime::currentDateTime().toString("hhmmss").toInt();
+    int hh = QDateTime::currentDateTime().time().hour();
+    int mm = QDateTime::currentDateTime().time().minute();
+    int ss = QDateTime::currentDateTime().time().second();
+
+    int min_5_amain_second = (5 - (hh * 60 + mm) % 5) * 60 - ss; 
+    int min_15_amain_second = (15 - (hh * 60 + mm) % 15) * 60 - ss; 
+
+    
+    /*if( hh > 9 )
+    {
+        amain_second = (5 - ((hh - 9) * 60 + mm) % 5) * 60 - ss; 
+
+    }else
+    {
+        amain_second = (5 - ((hh - 9) * 60 + mm) % 5) * 60 - ss; 
+    }
+*/
+    //hhmm / 100 * 60 - 9 * 60
+    QString content = QString("%1                                         %2                 5M: %3     \t\t     15M: %4")
+        .arg(QDateTime::currentDateTime().toString("yyyyMMdd hh:mm:ss"))
+        .arg(QString::number(cur_quote_price(), 'f', 1))
+        .arg(min_5_amain_second)
+        .arg(min_15_amain_second);
+
     statusBar()->showMessage(content);
 
 }
