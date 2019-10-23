@@ -20,6 +20,8 @@
 #include "futures_forecast_app.h"
 #include "exchange_calendar.h"
   
+#define DEFAULT_CODE  "SC1912"
+
 static const int cst_default_year = 2017;
 static const Qt::CursorShape cst_cur_del_forcst_line = Qt::ClosedHandCursor;
 const double KLineWall::cst_k_mm_enlarge_times = 1.02; 
