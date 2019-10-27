@@ -72,6 +72,11 @@ void MomentumZhibiaoWin::DrawWindow(QPainter &painter, int mm_w)
     curve_pen.setWidth(line_size*2);
     curve_pen.setStyle(Qt::SolidLine);
 
+    QPen dea_curve_pen;
+    dea_curve_pen.setColor(Qt::yellow);
+    dea_curve_pen.setWidth(line_size*2);
+    dea_curve_pen.setStyle(Qt::SolidLine);
+
     // find max value 
     double min_negat_val = 99999.99;
     double max_posit_val = 0.0;
@@ -106,14 +111,19 @@ void MomentumZhibiaoWin::DrawWindow(QPainter &painter, int mm_w)
     {
         double curve_val = 3.12 * ((*iter)->zhibiao_atoms[MOMENTUM_POS]->val0() - (*iter)->zhibiao_atoms[MOMENTUM_POS]->val1());
         double curve_val_next = 0.0;
+        double dea_curve_val = 3.12 * (*iter)->zhibiao_atoms[MOMENTUM_POS]->val2();
+        double dea_curve_val_next = 0.0;
         double x_right_next = 0.0;
         if( (iter + 1) != parent_->p_hisdata_container_->rend() )
         {
             curve_val_next = 3.12 * ((*(iter+1))->zhibiao_atoms[MOMENTUM_POS]->val0() - (*(iter+1))->zhibiao_atoms[MOMENTUM_POS]->val1());
+            dea_curve_val_next = 3.12 * (*(iter+1))->zhibiao_atoms[MOMENTUM_POS]->val2();
             x_right_next = right_end - item_w * (parent_->k_num_ - k + 1);  
         }
         double curve_high = curve_val * Height() / (total_val);
         double curve_high_next = curve_val_next * Height() / (total_val);
+        double dea_curve_high = dea_curve_val * Height() / (total_val);
+        double dea_curve_high_next = dea_curve_val_next * Height() / (total_val);
 
         auto val = (*iter)->zhibiao_atoms[MOMENTUM_POS]->val3();
         
@@ -154,6 +164,9 @@ void MomentumZhibiaoWin::DrawWindow(QPainter &painter, int mm_w)
 
         painter.setPen(curve_pen);
         painter.drawLine(x_right, -1 * (curve_high + zero_y), x_right_next, -1 * (curve_high_next + zero_y));
+
+        painter.setPen(dea_curve_pen);
+        painter.drawLine(x_right, -1 * (dea_curve_high + zero_y), x_right_next, -1 * (dea_curve_high_next + zero_y));
     }
      
 }
