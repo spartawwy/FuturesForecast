@@ -6,11 +6,15 @@
 
 #include "stkfo_common.h"
 
+namespace  TSystem
+{
+    class LocalLogger;
+}
 class ExchangeCalendar;
 class TdxExHqWrapper
 {
 public:
-    TdxExHqWrapper(ExchangeCalendar  *exchange_calendar);
+    TdxExHqWrapper(ExchangeCalendar  *exchange_calendar, TSystem::LocalLogger &local_logger);
     ~TdxExHqWrapper();
 
     bool Init();
@@ -37,6 +41,7 @@ private:
     std::mutex  conn_handle_mutext_;
 
     ExchangeCalendar  *exchange_calendar_;
+    TSystem::LocalLogger &local_logger_;
 };
 
 #define  MAX_K_COUNT 500 //800 // 虽然(TdxHq_GetSecurityBars TdxHq_GetIndexBars)接口说明最大值 800, 但实际测试为 420

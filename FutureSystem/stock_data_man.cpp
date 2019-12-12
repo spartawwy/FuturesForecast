@@ -23,6 +23,8 @@
 #include "exchange_calendar.h"
 #include "kline_wall.h"
 
+#include "futures_forecast_app.h"
+
 #define RESERVE_CAPACITY_IN_T_VECTOR    1024*16
 //#define RESERVE_SIZE_IN_T_VECTOR    1024*16
 //#define FIRST_STARTPOS_IN_T_VECTOR  10000
@@ -45,7 +47,7 @@ static bool bompare(const T_KlineDataItem &lh, const T_KlineDataItem &rh)
 
  
 
-StockDataMan::StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar)
+StockDataMan::StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar, TSystem::LocalLogger &local_logger)
     : /*kwall_(p_kwall)
     ,*/ m5_stock_his_items_(1024)
     , m1_stock_his_items_(1024)
@@ -77,8 +79,9 @@ StockDataMan::StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_
     , WinnerHisHq_DisConnect_(nullptr)
 #endif
     , p_stk_hisdata_item_vector_(nullptr)
-    , tdx_exhq_wrapper_(p_exchange_calendar)
+    , tdx_exhq_wrapper_(p_exchange_calendar, local_logger)
     , p_exchange_calendar_(p_exchange_calendar)
+    , local_logger_(local_logger)
 {
     //LoadDataFromFile("./data/600030.dat");
     zhibiao_types_.push_back(ZhibiaoType::MOMENTUM); // momentum is in pos MOMENTUM_POS: 0
@@ -180,6 +183,8 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
 
     auto p_stk_hisdata_item_vector = new std::vector<T_StockHisDataItem>();
     bool ret = tdx_exhq_wrapper_.GetHisKBars(code, is_index, nmarket, ToTypePeriod(period_type), start_date, end_date, *p_stk_hisdata_item_vector);
+    local_logger_.LogLocal(TSystem::utility::FormatStr("AppendStockData GetHisKBars %d ret:%d %d", period_type, ret, p_stk_hisdata_item_vector->size()));
+
     if( !ret || p_stk_hisdata_item_vector->empty() ) // fail
     {
         delete p_stk_hisdata_item_vector; 

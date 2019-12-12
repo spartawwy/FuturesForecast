@@ -7,16 +7,20 @@
 #include <regex>
 
 #include "tdxhq/ExHqApi.h"
+#include <TLib/core/tsystem_local_logger.h>
+#include <TLib/core/tsystem_utility_functions.h>
+
 #include "exchange_calendar.h"
 
 #include <qdebug.h>
 
 #pragma comment(lib, "TradeX2-M.lib")
 
-TdxExHqWrapper::TdxExHqWrapper(ExchangeCalendar  *exchange_calendar)
+TdxExHqWrapper::TdxExHqWrapper(ExchangeCalendar  *exchange_calendar, TSystem::LocalLogger &local_logger)
     : conn_handle_(-1)
     , conn_handle_mutext_()
     , exchange_calendar_(exchange_calendar)
+    , local_logger_(local_logger)
 {
 
 }
@@ -157,6 +161,9 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
         total_get += local_count;
     }
      
+    local_logger_.LogLocal(TSystem::utility::FormatStr("GetHisKBars %d | %d %d | %d %d | %d %d", kbar_type, start_date, end_date, std::get<0>(tuple_index_len), count
+        , items.back().date, items.back().hhmmss));
+
     return total_get > 0;
      
 }

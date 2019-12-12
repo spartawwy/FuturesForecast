@@ -61,6 +61,7 @@ private:
     std::shared_ptr<StockDataMan>  stock_data_man_;
 
     bool exit_flag_;
+     
 };
 
 void Delay(__int64 mseconds);

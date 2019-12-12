@@ -20,7 +20,7 @@
 #include "futures_forecast_app.h"
 #include "exchange_calendar.h"
   
-#define DEFAULT_CODE  "SC1912"
+#define DEFAULT_CODE  "SC2002"
 
 static const int cst_default_year = 2017;
 static const Qt::CursorShape cst_cur_del_forcst_line = Qt::ClosedHandCursor;
@@ -1829,6 +1829,7 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
+            //app_->local_logger().LogLocal(utility::FormatStr("UpdateIfNecessary AppendStockData %d", k_type_));
             auto date_time = GetKDataTargetDateTime(*app_->exchange_calendar(), k_type_, target_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
             auto p_cur_time_contain = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, std::get<0>(date_time), target_date, is_index_);
 
@@ -1839,11 +1840,15 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
                 p_hisdata_container_ = p_cur_time_contain;
                 is_need_updated = true;
             }
+
         }
         if( is_need_updated )
         {
             Emit_UpdateKwall(); 
         }
+    }else
+    {
+
     }
 }
 

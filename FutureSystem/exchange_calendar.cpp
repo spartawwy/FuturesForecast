@@ -246,16 +246,22 @@ T_TupleIndexLen ExchangeCalendar::GetStartIndexAndLen_backforward(TypePeriod typ
             span_len /= 5;
         break;
     case TypePeriod::PERIOD_HOUR:
-        start_index *= 4;
-        span_len *= 4;
+       /* start_index *= 4;
+        span_len *= 4;*/
+         start_index *= 20;
+        span_len *= 20;
         break;
     case TypePeriod::PERIOD_30M:
-        start_index *= 8;
-        span_len *= 8;
+        /* start_index *= 8;
+        span_len *= 8;*/
+        start_index *= 38;
+        span_len *= 38;
         break;
     case TypePeriod::PERIOD_15M:
-        start_index *= 16;
-        span_len *= 16;
+        /*start_index *= 16;
+        span_len *= 16;*/
+        start_index *= 76;
+        span_len *= 76;
         break;
     case TypePeriod::PERIOD_5M:
         start_index *= 111;

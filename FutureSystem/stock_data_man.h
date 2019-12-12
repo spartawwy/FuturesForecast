@@ -22,13 +22,18 @@
 TypePeriod ToTypePeriod(PeriodType src);
 PeriodType ToPeriodType(TypePeriod src);
 
+namespace  TSystem
+{
+    class LocalLogger;
+}
 class KLineWall;
 class ExchangeCalendar;
+
 class StockDataMan
 {
 public:
 
-    StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar);
+    StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_calendar, TSystem::LocalLogger &local_logger);
     ~StockDataMan();
     bool Init();
 
@@ -115,6 +120,7 @@ private:
      
    std::vector<ZhibiaoType> zhibiao_types_;
    ExchangeCalendar *p_exchange_calendar_;
+   TSystem::LocalLogger &local_logger_;
 };
 
 // < 0 : meaning no related data

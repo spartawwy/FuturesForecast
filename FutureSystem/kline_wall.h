@@ -261,6 +261,7 @@ private:
     friend class VolZhibiaoWin;
     friend class MomentumZhibiaoWin;
     friend class TrainDlg;
+    friend class StockDataMan;
 };
 
 int CalculateSpanDays(TypePeriod type_period, int k_count);

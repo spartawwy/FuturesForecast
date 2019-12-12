@@ -11,7 +11,8 @@
 #include "exchange_calendar.h"
 #include "database.h"
 #include "stock_man.h"
- 
+#include "stock_data_man.h"
+
 #include "mainwindow.h"
 
 FuturesForecastApp::FuturesForecastApp(int argc, char* argv[])
@@ -51,7 +52,7 @@ bool FuturesForecastApp::Init()
     exchange_calendar_ = std::make_shared<ExchangeCalendar>();
     data_base_->LoadTradeDate(exchange_calendar_.get());
 
-    stock_data_man_ = std::make_shared<StockDataMan>(exchange_calendar_.get());
+    stock_data_man_ = std::make_shared<StockDataMan>(exchange_calendar_.get(), local_logger());
     if( !stock_data_man_->Init() )
     {
         QMessageBox::information(nullptr, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("stock_data_man构件初始化失败!"));
@@ -115,7 +116,7 @@ void FuturesForecastApp::UpdateStockData()
     if( !is_trade_time )
         return;
 
-     main_window()->UpdateStockData(target_date, cur_hhmm);
+     main_window()->UpdateStockData(target_date, cur_hhmm);// update main and sub window stock data
      
      ////////////////////////////////////
      TypePeriod  type_periods_to_judge[] = {TypePeriod::PERIOD_1M, TypePeriod::PERIOD_5M, TypePeriod::PERIOD_15M, TypePeriod::PERIOD_30M, TypePeriod::PERIOD_HOUR
@@ -127,7 +128,7 @@ void FuturesForecastApp::UpdateStockData()
      std::vector<TypePeriod> target_periods;
 
      // update other k period stock data which has been opened----------------
-
+                       
      for( int i = 0; i < sizeof(type_periods_to_judge)/sizeof(type_periods_to_judge[0]); ++i )
      {
          if( main_window()->MainKlineWall()->k_type() == type_periods_to_judge[i] )
@@ -155,13 +156,13 @@ void FuturesForecastApp::UpdateStockData(int target_date, int cur_hhmm, const st
 {
     //bool is_need_updated = false;
     int hhmm = GetKDataTargetStartTime(type_period, cur_hhmm);
-    
     T_HisDataItemContainer &container = stock_data_man().GetHisDataContainer(ToPeriodType(type_period), code);
     if( !container.empty() )
     {
         auto p_contain = stock_data_man().FindStockData(ToPeriodType(type_period), code, target_date, target_date, hhmm/*, bool is_index*/);
         if( p_contain ) // current time k data exists
         { 
+            local_logger().LogLocal(TSystem::utility::FormatStr("UpdateStockData k ex %d %04d tp:%d", target_date, cur_hhmm, type_period));
             int ret = stock_data_man().UpdateOrAppendLatestItemStockData(ToPeriodType(type_period), nmarket, code, false);
             if( ret == 1 )
                 TraverSetSignale(type_period, container, true);
@@ -173,8 +174,10 @@ void FuturesForecastApp::UpdateStockData(int target_date, int cur_hhmm, const st
             
         }else
         {
+            int pre_k_num = container.size();
             auto date_time = GetKDataTargetDateTime(*exchange_calendar(), type_period, target_date, cur_hhmm, WOKRPLACE_DEFUALT_K_NUM);
             auto p_cur_time_contain = stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket, code, std::get<0>(date_time), target_date, false);
+            local_logger().LogLocal(TSystem::utility::FormatStr("UpdateStockData k app <%d %d %d> tp:%d %d %d", std::get<0>(date_time), std::get<1>(date_time), target_date, type_period, pre_k_num, p_cur_time_contain->size()));
         }
     }
 }
