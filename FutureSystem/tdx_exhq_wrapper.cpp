@@ -162,7 +162,8 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
     }
      
     local_logger_.LogLocal(TSystem::utility::FormatStr("GetHisKBars %d | %d %d | %d %d | %d %d", kbar_type, start_date, end_date, std::get<0>(tuple_index_len), count
-        , items.back().date, items.back().hhmmss));
+        , (items.empty() ? 0 : items.back().date)
+        , (items.empty() ? 0 : items.back().hhmmss)));
 
     return total_get > 0;
      
