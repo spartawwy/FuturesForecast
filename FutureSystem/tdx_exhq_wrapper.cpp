@@ -114,7 +114,7 @@ int TdxExHqWrapper::_ConnectServer()
 // items date is from small to big
 bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nmarket, TypePeriod kbar_type, int start_date, int end_date, std::vector<T_StockHisDataItem> &items)
 {  
-    static auto get_indexs_one_day = [](TypePeriod type_period)->int
+    /*static auto get_indexs_one_day = [](TypePeriod type_period)->int
     { 
         switch( type_period )
         { 
@@ -125,7 +125,7 @@ bool TdxExHqWrapper::GetHisKBars(const std::string &code, bool is_index, int nma
         case TypePeriod::PERIOD_1M: return 555;  
         default: return 1;
         }
-    };
+    };*/
 
     std::vector<T_K_Data> resut;
     const int cst_result_len = 1024 * 1024;

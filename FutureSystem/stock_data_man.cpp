@@ -194,11 +194,74 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
     std::vector<T_StockHisDataItem> &p_data_items = *p_stk_hisdata_item_vector;  
     const int count = p_data_items.size();
     
+    static auto data_compare = [](const T_StockHisDataItem &his_data, std::shared_ptr<T_KlineDataItem> &k_data)
+    {
+        if( his_data.date < k_data->stk_item.date 
+            || (his_data.date == k_data->stk_item.date && his_data.hhmmss < k_data->stk_item.hhmmss) ) 
+            return -1;
+        else if( his_data.date > k_data->stk_item.date 
+            || (his_data.date == k_data->stk_item.date && his_data.hhmmss > k_data->stk_item.hhmmss) ) 
+            return 1;
+        else 
+            return 0;
+    };
     // save data to items_in_container (notice: only can insert to back or front ) ---------------------------
-   
+      
     if( !items_in_container.empty() ) // old data is exists
     {
-#if 1
+        if( data_compare(p_data_items[p_data_items.size()-1], items_in_container.front() ) < 0 )
+        {// if all smaller 
+            for( int k = count; k > 0; --k )
+            {
+                auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k-1]); 
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                items_in_container.push_front(std::move(k_item));
+            }
+        }else if( data_compare(p_data_items[0], items_in_container.back() ) > 0 )
+        {// if all bigger 
+            for( int k = 0; k < count; ++k )
+            { 
+                auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k]); 
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                items_in_container.push_back(std::move(k_item));
+            }
+
+        }else
+        {
+            int s_index = -1; 
+            for( int k = 0; k < count; ++k )
+            {
+                if( data_compare(p_data_items[k], items_in_container.front()) >= 0 ) 
+                {
+                    s_index = k;
+                    break;
+                }
+            }
+            for( int k = s_index; k > 0; --k )
+            {
+                auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k-1]); 
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                items_in_container.push_front(std::move(k_item));
+            }
+
+            int b_index = 99999;
+            for( int k = count; k > 0; --k )
+            {
+                if( data_compare(p_data_items[k-1], items_in_container.back()) <= 0 ) 
+                {
+                    b_index = k - 1;
+                    break;
+                }
+            }
+            for( int k = b_index + 1; k < count; ++k )
+            {
+                auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k]); 
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                items_in_container.push_back(std::move(k_item));
+            }
+        }
+
+#if 0
         if( p_data_items[p_data_items.size()-1].date < items_in_container.back()->stk_item.date 
             || p_data_items[0].date < items_in_container.back()->stk_item.date )
         { 
@@ -229,7 +292,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
                 }
             }
         }
-         
+#endif
     }else // first insert
     {
         for( int k = 0; k < count; ++k )
@@ -239,7 +302,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             items_in_container.push_back(std::move(k_item));
         }
     }
-#endif
+ 
     
     // sort T_KlineDateItems by day from small to bigger
     //std::sort(items_in_container.begin(), items_in_container.end(), dompare);
@@ -287,7 +350,11 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
     
     T_StockHisDataItem  item;
     memset(&item, 0, sizeof(item));
-    tdx_exhq_wrapper_.GetLatestKBar(stk_code, is_index, nmarket, ToTypePeriod(period_type), item);
+    bool result = tdx_exhq_wrapper_.GetLatestKBar(stk_code, is_index, nmarket, ToTypePeriod(period_type), item);
+    // debug --------
+    if( period_type == PeriodType::PERIOD_30M )
+        local_logger_.LogLocal(TSystem::utility::FormatStr("dbg 30m %d newest:%.2f", result, item.close_price));
+    //end------------
     if( items_in_container.back()->stk_item.date <= item.date )
     {
         if( items_in_container.back()->stk_item.date == item.date )
@@ -297,7 +364,7 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
                 memcpy( std::addressof(items_in_container.back()->stk_item), &item, sizeof(item) );
                 ret = 1;
             }
-            else if( items_in_container.back()->stk_item.hhmmss < item.hhmmss )
+            else if( items_in_container.back()->stk_item.hhmmss < item.hhmmss ) // append
             {
                 auto k_date_item = std::make_shared<T_KlineDataItem>(item);
                 k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
@@ -311,7 +378,7 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
                 return 0;
             }
 
-        }else 
+        }else // append
         {
             auto k_date_item = std::make_shared<T_KlineDataItem>(item);
             k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));

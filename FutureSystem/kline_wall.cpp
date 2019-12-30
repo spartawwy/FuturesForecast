@@ -397,15 +397,15 @@ std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, Typ
     case TypePeriod::PERIOD_HOUR:  // ndchk 
         {
             //10:30 13:00 14:00 15:00
-            int tp_array[] = { 1030, 1300, 1400, 1500 };
+            int tp_array[] = {30, 1030, 1300, 1400, 1500};
             hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
             break;
         }
     case TypePeriod::PERIOD_30M:
         {
-            int tp_array[] = { 1000, 1030, 1100, 1130, 1330, 1400, 1430, 1500 };
+            int tp_array[] = {30, 100, 130, 200, 230, 930, 1000, 1030, 1100, 1130, 1330, 1400, 1430, 1500, 2130, 2200, 2230, 2300, 2330, 2359};
             hhmm = get_hhmm(tmp_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
-            break;
+            break; 
         }
     case TypePeriod::PERIOD_15M:
         {
