@@ -654,7 +654,7 @@ void TraverseSetUpwardFractal(T_HisDataItemContainer &kline_data_items, int back
 
         if( n_fractal_ahead > 0 && n_fractal_follow > 0 )
         {
-            qDebug() << __FUNCTION__ << " set btm " << kline_data_items[index]->stk_item.date << " : " << kline_data_items[index]->stk_item.hhmmss << "\n";
+            //qDebug() << __FUNCTION__ << " set btm " << kline_data_items[index]->stk_item.date << " : " << kline_data_items[index]->stk_item.hhmmss << "\n";
             kline_data_items[index]->type |= int(FractalType::BTM_AXIS_T_3);
             if( n_fractal_ahead > 1 && n_fractal_follow > 1 )
             {

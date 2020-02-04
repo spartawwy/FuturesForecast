@@ -391,7 +391,8 @@ do
                         year += 31;
                     ++index;
                     int mon = boost::lexical_cast<int>(match_result[index]);
-                    mon -= 18;
+                    //qDebug() << mon << "\n";
+                    mon = 20 - mon;
                     ++index;
                     int day = boost::lexical_cast<int>(match_result[index]);
                     day = 48 - day;
