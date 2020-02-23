@@ -34,7 +34,10 @@ TitleBar::TitleBar(QWidget *parent)
     m_pTitleLabel = new QLabel(this);
     m_pTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_pTitleLabel->setObjectName("whiteLabel");
-    m_pTitleLabel->setText("FuturesForcast.sparta.ver.1.0"); // titile 
+    QPalette pa;
+    pa.setColor(QPalette::WindowText, Qt::white);
+    m_pTitleLabel->setPalette(pa);
+    m_pTitleLabel->setText( QString::fromLocal8Bit("FuturesForcast.sparta.ver.1.0  ...顺势  及时止损 持有...有把握再下单...及时平无把握单...冷静 客观") ); // titile 
 
     m_psystemButton = new QPushButton("system", this);
     m_psystemButton->setFixedSize(50, 22);
