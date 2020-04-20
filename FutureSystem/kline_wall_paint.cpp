@@ -140,8 +140,8 @@ void KLineWall::Draw2pDownForcast(QPainter &painter, const int mm_h, double item
             auto item_b = GetKLineDataItemByDate(data_2pforcastdown.date_b, data_2pforcastdown.hhmm_b);
             if( item_a && item_a->kline_posdata(wall_index_).date != 0 && item_b && item_b->kline_posdata(wall_index_).date != 0 )
             {
-                if( abs(item_a->kline_posdata(wall_index_).top.y()) > abs(item_b->kline_posdata(wall_index_).top.y()) )  // y is negative
-                {  
+                //if( abs(item_a->kline_posdata(wall_index_).top.y()) > abs(item_b->kline_posdata(wall_index_).top.y()) )  // y is negative
+                //{  
                     pen.setStyle(Qt::SolidLine); 
                     painter.setPen(pen);  
                     data_2pforcastdown.point_a = item_a->kline_posdata(wall_index_).top;
@@ -170,11 +170,11 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y2),
 
                     painter.drawLine(QPointF(h_line_left, y3), QPointF(x_b + 20*item_w, y3));
 fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y3), utility::FormatStr("C3: %.2f", data_2pforcastdown.c3)));            
-                }else 
+                /*}else 
                 {
                     painter.drawLine(item_a->kline_posdata(wall_index_).bottom, item_b->kline_posdata(wall_index_).top);
 
-                }
+                }*/
             }
         }  
 
@@ -212,8 +212,8 @@ void KLineWall::Draw2pUpForcast(QPainter &painter, const int mm_h, double item_w
         auto item_b = GetKLineDataItemByDate(data_2pforcast.date_b, data_2pforcast.hhmm_b);
         if( item_a && item_a->kline_posdata(wall_index_).date != 0 && item_b && item_b->kline_posdata(wall_index_).date != 0 )
         {
-            if( abs(item_a->kline_posdata(wall_index_).top.y()) < abs(item_b->kline_posdata(wall_index_).top.y()) )  // y is negative
-            {  
+            //if( abs(item_a->kline_posdata(wall_index_).top.y()) < abs(item_b->kline_posdata(wall_index_).top.y()) )  // y is negative
+            //{  
                 pen.setStyle(Qt::SolidLine); 
                 painter.setPen(pen);  
                 data_2pforcast.point_a = item_a->kline_posdata(wall_index_).bottom;
@@ -240,10 +240,10 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y2),
 
                 painter.drawLine(QPointF(h_line_left, y3), QPointF(x_b + 20*item_w, y3));
 fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y3),  utility::FormatStr("C3: %.2f", data_2pforcast.c3)));           
-            }else 
+            /*}else 
             {
                 painter.drawLine(item_a->kline_posdata(wall_index_).top, item_b->kline_posdata(wall_index_).bottom);
-            }
+            }*/
         }
     }
 
@@ -673,8 +673,8 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             bool is_down = true;
             if( forcast_man_.Find2pForcast(stock_code_, k_type_, is_down, *item_a, *item_b) )
                 return ResetDrawState(draw_action_);  
-            //if( item_a->stk_item.high_price > item_b->stk_item.high_price )
-            //{
+            if( item_a->stk_item.high_price > item_b->stk_item.low_price )
+            {
                 T_Data2pForcast data_2pdown_fcst(is_down);
                 data_2pdown_fcst.stock_code = stock_code_;
                 data_2pdown_fcst.date_a = item_a->stk_item.date; 
@@ -687,8 +687,10 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
                 data_2pdown_fcst.c2 = std::get<1>(c1_c2_c3);
                 data_2pdown_fcst.c3 = std::get<2>(c1_c2_c3);
                 forcast_man_.Append(k_type_, stock_code_, is_down, data_2pdown_fcst);
-            //}else
-            //    QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("下降反弹预测,B点最高价不能大于等于A点最高价!")); 
+            }else
+            {
+                //QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("下降反弹预测,B点最高价不能大于等于A点最高价!")); 
+            }
             return ResetDrawState(draw_action_); 
 
         }else if( draw_action_ == DrawAction::DRAWING_FOR_2PUP_C ) 
@@ -696,8 +698,8 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             bool is_down = false;
             if( forcast_man_.Find2pForcast(stock_code_, k_type_, is_down, *item_a, *item_b) )
                 return ResetDrawState(draw_action_);  
-            //if( item_a->stk_item.high_price < item_b->stk_item.high_price )
-            //{
+            if( item_a->stk_item.low_price < item_b->stk_item.high_price )
+            {
                 T_Data2pForcast data_2pup_fcst(is_down);
                 data_2pup_fcst.stock_code = stock_code_; 
                 data_2pup_fcst.date_a = item_a->stk_item.date; 
@@ -710,15 +712,17 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
                 data_2pup_fcst.c2 = std::get<1>(c1_c2_c3);
                 data_2pup_fcst.c3 = std::get<2>(c1_c2_c3);
                 forcast_man_.Append(k_type_, stock_code_, is_down, data_2pup_fcst);
-            //}else
-            //    QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("上升反弹预测,B点最高价不能小于等于A点最高价!")); 
+            }else
+            {
+                //QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("上升反弹预测,B点最高价不能小于等于A点最高价!")); 
+            }
             return ResetDrawState(draw_action_);  
 
         }else if( draw_action_ == DrawAction::DRAWING_FOR_3PDOWN_D )
         { 
             if( forcast_man_.Find3pForcast(stock_code_, k_type_, true, *item_a, *item_b) ) // already exist
                 return ResetDrawState(draw_action_);  
-            if( item_a->stk_item.high_price > item_b->stk_item.high_price )
+            if( !(item_a->stk_item.high_price < item_b->stk_item.high_price) )
             {
                 drawing_line_B_ = item_b->kline_posdata(wall_index_).bottom;
                 append_3pforcast_data(this, true, *item_a, *item_b);
@@ -726,6 +730,7 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             }else
             {
                 //QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("下降3点预测,B点最高价不能大于等于A点最高价!")); 
+                return ResetDrawState(draw_action_);  
             }
 
         }else if( draw_action_ == DrawAction::DRAWING_FOR_3PUP_D )
@@ -733,15 +738,16 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             if( forcast_man_.Find3pForcast(stock_code_, k_type_, false, *item_a, *item_b) ) // already exist
                 return ResetDrawState(draw_action_);  
 
-            //if( item_a->stk_item.high_price < item_b->stk_item.high_price )
-            //{ 
+            if( !(item_a->stk_item.low_price > item_b->stk_item.low_price) )
+            { 
                 drawing_line_B_ = item_b->kline_posdata(wall_index_).top; 
                 append_3pforcast_data(this, false, *item_a, *item_b);
                 return;
-            //}else
-            //{
+            }else
+            {
                 //QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("上升3点预测,B点最高价不能小于等于A点最高价!")); 
-            //}
+                return ResetDrawState(draw_action_);  
+            }
         }
     } // if( drawing_line_B_ == CST_MAGIC_POINT )
     else if( drawing_line_C_ == CST_MAGIC_POINT ) // if to generate point C
