@@ -107,6 +107,7 @@ signals:
 public slots:
     void slotOpenRelatedSubKwall(bool);
     void slotUpdateKwall();
+    void slotDrawAlarmLine();
 
 protected:
 
@@ -256,6 +257,7 @@ private:
      
     StatisticDlg  statistic_dlg_;
      
+    bool draw_important_line_flag_;
 
     friend class ZhibiaoWindow;
     friend class VolZhibiaoWin;

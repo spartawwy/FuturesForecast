@@ -74,6 +74,7 @@ KLineWall::KLineWall(FuturesForecastApp *app, QWidget *parent, int index, TypePe
     , is_draw_section_(false)
     , right_clicked_k_date_(0)
     , right_clicked_k_hhmm_(0)
+    , draw_important_line_flag_(false)
     
 {
     ui.setupUi(this);
@@ -111,9 +112,16 @@ bool KLineWall::Init()
     auto action_pop_related_kwall = new QAction(this);
     action_pop_related_kwall->setText(QStringLiteral("联动时段"));
     ret = QObject::connect(action_pop_related_kwall, SIGNAL(triggered(bool)), this, SLOT(slotOpenRelatedSubKwall(bool)));
+    assert(ret);
     k_wall_menu_sub_->addAction(action_pop_related_kwall);
 
     ret = QObject::connect(this, SIGNAL(sigUpdateKwall()), this, SLOT(slotUpdateKwall()));
+
+    auto action_draw_alarm_line = new QAction(this);
+    action_draw_alarm_line->setText(QStringLiteral("画告警线"));
+    ret = QObject::connect(action_draw_alarm_line, SIGNAL(triggered(bool)), this, SLOT(slotDrawAlarmLine()));
+    assert(ret);
+    k_wall_menu_sub_->addAction(action_draw_alarm_line);
 
     return ResetStock(DEFAULT_CODE, k_type_, false, MARKET_SH_FUTURES); // 600196  000301
 
@@ -1030,8 +1038,8 @@ void KLineWall::paintEvent(QPaintEvent*)
             brush.setColor(QColor(255,0,0));
         }else
         { 
-            pen.setColor(QColor(0,255,0)); 
-            brush.setColor(QColor(0,255,0));
+            pen.setColor(Qt::darkGreen); 
+            brush.setColor(Qt::darkGreen);
         }
         painter.setPen(pen);  
         painter.setBrush(brush);   
@@ -1632,6 +1640,12 @@ void KLineWall::slotOpenRelatedSubKwall(bool)
         main_win_->SubKlineWall()->setVisible(true);
     }
     main_win_->tool_bar()->SetShowSubKwallBtn(true);
+}
+
+void KLineWall::slotDrawAlarmLine()
+{
+    ResetDrawState(draw_action_);
+    draw_important_line_flag_ = true;
 }
 
 void KLineWall::slotUpdateKwall()
