@@ -67,6 +67,9 @@ KLineWall::KLineWall(FuturesForecastApp *app, QWidget *parent, int index, TypePe
     , mm_move_flag_(false)
     , move_start_point_(0, 0)
     , area_select_flag_(false)
+    , k_wall_menu_(nullptr)
+    , k_wall_area_menu_(nullptr)
+    , k_wall_point_menu_(nullptr)
     , forcast_man_(index)
     , cur_select_forcast_(nullptr)
     , is_draw_bi_(false)
@@ -108,20 +111,21 @@ bool KLineWall::Init()
     ret = QObject::connect(action_zoomin_select, SIGNAL(triggered(bool)), this, SLOT(slotZoominSelect(bool)));
     k_wall_menu_->addAction(action_zoomin_select);
 
-    k_wall_menu_sub_ = new QMenu(this);
+    k_wall_area_menu_ = new QMenu(this);
     auto action_pop_related_kwall = new QAction(this);
     action_pop_related_kwall->setText(QStringLiteral("联动时段"));
     ret = QObject::connect(action_pop_related_kwall, SIGNAL(triggered(bool)), this, SLOT(slotOpenRelatedSubKwall(bool)));
     assert(ret);
-    k_wall_menu_sub_->addAction(action_pop_related_kwall);
+    k_wall_area_menu_->addAction(action_pop_related_kwall);
 
     ret = QObject::connect(this, SIGNAL(sigUpdateKwall()), this, SLOT(slotUpdateKwall()));
-
+    //------
+    k_wall_point_menu_ = new QMenu(this);
     auto action_draw_alarm_line = new QAction(this);
     action_draw_alarm_line->setText(QStringLiteral("画告警线"));
     ret = QObject::connect(action_draw_alarm_line, SIGNAL(triggered(bool)), this, SLOT(slotDrawAlarmLine()));
     assert(ret);
-    k_wall_menu_sub_->addAction(action_draw_alarm_line);
+    k_wall_point_menu_->addAction(action_draw_alarm_line);
 
     return ResetStock(DEFAULT_CODE, k_type_, false, MARKET_SH_FUTURES); // 600196  000301
 
@@ -622,14 +626,31 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
         data_3p.hhmm_b = item_b.stk_item.hhmmss; 
         kwall->forcast_man_.Append(kwall->k_type_, kwall->stock_code_, is_down, data_3p);
     };
-    //qDebug() << "paintEvent QCursor::pos  x:" << QCursor::pos().x() << " y: "<< QCursor::pos().y() << "\n"; 
+    //qDebug() << " QCursor::pos  x:" << QCursor::pos().x() << " y: "<< QCursor::pos().y() << "\n"; 
 #ifdef STK_INPUT_KWALL
 	if( stock_input_dlg_.isVisible() )
 		stock_input_dlg_.hide();
 #endif
     if( draw_action_ == DrawAction::NO_ACTION )
     {
-        if( event->buttons() & Qt::LeftButton )
+        if( draw_important_line_flag_ )
+        {
+            if( event->buttons() & Qt::RightButton )
+            {
+                draw_important_line_flag_ = false;
+                return;
+            } 
+            auto pos_from_global = mapFromGlobal(QCursor::pos());
+            //bool is_equal = event->pos() == QCursor::pos();
+            const int k_mm_h = Calculate_k_mm_h();
+            const float price_per_len = (highestMaxPrice_ - lowestMinPrice_) / float(k_mm_h);
+            double cur_point_price = lowestMinPrice_ + price_per_len * (h_axis_trans_in_paint_k_ - pos_from_global.y());
+            cur_point_price = cur_point_price;
+            
+            // todo: add price to ...
+
+            draw_important_line_flag_ = false;
+        }else if( event->buttons() & Qt::LeftButton )
         {
             mm_move_flag_ = true;
             move_start_point_ = event->pos();
@@ -638,9 +659,12 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
         {
             area_select_flag_ = true;
             move_start_point_ = event->pos();
-        }
+        } 
+
         return;
-    }else if( event->buttons() & Qt::RightButton )
+    }
+    // ---------------------DrawAction related ----------------------------
+    if( event->buttons() & Qt::RightButton )
     {
         if( draw_action_ == DrawAction::DRAWING_FOR_3PDOWN_D || draw_action_ == DrawAction::DRAWING_FOR_3PUP_D )
         { 
@@ -832,41 +856,48 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
     }else if( area_select_flag_ )
     {
         area_select_flag_ = false;
+        //qDebug() << "mouseReleaseEvent move_start_point_:" << move_start_point_ << " e pos:" << e->pos();
         if( move_start_point_ != e->pos() )
         {  
             area_sel_mouse_release_point_ = e->pos();
             k_wall_menu_->popup(QCursor::pos());
              
-        }else if( wall_index_ == (int)WallIndex::MAIN )
-        {  
-            const double x_pos = e->localPos().x();
-            right_clicked_k_date_ = 0;
-            right_clicked_k_hhmm_ = 0;
-            int j = 0;
-            for( auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
-                iter != p_hisdata_container_->rend() && j < k_num_; 
-                ++iter, ++j)
-            {  
-                T_KlinePosData &pos_data = iter->get()->kline_posdata(wall_index_);
-                if( pos_data.x_left == CST_MAGIC_POINT.x() )
-                    continue;
-                //if( pos_data.x_left > 0.0 )
-                //    qDebug() << " " << pos_data.x_left << " " << x_pos << " " << pos_data.x_right << "\n";
-                if( pos_data.x_left <= x_pos && x_pos <= pos_data.x_right )
-                {
-                    right_clicked_k_date_ = iter->get()->stk_item.date;
-                    right_clicked_k_hhmm_ = iter->get()->stk_item.hhmmss;
-                    break;
-                } 
-            }
-            if( right_clicked_k_date_ != 0 )
-                k_wall_menu_sub_->popup(QCursor::pos());
+        }else 
+        {
+            //if( e->buttons() & Qt::RightButton ) // button has already been released
+                k_wall_point_menu_->popup(QCursor::pos()); 
         }
-        
+        //else if( wall_index_ == (int)WallIndex::MAIN )
+        //{  
+        //    const double x_pos = e->localPos().x();
+        //    right_clicked_k_date_ = 0;
+        //    right_clicked_k_hhmm_ = 0;
+        //    int j = 0;
+        //    for( auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
+        //        iter != p_hisdata_container_->rend() && j < k_num_; 
+        //        ++iter, ++j)
+        //    {  
+        //        T_KlinePosData &pos_data = iter->get()->kline_posdata(wall_index_);
+        //        if( pos_data.x_left == CST_MAGIC_POINT.x() )
+        //            continue;
+        //        //if( pos_data.x_left > 0.0 )
+        //        //    qDebug() << " " << pos_data.x_left << " " << x_pos << " " << pos_data.x_right << "\n";
+        //        if( pos_data.x_left <= x_pos && x_pos <= pos_data.x_right )
+        //        {
+        //            right_clicked_k_date_ = iter->get()->stk_item.date;
+        //            right_clicked_k_hhmm_ = iter->get()->stk_item.hhmmss;
+        //            break;
+        //        } 
+        //    }
+        //    if( right_clicked_k_date_ != 0 )
+        //        k_wall_area_menu_->popup(QCursor::pos());
+        //}
+     
     }else
-    {
+    { 
         if( cur_select_forcast_ )
         {
+            //assert(e->buttons() & Qt::LeftButton); // button has already been released
             if( main_win_->is_train_mode() )
                 main_win_->MinimizeTrainDlg();
 
@@ -1644,7 +1675,8 @@ void KLineWall::slotOpenRelatedSubKwall(bool)
 
 void KLineWall::slotDrawAlarmLine()
 {
-    ResetDrawState(draw_action_);
+    if( draw_action_ != DrawAction::NO_ACTION )
+        ResetDrawState(draw_action_);
     draw_important_line_flag_ = true;
 }
 

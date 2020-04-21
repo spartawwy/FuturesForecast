@@ -241,7 +241,8 @@ private:
     QPointF area_sel_mouse_release_point_;
 
     QMenu * k_wall_menu_;
-    QMenu * k_wall_menu_sub_;
+    QMenu * k_wall_area_menu_;
+    QMenu * k_wall_point_menu_;
     ForcastMan  forcast_man_;
     T_DataForcast *cur_select_forcast_;
 
