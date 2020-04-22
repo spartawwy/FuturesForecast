@@ -463,6 +463,20 @@ void MainWindow::updateDateTime()
 #endif
 }
   
+void MainWindow::AddAlarmLinePrice(double price)
+{
+    auto iter = alarm_line_prices_.find(price);
+    if( iter == alarm_line_prices_.end() )
+        alarm_line_prices_.insert(std::make_pair(price, false));
+}
+
+void MainWindow::RemoveAlarmLinePrice(double price)
+{
+    auto iter = alarm_line_prices_.find(price);
+    if( iter != alarm_line_prices_.end() )
+        alarm_line_prices_.erase(iter);
+}
+
 void MainWindow::onMainKwallCycleChange(int /*index*/)
 {
     assert(kline_wall_main);

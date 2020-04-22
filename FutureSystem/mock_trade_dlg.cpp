@@ -413,12 +413,12 @@ void MockTradeDlg::UpDateStopProfitOrLossIfNecessary(int row_index, bool is_prof
         double *p_stop_price = is_profit ? &position_atom->stop_profit_price : &position_atom->stop_loss_price;
         char buf0[128] = {0};
         if( is_profit ) 
-            sprintf(buf0, "调整止赢价为:%.1f ", position_atom->stop_profit_price);
+             sprintf_s(buf0, sizeof(buf0), "调整止赢价为:%.1f ", position_atom->stop_profit_price);
         else
-            sprintf(buf0, "调整止损价为:%.1f ", position_atom->stop_loss_price);
+            sprintf_s(buf0, sizeof(buf0), "调整止损价为:%.1f ", position_atom->stop_loss_price);
 
         char buf[1024] = {0};
-        sprintf(buf, "任务:%d %s", trade_id, buf0);
+        sprintf_s(buf, sizeof(buf), "任务:%d %s", trade_id, buf0);
 
         QString log_str = QString::fromLocal8Bit(buf);
         if( !Equal(*p_stop_price, stop_price) )

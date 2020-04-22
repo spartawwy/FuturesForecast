@@ -74,7 +74,7 @@ public:
     int HeadHeight() { return int(height() * head_h_percent_); }
     int BottomHeight() { return int(height() * bottom_h_percent_); }
      
-    void DoIfForcastLineNearbyCursor(QMouseEvent &e);
+    bool DoIfForcastLineNearbyCursor(QMouseEvent &e);
 
     void ShowDurationKlines(int date, int hhmm);
 
@@ -258,7 +258,8 @@ private:
      
     StatisticDlg  statistic_dlg_;
      
-    bool draw_important_line_flag_;
+    bool draw_alarm_line_flag_;
+    double alarm_line_price_my_del_;
 
     friend class ZhibiaoWindow;
     friend class VolZhibiaoWin;

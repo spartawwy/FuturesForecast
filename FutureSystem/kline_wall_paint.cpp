@@ -77,7 +77,8 @@ KLineWall::KLineWall(FuturesForecastApp *app, QWidget *parent, int index, TypePe
     , is_draw_section_(false)
     , right_clicked_k_date_(0)
     , right_clicked_k_hhmm_(0)
-    , draw_important_line_flag_(false)
+    , draw_alarm_line_flag_(false)
+    , alarm_line_price_my_del_(MAGIC_STOP_PRICE)
     
 {
     ui.setupUi(this);
@@ -633,11 +634,11 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
 #endif
     if( draw_action_ == DrawAction::NO_ACTION )
     {
-        if( draw_important_line_flag_ )
+        if( draw_alarm_line_flag_ )
         {
             if( event->buttons() & Qt::RightButton )
             {
-                draw_important_line_flag_ = false;
+                draw_alarm_line_flag_ = false;
                 return;
             } 
             auto pos_from_global = mapFromGlobal(QCursor::pos());
@@ -645,17 +646,18 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
             const int k_mm_h = Calculate_k_mm_h();
             const float price_per_len = (highestMaxPrice_ - lowestMinPrice_) / float(k_mm_h);
             double cur_point_price = lowestMinPrice_ + price_per_len * (h_axis_trans_in_paint_k_ - pos_from_global.y());
-            cur_point_price = cur_point_price;
+            cur_point_price = ProcDecimal(cur_point_price, 1);
             
-            // todo: add price to ...
+            // add price to alarm line price
+            main_win_->AddAlarmLinePrice(cur_point_price);
+            draw_alarm_line_flag_ = false;
 
-            draw_important_line_flag_ = false;
         }else if( event->buttons() & Qt::LeftButton )
         {
             mm_move_flag_ = true;
             move_start_point_ = event->pos();
             pre_k_rend_index_ = k_rend_index_;
-        }else if( (event->buttons() & Qt::RightButton) && !cur_select_forcast_ )
+        }else if( (event->buttons() & Qt::RightButton) && !cur_select_forcast_ && alarm_line_price_my_del_ < 0.0 )
         {
             area_select_flag_ = true;
             move_start_point_ = event->pos();
@@ -909,6 +911,22 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
                 cur_select_forcast_->Clear();
                 this->Set_Cursor(Qt::CrossCursor);
             }
+        }else if( alarm_line_price_my_del_ > 0.0 )
+        {
+            if( main_win_->is_train_mode() )
+                main_win_->MinimizeTrainDlg();
+
+            if( main_win_->is_mock_trade() )
+                main_win_->MinimizeMockTradeDlg();
+
+            auto ret = QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("是否删除该告警线?"), QMessageBox::Yes, QMessageBox::No);
+            if( ret == QMessageBox::Yes )
+            {
+                main_win_->RemoveAlarmLinePrice(alarm_line_price_my_del_);
+                 
+                this->Set_Cursor(Qt::CrossCursor);
+            }
+            alarm_line_price_my_del_ = MAGIC_STOP_PRICE;
         }
     }
 }
@@ -1020,7 +1038,7 @@ void KLineWall::paintEvent(QPaintEvent*)
      
     // vertical' price scale ------------
     
-    pen.setColor(Qt::red);
+    pen.setColor(Qt::darkGray);
     pen.setStyle(Qt::DotLine); // ............
     painter.setPen(pen); 
     const float price_per_len = (highestMaxPrice_ - lowestMinPrice_) / float(k_mm_h);
@@ -1030,7 +1048,17 @@ void KLineWall::paintEvent(QPaintEvent*)
         painter.drawText(mm_w - right_w_, pos_y, QString("%1").arg(lowestMinPrice_ + (price_per_len * scale_part_h * i) ));
         painter.drawLine(0, pos_y, mm_w - right_w_, pos_y);
     }
-        
+    // alarm price lines ----------------    
+    pen.setColor(Qt::red);
+    pen.setStyle(Qt::DashLine);
+    painter.setPen(pen);
+    std::for_each(std::begin(main_win_->alarm_line_prices()), std::end(main_win_->alarm_line_prices()), [this, mm_w, k_mm_h, scale_part_h, &painter](std::unordered_map<double, bool>::const_reference in)
+    { 
+        double pos_y = get_price_y(in.first, k_mm_h);
+        painter.drawText((mm_w - 2*right_w_)/2, pos_y, QString("%1").arg(in.first));
+        painter.drawLine(0, pos_y, mm_w - right_w_, pos_y);
+    });
+
     //draw k_num_ k line -------------------------------------
 	if( p_hisdata_container_ && !p_hisdata_container_->empty() )
 	{   
@@ -1308,18 +1336,36 @@ void KLineWall::mouseMoveEvent(QMouseEvent *e)
     else if( draw_action_ != DrawAction::NO_ACTION )
     {
         //qDebug() << " mouseMoveEvent DRAWING_FOR_2PDOWN_C " << "\n";
-        cur_mouse_point_ = e->pos();
+        cur_mouse_point_ = e->pos(); // only for debug
     }else if( area_select_flag_ )
     {
          
     }else
     {
-        DoIfForcastLineNearbyCursor(*e);
+        bool is_near_by = DoIfForcastLineNearbyCursor(*e);
+        if( !is_near_by )
+        {
+            int k_mm_h = Calculate_k_mm_h();
+            const int transed_y = e->y() - h_axis_trans_in_paint_k_;
+         
+            alarm_line_price_my_del_ = MAGIC_STOP_PRICE;
+            auto iter = main_win_->alarm_line_prices().begin();
+            for( ; iter != main_win_->alarm_line_prices().end(); ++iter )
+            {
+                double pos_y = get_price_y(iter->first, k_mm_h);
+                if( fabs(pos_y - transed_y) < 4 )
+                {
+                    alarm_line_price_my_del_ = iter->first; 
+                    this->Set_Cursor(cst_cur_del_forcst_line);
+                    break;
+                }
+            } 
+        }
     }
     update();
 }
 
-void KLineWall::DoIfForcastLineNearbyCursor(QMouseEvent &e)
+bool KLineWall::DoIfForcastLineNearbyCursor(QMouseEvent &e)
 {
     static auto is_nearby_line = [](QPointF &beg_point, QPointF &end_point, QPointF &point) -> bool
     { 
@@ -1401,7 +1447,7 @@ void KLineWall::DoIfForcastLineNearbyCursor(QMouseEvent &e)
         this->Set_Cursor(cst_cur_del_forcst_line);
     else
         this->Set_Cursor(Qt::CrossCursor);
-
+    return ret;
 }
 
 void KLineWall::keyPressEvent(QKeyEvent *e)
@@ -1677,7 +1723,7 @@ void KLineWall::slotDrawAlarmLine()
 {
     if( draw_action_ != DrawAction::NO_ACTION )
         ResetDrawState(draw_action_);
-    draw_important_line_flag_ = true;
+    draw_alarm_line_flag_ = true;
 }
 
 void KLineWall::slotUpdateKwall()

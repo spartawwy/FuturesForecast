@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QtWidgets/QTableWidgetItem>
  
+#include <unordered_map>
+
 #include "stockinput_dlg.h"
 
 //#define  USE_TITLE_VCM
@@ -87,6 +89,10 @@ public:
     double cur_quote_price() { return cur_quote_price_; }
     void cur_quote_price(double val) { cur_quote_price_ = val; }
 
+    void AddAlarmLinePrice(double price);
+    void RemoveAlarmLinePrice(double price);
+    std::unordered_map<double, bool> & alarm_line_prices() { return alarm_line_prices_; }
+
 signals:
 
     void sigQuoteData(double, double, double, int, int, int);
@@ -132,6 +138,9 @@ private:
     bool show_sig_;
 
     double cur_quote_price_;
+
+    //(price, bool)
+    std::unordered_map<double, bool>  alarm_line_prices_;
 
 private slots:
 
