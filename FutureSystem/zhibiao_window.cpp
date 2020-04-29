@@ -16,10 +16,10 @@ void VolZhibiaoWin::DrawWindow(QPainter &painter, int mm_w)
     const int right_end = double(mm_w -  parent_->empty_right_w_ -  parent_->right_w_) - k_bar_w;
     const double largest_vol = parent_->GetCurWinKLargetstVol();
     
-    QPen red_pen; red_pen.setColor(Qt::red); red_pen.setStyle(Qt::SolidLine); red_pen.setWidth(1);
-    QPen green_pen; green_pen.setColor(Qt::green); green_pen.setStyle(Qt::SolidLine); green_pen.setWidth(1);  
-    QBrush red_brush(Qt::red);  
-    QBrush green_brush(Qt::green);  
+    QPen red_pen; red_pen.setColor(POSITIVE_K_COLOR); red_pen.setStyle(Qt::SolidLine); red_pen.setWidth(1);
+    QPen green_pen; green_pen.setColor(NEGATIVE_K_COLOR); green_pen.setStyle(Qt::SolidLine); green_pen.setWidth(1);  
+    QBrush red_brush(POSITIVE_K_COLOR);  
+    QBrush green_brush(NEGATIVE_K_COLOR);  
     //------------------  
     int k = parent_->k_num_;
     for( auto iter = parent_->p_hisdata_container_->rbegin() + parent_->k_rend_index_;
@@ -68,7 +68,7 @@ void MomentumZhibiaoWin::DrawWindow(QPainter &painter, int mm_w)
     painter.drawLine(0, 0, right_end, 0);
 
     QPen curve_pen;
-    curve_pen.setColor(Qt::white);
+    curve_pen.setColor(CURVE_PEN_COLOR);
     curve_pen.setWidth(line_size*2);
     curve_pen.setStyle(Qt::SolidLine);
 

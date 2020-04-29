@@ -64,6 +64,9 @@ private:
      
 };
 
+
+int FindKRendIndexInHighPeriodContain(TypePeriod tp_period, T_HisDataItemContainer &p_hisdata_container, ExchangeCalendar &calender, int date_val, int hhmm);
+
 void Delay(__int64 mseconds);
 
 #endif // STK_FORECAST_APP_SDF8533_H_

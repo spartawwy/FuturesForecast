@@ -20,6 +20,7 @@
 #include "futures_forecast_app.h"
 #include "exchange_calendar.h"
   
+
 #define DEFAULT_CODE  "SC2006"
 
 static const int cst_default_year = 2017;
@@ -191,7 +192,7 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y3),
             }
         }  
 
-        pen.setColor(Qt::white);
+        pen.setColor(PRICE_FONT_COLOR);
         pen.setStyle(Qt::SolidLine); 
         painter.setPen(pen);
         //char buf[32] = {0};
@@ -260,7 +261,7 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y3),
         }
     }
 
-    pen.setColor(Qt::white);
+    pen.setColor(PRICE_FONT_COLOR);
     pen.setStyle(Qt::SolidLine); 
     painter.setPen(pen); 
     std::for_each( std::begin(fronts_to_draw), std::end(fronts_to_draw), [&painter, this](T_TuplePointStr& in)
@@ -364,7 +365,7 @@ void KLineWall::_Draw3pForcast(QPainter &painter, const int mm_h, double item_w,
         }
 
     }// for
-    pen.setColor(Qt::white);
+    pen.setColor(PRICE_FONT_COLOR);
     pen.setStyle(Qt::SolidLine); 
     painter.setPen(pen); 
     std::for_each( std::begin(fronts_to_draw), std::end(fronts_to_draw), [&painter, this](T_TuplePointStr& in)
@@ -931,6 +932,7 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
     }
 }
 
+
 void KLineWall::paintEvent(QPaintEvent*)
 {
     static auto IsAreaShapeChange = [](KLineWall *kwall, int w, int h)->bool
@@ -946,10 +948,13 @@ void KLineWall::paintEvent(QPaintEvent*)
     std::lock_guard<std::mutex> locker(painting_mutex_);
 
     QPainter painter(this); 
+    painter.setBrush(BACK_GROUND_COLOR); //(QColor(0x87, 0xCE, 0xFA));
+    painter.drawRect(this->rect());
+
     auto old_font = painter.font();
     QPen red_pen; red_pen.setColor(Qt::red); red_pen.setStyle(Qt::SolidLine); red_pen.setWidth(1);
     QPen green_pen; green_pen.setColor(Qt::green); green_pen.setStyle(Qt::SolidLine); green_pen.setWidth(1);
-    QBrush red_brush(Qt::red);  
+    QBrush red_brush(POSITIVE_K_COLOR);  
     QBrush green_brush(Qt::green);  
     QPen border_pen(red_pen); border_pen.setWidth(2);
     QPen lit_border_pen(red_pen); lit_border_pen.setWidth(1);
@@ -1020,7 +1025,7 @@ void KLineWall::paintEvent(QPaintEvent*)
 
     // draw stock code     -------------
     QPen pen; 
-    pen.setColor(Qt::white);
+    pen.setColor(PRICE_FONT_COLOR);
     painter.setPen(pen);
     
     QFont font;  
@@ -1093,12 +1098,12 @@ void KLineWall::paintEvent(QPaintEvent*)
         pen.setStyle(Qt::SolidLine);
         if( (*iter)->stk_item.open_price <= (*iter)->stk_item.close_price )
         { 
-            pen.setColor(QColor(255,0,0));
-            brush.setColor(QColor(255,0,0));
+            pen.setColor(POSITIVE_K_COLOR);
+            brush.setColor(POSITIVE_K_COLOR);
         }else
         { 
-            pen.setColor(Qt::darkGreen); 
-            brush.setColor(Qt::darkGreen);
+            pen.setColor(NEGATIVE_K_COLOR); 
+            brush.setColor(NEGATIVE_K_COLOR);
         }
         painter.setPen(pen);  
         painter.setBrush(brush);   
@@ -1240,7 +1245,7 @@ void KLineWall::paintEvent(QPaintEvent*)
      
     // draw left top k bar detail ------
     painter.translate(0, -1 * trans_y_totoal); // translate axis back
-    pen.setColor(Qt::white);
+    pen.setColor(PRICE_FONT_COLOR);
     pen.setStyle(Qt::SolidLine); 
     painter.setPen(pen);  
     font.setPointSizeF(mm_w / 50);
@@ -1915,7 +1920,7 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
                 TraverseAjustFractal(container, backward_size);
             }
             if( ret == 1 )
-                TraverSetSignale(k_type_, container, true);
+                TraverSetSignale(k_type_, container, true); // only set tail
             else if( ret == 2 )
             {
                 TraverSetSignale(k_type_, container, false);

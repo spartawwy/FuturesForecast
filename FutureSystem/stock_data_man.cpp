@@ -108,7 +108,7 @@ bool StockDataMan::Init()
     return ret;
 }
 
-
+// ps: for future market 
 T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, const std::string &stk_code, int start_date, int end_date, int cur_hhmm, bool /*is_index*/)
 {
     assert( !stk_code.empty() ); 
@@ -126,11 +126,23 @@ T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, cons
         case PeriodType::PERIOD_DAY:
             start_hhmm = 0; break;
         case PeriodType::PERIOD_HOUR:
-            start_hhmm = 1030; break;
+           if( real_start_date == start_date )
+                start_hhmm = 1000; 
+            else
+                start_hhmm = 2200; 
+            break;
         case PeriodType::PERIOD_30M:
-            start_hhmm = 1000; break;
+            if( real_start_date == start_date )
+                start_hhmm = 930; 
+            else
+                start_hhmm = 2130; 
+            break;
         case PeriodType::PERIOD_15M:
-            start_hhmm = 945; break;
+            if( real_start_date == start_date )
+                start_hhmm = 915; 
+            else
+                start_hhmm = 2115; 
+            break;
         case PeriodType::PERIOD_5M:
             if( real_start_date == start_date )
                 start_hhmm = 905; 
@@ -139,9 +151,9 @@ T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, cons
             break;
         case PeriodType::PERIOD_1M:
             if( real_start_date == start_date )
-                start_hhmm = 900; 
+                start_hhmm = 901; 
             else
-                start_hhmm = 2100; 
+                start_hhmm = 2101; 
             break;
     }
     if( real_start_date == real_end_date )

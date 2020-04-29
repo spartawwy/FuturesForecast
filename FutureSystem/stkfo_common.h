@@ -370,5 +370,10 @@ KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_
 
 #define MARKET_SH_FUTURES  30
 
-
+//---------------COLOR ------------------
+#define BACK_GROUND_COLOR QColor(0xC7, 0xED, 0xCC)
+#define PRICE_FONT_COLOR  Qt::black
+#define CURVE_PEN_COLOR   Qt::black
+#define POSITIVE_K_COLOR  QColor(0x8B, 0x45, 0x13)
+#define NEGATIVE_K_COLOR  Qt::darkGreen
 #endif // STKFO_COMMON_SDF3DSF_H_
