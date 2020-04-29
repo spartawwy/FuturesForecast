@@ -25,7 +25,6 @@
 #include "title_bar.h"
 #include "tool_bar.h"
 #include "code_list_wall.h"
-#include "train_dlg.h"
 #include "mock_trade_dlg.h"
 
 #define MAKE_SUB_WALL 
@@ -48,7 +47,6 @@ MainWindow::MainWindow(FuturesForecastApp *app, QWidget *parent) :
     , cur_kline_index_(WallIndex::MAIN)
     , stock_input_dlg_(this, app->data_base())
     , timer_update_kwall_inter_(0)
-    , train_dlg_(nullptr)
     , is_train_mode_(false)
     , is_mock_trade_(false)
     , mock_trade_dlg_(nullptr)
@@ -134,12 +132,8 @@ bool MainWindow::Initialize()
     wd->setLayout(layout_all);  
     this->setCentralWidget(wd);  
 
-    train_dlg_ = new TrainDlg(kline_wall_main, this);
-    train_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
-    train_dlg_->hide();
-
     mock_trade_dlg_ = new MockTradeDlg(this);
-    mock_trade_dlg_->setWindowFlags(train_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
+    mock_trade_dlg_->setWindowFlags(mock_trade_dlg_->windowFlags() | Qt::WindowStaysOnTopHint/*Qt::Dialog*/ );
     mock_trade_dlg_->hide();
 
     bool result = connect(this, SIGNAL(sigQuoteData(double, double, double, int, int, int)), mock_trade_dlg_, SLOT(slotHandleQuote(double, double, double, int, int, int)));
@@ -208,8 +202,6 @@ void MainWindow::ResetKLineWallCode(const QString &code, const QString &cn_name,
  
 void MainWindow::closeEvent(QCloseEvent * event)
 {
-    if( train_dlg_ )
-        train_dlg_->hide();
     auto ret_button = QMessageBox::question(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("确定退出系统?"),
         QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
     if( ret_button == QMessageBox::Cancel )
@@ -292,30 +284,10 @@ void MainWindow::UpdateStockQuote()
     if( kline_wall_main )
         kline_wall_main->UpdateStockQuote();
 }
-
-void MainWindow::PopTrainDlg()
-{
-    assert(train_dlg_);
-
-    if( tool_bar()->main_cycle_comb()->currentIndex() != COMBO_PERIOD_5M_INDEX )
-    {
-        // ps: it will trigger onMainKwallCycleChange
-        tool_bar()->main_cycle_comb()->setCurrentIndex(COMBO_PERIOD_5M_INDEX); // set current to period day
-    }
-    if( tool_bar()->sub_cycle_comb()->currentIndex() != COMBO_PERIOD_1M_INDEX )
-    {
-        // ps: it will trigger onSubKwallCycleChange
-        tool_bar()->sub_cycle_comb()->setCurrentIndex(COMBO_PERIOD_1M_INDEX);
-    }
-    tool_bar()->main_cycle_comb()->setEnabled(false);
-
-    is_train_mode(true);
-    train_dlg_->showNormal();
-}
-
+ 
 void MainWindow::MinimizeTrainDlg()
 {
-    train_dlg_->showMinimized();
+    //train_dlg_->showMinimized();
 }
 
 void MainWindow::PopMokeTradeDlg()
@@ -499,8 +471,8 @@ void MainWindow::onSubKwallCycleChange(int /*index*/)
         if( kline_wall_main->k_cur_train_date() > 0 )
         {
             kline_wall_sub->ShowDurationKlines(kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
-            kline_wall_sub->SetTrainStartDateTime(TypePeriod(tool_bar_->sub_cycle_comb()->currentData().toInt())
-                , kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());
+            /*kline_wall_sub->SetTrainStartDateTime(TypePeriod(tool_bar_->sub_cycle_comb()->currentData().toInt())
+                , kline_wall_main->k_cur_train_date(), kline_wall_main->k_cur_train_hhmm());*/
         }
     }
 }

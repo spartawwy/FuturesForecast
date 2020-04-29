@@ -29,7 +29,6 @@ enum class WallType : unsigned char
 };
 
 class MockTradeDlg;
-class TrainDlg;
 class FuturesForecastApp;
 class TitleBar;
 class ToolBar;
@@ -66,7 +65,6 @@ public:
 
     void StockInputDlgRet();
 
-    void PopTrainDlg();
     void MinimizeTrainDlg();
 
     bool is_train_mode(){ return is_train_mode_; }
@@ -129,7 +127,6 @@ private:
 
     StockInputDlg  stock_input_dlg_;
     
-    TrainDlg *train_dlg_;
     volatile bool  is_train_mode_;
     volatile bool  is_mock_trade_;
 

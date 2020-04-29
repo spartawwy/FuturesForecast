@@ -7,6 +7,7 @@ class MomentumZhibiao : public ZhiBiaoAtom
 {
 public:
     static void Caculate(T_HisDataItemContainer &data_items_in_container);
+    static void Caculate(T_HisDataItemContainer &data_items_in_container, int end_span);
 
     MomentumZhibiao():val0_(0.0), val1_(0.0),val2_(0.0), val3_(0.0) {}
       

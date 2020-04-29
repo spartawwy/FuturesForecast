@@ -129,7 +129,7 @@ void FuturesForecastApp::UpdateStockData()
 
      // update other k period stock data which has been opened----------------
                        
-     for( int i = 0; i < sizeof(type_periods_to_judge)/sizeof(type_periods_to_judge[0]); ++i )
+     for( unsigned int i = 0; i < sizeof(type_periods_to_judge)/sizeof(type_periods_to_judge[0]); ++i )
      {
          if( main_window()->MainKlineWall()->k_type() == type_periods_to_judge[i] )
              continue;
@@ -146,7 +146,7 @@ void FuturesForecastApp::UpdateStockData()
      std::string code = main_window()->MainKlineWall()->stock_code();
      int nmarket = main_window()->MainKlineWall()->nmarket();
      
-     for( int j = 0; j < target_periods.size(); ++j )
+     for( unsigned int j = 0; j < target_periods.size(); ++j )
      {
          UpdateStockData(target_date, cur_hhmm, code, target_periods[j], nmarket);
      }
@@ -155,7 +155,7 @@ void FuturesForecastApp::UpdateStockData()
 void FuturesForecastApp::UpdateStockData(int target_date, int cur_hhmm, const std::string &code, TypePeriod type_period, int nmarket)
 {
     //bool is_need_updated = false;
-    int hhmm = GetKDataTargetStartTime(type_period, cur_hhmm);
+    //int hhmm = GetKDataTargetStartTime(type_period, cur_hhmm);
     T_HisDataItemContainer &container = stock_data_man().GetHisDataContainer(ToPeriodType(type_period), code);
     if( !container.empty() )
     {
@@ -197,11 +197,12 @@ int GetOverDayPoint(TypePeriod tp_period, int hhmm)
     int over_day_point = 0;
     switch(tp_period)
     {
+    case TypePeriod::PERIOD_1M: over_day_point = 2359; break;
     case TypePeriod::PERIOD_5M: over_day_point = 2355; break;
     case TypePeriod::PERIOD_15M: over_day_point = 2345; break;
     case TypePeriod::PERIOD_30M: over_day_point = 2330; break;
     case TypePeriod::PERIOD_HOUR: over_day_point = 2300; break;
-    case TypePeriod::PERIOD_1M: 
+   
     case TypePeriod::PERIOD_DAY: 
     case TypePeriod::PERIOD_WEEK: 
     case TypePeriod::PERIOD_MON: 
@@ -212,11 +213,8 @@ int GetOverDayPoint(TypePeriod tp_period, int hhmm)
 }
 
 int find_over_day_index(T_HisDataItemContainer &hisdata_container, int target_day)
-{
-    //bool is_find = false;
-    int j = 0;
-    //int near_span = 99999;
-    //int near_j = -1;
+{ 
+    int j = 0; 
     auto iter = hisdata_container.rbegin(); 
     for( auto iter = hisdata_container.rbegin();
         iter != hisdata_container.rend(); 
@@ -305,6 +303,140 @@ int FindKRendIndexInHighPeriodContain(TypePeriod tp_period, T_HisDataItemContain
         return -1;
 }
 
+
+int GetKTagDateTime(TypePeriod type_period, int para_hhmm)
+{
+    static auto get_hhmm = [](int hhmm_para, int *tp_array, int num)->int
+    {
+        int ret_hhmm = 0;
+        assert(num > 0);
+        for( int i = 0; i < num; ++i )
+        {
+            if( hhmm_para <= tp_array[i] ) 
+            {
+                if( tp_array[i] == 2359 )
+                    ret_hhmm = 0;
+                else
+                    ret_hhmm = tp_array[i];
+                return ret_hhmm;
+            }
+        }
+        if( tp_array[num-1] == 2359 )
+            ret_hhmm = 0;
+        else
+            ret_hhmm = tp_array[num-1];
+        return ret_hhmm;
+    };
+
+    int hhmm = 0;
+    switch( type_period )
+    {
+    case TypePeriod::PERIOD_YEAR: 
+    case TypePeriod::PERIOD_MON:
+    case TypePeriod::PERIOD_DAY:
+    case TypePeriod::PERIOD_WEEK:
+        break;
+    case TypePeriod::PERIOD_HOUR:  // ndchk 
+        { 
+            int tp_array[] = {100, 200, 930, 1045, 1345, 1445, 1500, 2200, 2300, 2359};
+            hhmm = get_hhmm(para_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
+            break;
+        }
+    case TypePeriod::PERIOD_30M:
+        {
+            int tp_array[] = {30, 100, 130, 200, 230, 930, 1045, 1345, 1445, 1500
+                , 2130, 2200, 2230, 2300, 2330, 2359};
+            hhmm = get_hhmm(para_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
+            break; 
+        }
+    case TypePeriod::PERIOD_15M:
+        {
+            int tp_array[] = { 15, 30, 45, 100, 115, 130, 145, 200, 215, 230
+                , 915, 930, 945, 1000, 1015, 1045, 1100, 1115, 1130, 1345, 1400, 1415, 1430, 1445, 1500
+                , 2115, 2130, 2145, 2200, 2215, 2230, 2245, 2300, 2315, 2330, 2345, 2359 };
+            hhmm = get_hhmm(para_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
+            break;
+        }
+    case TypePeriod::PERIOD_5M:
+        {
+            int tp_array[] = {5, 10, 15,20,25,30,35,40,45,50,55,100,105,110,115,120,125,130,135,140,145,150,155
+                ,200,205,210,215,220,225,230,   905, 910, 915, 920, 925,930
+                ,935,940,945,950,955,1000,1005,1010,1015,1035,1040,1045,1050,1055,1100,1105
+                ,1110,1115,1120,1125,1130,1335,1340,1345,1350,1355,1400,1405
+                ,1410,1415,1420,1425,1430,1435,1440,1445,1450,1455,1500
+                , 2105, 2110,2115, 2120, 2125,2130,2135,2140,2145,2150,2155,2200
+                , 2205, 2210,2215, 2220, 2225,2230,2235,2240,2245,2250,2255,2300
+                , 2305, 2310,2315, 2320, 2325,2330,2335,2340,2345,2350,2355,2359};
+            hhmm = get_hhmm(para_hhmm, tp_array, sizeof(tp_array)/sizeof(tp_array[0]));
+            break;
+        }
+    case TypePeriod::PERIOD_1M:
+        hhmm = para_hhmm;
+        break;
+    } 
+    return hhmm;
+}
+
+
+int GetKDataNatureStartTime(TypePeriod type_period)
+{
+    int hhmm = 0;
+    switch( type_period )
+    {
+    case TypePeriod::PERIOD_YEAR: 
+    case TypePeriod::PERIOD_MON: 
+    case TypePeriod::PERIOD_DAY:
+    case TypePeriod::PERIOD_WEEK: 
+        break;
+    case TypePeriod::PERIOD_HOUR:    
+    case TypePeriod::PERIOD_30M: 
+        hhmm = 930;// checked from tdx
+        break; 
+    case TypePeriod::PERIOD_15M: 
+        hhmm = 915;
+        break; 
+    case TypePeriod::PERIOD_5M:  
+        hhmm = 905;
+        break; 
+    case TypePeriod::PERIOD_1M:  
+        hhmm = 901;
+        break; 
+    }  
+    return hhmm;
+}
+
+int GetKDataTargetStartTime(TypePeriod type_period, int para_hhmm)
+{ 
+    int hhmm = 0;  
+    if( para_hhmm < 900 )
+        hhmm = 0;
+    else
+    {
+        switch( type_period )
+        {
+        case TypePeriod::PERIOD_YEAR: 
+        case TypePeriod::PERIOD_MON: 
+        case TypePeriod::PERIOD_DAY:
+        case TypePeriod::PERIOD_WEEK: 
+            break;
+        case TypePeriod::PERIOD_HOUR:    
+        case TypePeriod::PERIOD_30M: 
+            hhmm = 930;// checked from tdx
+            break; 
+        case TypePeriod::PERIOD_15M: 
+            hhmm = 915;
+            break; 
+        case TypePeriod::PERIOD_5M:  
+            hhmm = 905;
+            break; 
+        case TypePeriod::PERIOD_1M:  
+            hhmm = 901;
+            break; 
+        }
+    }
+
+    return hhmm;
+}
 
 void Delay(__int64 mseconds)
 { 

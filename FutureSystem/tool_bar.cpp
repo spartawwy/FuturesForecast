@@ -298,8 +298,7 @@ void ToolBar::onClickedClearBtn()
 {
     if( m_main_window->is_mock_trade() )
         m_main_window->MinimizeMockTradeDlg();
-    if( m_main_window->is_train_mode() )
-        m_main_window->MinimizeTrainDlg();
+    
     auto ret = QMessageBox::information(nullptr, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("是否删除所有手动预测画线?"), QMessageBox::Yes, QMessageBox::No); 
     if( QMessageBox::Yes == ret )
     {
@@ -362,8 +361,8 @@ void ToolBar::onShowSignal(bool val)
 
 void ToolBar::onShowTrainModelWin()
 {
-    m_main_window->is_train_mode(true);
-    m_main_window->PopTrainDlg();
+    /*m_main_window->is_train_mode(true);
+    m_main_window->PopTrainDlg();*/
 }
 
 void ToolBar::ConnectAllDrawNormalBtn()
@@ -374,6 +373,7 @@ void ToolBar::ConnectAllDrawNormalBtn()
     ret = connect(abc_up_for_d_pen_, SIGNAL(clicked(bool)), this, SLOT(onClicked()));
     
 }
+
 void ToolBar::DisConnectAllDrawNormalBtn()
 {
     bool ret = disconnect(ab_down_for_c_pen_, SIGNAL(clicked(bool)), this, SLOT(onClicked()));

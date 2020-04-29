@@ -110,6 +110,7 @@ private:
 
     std::tuple<int, int> GetDateIndexFromContainer(PeriodType period_type, const std::string& stock, int start_date, int end_date);
     void CaculateZhibiao(T_HisDataItemContainer &data_items_in_container);
+    void CaculateZhibiao(T_HisDataItemContainer &data_items_in_container, int end_span);
 
 private:
 

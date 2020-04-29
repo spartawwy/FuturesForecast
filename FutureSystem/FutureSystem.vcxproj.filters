@@ -104,12 +104,6 @@
     <ClCompile Include="tool_bar.cpp">
       <Filter>moudle</Filter>
     </ClCompile>
-    <ClCompile Include="train_dlg.cpp">
-      <Filter>win</Filter>
-    </ClCompile>
-    <ClCompile Include="train_trade_dlg.cpp">
-      <Filter>win</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_code_list_wall.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -126,18 +120,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_tool_bar.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_train_dlg.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_train_dlg.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_train_trade_dlg.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_train_trade_dlg.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_kline_wall.cpp">
@@ -234,12 +216,6 @@
     </CustomBuild>
     <CustomBuild Include="tool_bar.h">
       <Filter>moudle</Filter>
-    </CustomBuild>
-    <CustomBuild Include="train_dlg.h">
-      <Filter>win</Filter>
-    </CustomBuild>
-    <CustomBuild Include="train_trade_dlg.h">
-      <Filter>win</Filter>
     </CustomBuild>
     <CustomBuild Include="kline_wall.h">
       <Filter>win</Filter>

@@ -66,6 +66,9 @@ private:
 
 
 int FindKRendIndexInHighPeriodContain(TypePeriod tp_period, T_HisDataItemContainer &p_hisdata_container, ExchangeCalendar &calender, int date_val, int hhmm);
+int GetKTagDateTime(TypePeriod type_period, int para_hhmm);
+int GetKDataTargetStartTime(TypePeriod type_period, int hhmm);
+int GetKDataNatureStartTime(TypePeriod type_period);
 
 void Delay(__int64 mseconds);
 

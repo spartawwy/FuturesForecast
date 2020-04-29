@@ -85,7 +85,7 @@ private:
      
     QCursor kline_wall_cursor_;
 
-    friend class TrainDlg;
+    //friend class TrainDlg;
 };
 
 #endif // TOOL_BAR_SFDDS32SDFDS_H_

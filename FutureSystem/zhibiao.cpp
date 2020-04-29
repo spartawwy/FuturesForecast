@@ -103,3 +103,17 @@ void MomentumZhibiao::Caculate(T_HisDataItemContainer &data_items_in_container)
     } 
 }
 
+void MomentumZhibiao::Caculate(T_HisDataItemContainer &data_items_in_container, int end_span)
+{
+    int i = (int)data_items_in_container.size() - end_span;
+    if( i < 0 )
+        i = 0;
+    for( ; i < data_items_in_container.size(); ++i )
+    { 
+        double st = EmaShort(MOMENTUM_POS, data_items_in_container, i);
+        double lg = EmaLong(MOMENTUM_POS, data_items_in_container, i);
+        double dea = EmaDea(MOMENTUM_POS, data_items_in_container, i);
+        double macd = Macd(MOMENTUM_POS, data_items_in_container, i);
+        macd = macd;
+    } 
+}

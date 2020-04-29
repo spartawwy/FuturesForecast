@@ -25,6 +25,11 @@
 
 static const int cst_default_year = 2017;
 static const Qt::CursorShape cst_cur_del_forcst_line = Qt::ClosedHandCursor;
+
+static const int cst_solid_pen_width = 2;
+static const int cst_dot_hpen_width = 2;
+static const int cst_dot_vpen_width = 1;
+
 const double KLineWall::cst_k_mm_enlarge_times = 1.02; 
 const double KLineWall::cst_k_mm_narrow_times = 0.98; 
 
@@ -134,7 +139,7 @@ bool KLineWall::Init()
 }
 
 void KLineWall::Draw2pDownForcast(QPainter &painter, const int mm_h, double item_w)
-{
+{ 
     std::vector<T_Data2pForcast> *p_data_vector = forcast_man_.Find2pForcastVector(stock_code_, k_type_, true);
 
     if( p_data_vector && !p_data_vector->empty() )
@@ -142,7 +147,7 @@ void KLineWall::Draw2pDownForcast(QPainter &painter, const int mm_h, double item
         QPen pen;  
         //pen.setStyle(Qt::DotLine);
         pen.setColor(Qt::magenta);
-        pen.setWidth(2);
+        pen.setWidth(cst_solid_pen_width);
        
         const auto font_size = painter.font().pointSizeF();
         std::vector<T_TuplePointStr>  fronts_to_draw;
@@ -157,6 +162,7 @@ void KLineWall::Draw2pDownForcast(QPainter &painter, const int mm_h, double item
                 //if( abs(item_a->kline_posdata(wall_index_).top.y()) > abs(item_b->kline_posdata(wall_index_).top.y()) )  // y is negative
                 //{  
                     pen.setStyle(Qt::SolidLine); 
+                    pen.setWidth(cst_solid_pen_width);
                     painter.setPen(pen);  
                     data_2pforcastdown.point_a = item_a->kline_posdata(wall_index_).top;
                     data_2pforcastdown.point_b = item_b->kline_posdata(wall_index_).bottom;
@@ -169,12 +175,15 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(data_2pforcastdown.point_b.x()-
                     double y3 = get_price_y(data_2pforcastdown.c3, mm_h);
                     double x_b = item_b->kline_posdata(wall_index_).bottom.x();
                     pen.setStyle(Qt::DotLine); 
+                    pen.setWidth(cst_dot_vpen_width);
                     painter.setPen(pen);  
                     // vertical line ----
                     painter.drawLine(item_b->kline_posdata(wall_index_).bottom, QPointF(x_b, y1));
                     painter.drawLine(QPointF(x_b, y1), QPointF(x_b, y2));
                     painter.drawLine(QPointF(x_b, y2), QPointF(x_b, y3));
                     // horzon forcast line -----------
+                    pen.setWidth(cst_dot_hpen_width);
+                    painter.setPen(pen);  
                     double h_line_left = item_b->kline_posdata(wall_index_).bottom.x() - item_w;
                     painter.drawLine(QPointF(h_line_left, y1), QPointF(x_b + 5*item_w, y1));
 fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y1), utility::FormatStr("C1: %.2f", data_2pforcastdown.c1))); 
@@ -194,6 +203,7 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y3),
 
         pen.setColor(PRICE_FONT_COLOR);
         pen.setStyle(Qt::SolidLine); 
+        pen.setWidth(cst_solid_pen_width);
         painter.setPen(pen);
         //char buf[32] = {0};
         std::for_each( std::begin(fronts_to_draw), std::end(fronts_to_draw), [&painter, /*&buf, */this](T_TuplePointStr& in)
@@ -214,7 +224,7 @@ void KLineWall::Draw2pUpForcast(QPainter &painter, const int mm_h, double item_w
 
     QPen pen;   
     pen.setColor(Qt::darkGreen);
-    pen.setWidth(2);
+    pen.setWidth(cst_solid_pen_width);
     //painter.setPen(pen); 
     const auto font_size = painter.font().pointSizeF();
     std::vector<T_TuplePointStr> fronts_to_draw;
@@ -229,6 +239,7 @@ void KLineWall::Draw2pUpForcast(QPainter &painter, const int mm_h, double item_w
             //if( abs(item_a->kline_posdata(wall_index_).top.y()) < abs(item_b->kline_posdata(wall_index_).top.y()) )  // y is negative
             //{  
                 pen.setStyle(Qt::SolidLine); 
+                pen.setWidth(cst_solid_pen_width);
                 painter.setPen(pen);  
                 data_2pforcast.point_a = item_a->kline_posdata(wall_index_).bottom;
                 data_2pforcast.point_b = item_b->kline_posdata(wall_index_).top;
@@ -241,10 +252,13 @@ void KLineWall::Draw2pUpForcast(QPainter &painter, const int mm_h, double item_w
                 double y3 = get_price_y(data_2pforcast.c3, mm_h);
                 double x_b = item_b->kline_posdata(wall_index_).bottom.x();
                 pen.setStyle(Qt::DotLine); 
+                pen.setWidth(cst_dot_vpen_width);
                 painter.setPen(pen);  
                 // vertical line ----
                 painter.drawLine(item_b->kline_posdata(wall_index_).top, QPointF(x_b, y3));
                 // horzon forcast line -----------
+                pen.setWidth(cst_dot_hpen_width);
+                painter.setPen(pen); 
                 double h_line_left = item_b->kline_posdata(wall_index_).bottom.x() - item_w;
                 painter.drawLine(QPointF(h_line_left, y1), QPointF(x_b + 5*item_w, y1));
 fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y1), utility::FormatStr("C1: %.2f", data_2pforcast.c1)));
@@ -263,6 +277,7 @@ fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y3),
 
     pen.setColor(PRICE_FONT_COLOR);
     pen.setStyle(Qt::SolidLine); 
+    pen.setWidth(cst_solid_pen_width);
     painter.setPen(pen); 
     std::for_each( std::begin(fronts_to_draw), std::end(fronts_to_draw), [&painter, this](T_TuplePointStr& in)
     {
@@ -291,7 +306,7 @@ void KLineWall::_Draw3pForcast(QPainter &painter, const int mm_h, double item_w,
         pen.setColor(Qt::darkGreen);
     else
         pen.setColor(Qt::magenta);
-    pen.setWidth(2);
+    pen.setWidth(cst_solid_pen_width);
     const auto font_size = painter.font().pointSizeF();
     std::vector<T_TuplePointStr>  fronts_to_draw;
     double lowest_price = MAX_PRICE;
@@ -329,6 +344,7 @@ void KLineWall::_Draw3pForcast(QPainter &painter, const int mm_h, double item_w,
                 price_c = item_c ? item_c->stk_item.low_price : 0.0;
             }
             pen.setStyle(Qt::SolidLine);
+            pen.setWidth(cst_solid_pen_width);
             painter.setPen(pen); 
             painter.drawLine(data_3p_forcast.point_a, data_3p_forcast.point_b);
             fronts_to_draw.push_back(std::make_tuple(QPointF(data_3p_forcast.point_a.x()-item_w/2, data_3p_forcast.point_a.y()), "A"));
@@ -342,10 +358,13 @@ void KLineWall::_Draw3pForcast(QPainter &painter, const int mm_h, double item_w,
                 double y3 = get_price_y(data_3p_forcast.d3, mm_h);
                 double x_c = data_3p_forcast.point_c.x();
                 pen.setStyle(Qt::DotLine);
+                pen.setWidth(cst_dot_vpen_width);
                 painter.setPen(pen); 
                 // vertical line ----
                 painter.drawLine(data_3p_forcast.point_c, QPointF(x_c, y3));
                 // horzon forcast line -----------
+                pen.setWidth(cst_dot_hpen_width);
+                painter.setPen(pen); 
                 double h_line_left = data_3p_forcast.point_c.x() - item_w;
                 painter.drawLine(QPointF(h_line_left, y1), QPointF(x_c + 5*item_w, y1));
                 fronts_to_draw.push_back(std::make_tuple(QPointF(h_line_left - font_size*6, y1), utility::FormatStr("D1: %.2f", data_3p_forcast.d1)));
@@ -367,6 +386,7 @@ void KLineWall::_Draw3pForcast(QPainter &painter, const int mm_h, double item_w,
     }// for
     pen.setColor(PRICE_FONT_COLOR);
     pen.setStyle(Qt::SolidLine); 
+    pen.setWidth(cst_solid_pen_width);
     painter.setPen(pen); 
     std::for_each( std::begin(fronts_to_draw), std::end(fronts_to_draw), [&painter, this](T_TuplePointStr& in)
     { 
@@ -1074,23 +1094,15 @@ void KLineWall::paintEvent(QPaintEvent*)
         k_detail_str = QString::fromLocal8Bit(temp_str);
 
         double item_w = double(mm_w - empty_right_w_ - right_w_) / double(k_num_ + 1) ;
-        
-#ifdef DRAW_FROM_LEFT
-    int j = 0;
-	for( auto iter = p_hisdata_container_->begin();
-		iter != p_hisdata_container_->end() && j < k_num_; 
-		++iter, ++j)
-    { 
-#else
-        // for fengxin line and every k line--------------
+ 
         
         assert( p_hisdata_container_->size() > k_rend_index_ );
-        int j = k_num_;
+        // for every k line and fengxin line --------------
+        int j = k_num_; 
         for( auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
             iter != p_hisdata_container_->rend() && j > 0; 
             ++iter, --j)
         { 
-#endif
         T_KlinePosData &pos_data = iter->get()->kline_posdata(wall_index_);
          
         //draw every k bar---------------
@@ -1775,10 +1787,10 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
 
     int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
     int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
-    if( cur_hhmm > 2100 )
+    /*if( cur_hhmm > 2100 )
     {
         cur_date = QDate::currentDate().addDays(1).toString("yyyyMMdd").toInt();
-    }
+    }*/
  
     bool ret = false;
     do
@@ -1786,18 +1798,18 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     // temp debug -------------
     //start_date = 20190524;
     //cur_date = 20190527;
-    int hhmm = GetKDataTargetStartTime(type_period, cur_hhmm);
+    //int hhmm = GetKDataNatureStartTime(type_period);
+    int k_tag_cur_hhmm = GetKTagDateTime(type_period, cur_hhmm);
     // find his k data which till cur hhmm --------------
-    p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, start_date, cur_date, hhmm, is_index);
+    p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(type_period), stock_code_, start_date, cur_date, k_tag_cur_hhmm, is_index);
     if( !p_hisdata_container_ )
     {
         //p_hisdata_container_ = app_->stock_data_man().AppendStockData(stock_code_, 20171216, 20180108); 
-        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, start_date, cur_date, is_index);
+        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket_, stock_code_, start_date, cur_date, is_index);
     }else
     {
         int a_pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
-        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(k_type_), nmarket_, stock_code_, a_pre_date, cur_date, is_index);
-        
+        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket_, stock_code_, a_pre_date, cur_date, is_index);
     }
 	
     if( !p_hisdata_container_ )
@@ -1878,42 +1890,24 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
     if( is_resetting_stock_ || draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
         return;
 
-    bool is_need_updated = false;
-#if 0
-    int cur_date = QDate::currentDate().year() * 10000 + QDate::currentDate().month() * 100 + QDate::currentDate().day();
-    int cur_hhmm = QTime::currentTime().hour() * 100 + QTime::currentTime().minute();
-    int target_date = 0;
- 
-    int pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
-    bool is_trade_time = false;
-    if( app_->exchange_calendar()->IsTradeDate(cur_date) && app_->exchange_calendar()->IsTradeTime(cur_hhmm) )
-    {
-        is_trade_time = true;
-        target_date = cur_date;
-    }else if( app_->exchange_calendar()->IsTradeDate(pre_date) && app_->exchange_calendar()->IsMidNightTradeTime(cur_hhmm) )
-    {
-        is_trade_time = true;
-        target_date = app_->exchange_calendar()->NextTradeDate(cur_date, 1);
-    }
-    if( !is_trade_time )
-        return;
-#endif
+    bool is_need_updated = false; 
     std::lock_guard<std::mutex> locker(painting_mutex_);
-     
-    int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);
     
     T_HisDataItemContainer &container = app_->stock_data_man().GetHisDataContainer(ToPeriodType(k_type_), stock_code_);
     if( !container.empty() )
     {
-        auto p_contain = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, target_date, target_date, hhmm/*, bool is_index*/);
-        if( p_contain ) // current time k data exists
+        //int hhmm = GetKDataTargetStartTime(k_type_, cur_hhmm);
+        //auto p_contain = app_->stock_data_man().FindStockData(ToPeriodType(k_type_), stock_code_, target_date, target_date, hhmm/*, bool is_index*/);
+        //if( p_contain ) // current time k data exists
+        int r_index = FindKRendIndexInHighPeriodContain(k_type_, container, *app_->exchange_calendar(), target_date, cur_hhmm);
+        if( r_index > -1 )
         {
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
             int ret = app_->stock_data_man().UpdateOrAppendLatestItemStockData(ToPeriodType(k_type_), nmarket_, stock_code_, is_index_);
             if( ret > 0 )
             {
-                int backward_size = p_contain->size() < 5 ? p_contain->size() : 5;
+                int backward_size = container.size() < 5 ? container.size() : 5;
                 TraverseClearFractalType(container, backward_size);
                 TraverseSetUpwardFractal(container, backward_size);
                 TraverseSetDownwardFractal(container, backward_size);
@@ -1928,8 +1922,8 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
             }
             is_need_updated = ret > 0;
             
-        }else
-        {
+        }else  
+        {   // to append ----------------
             if( draw_action_ != DrawAction::NO_ACTION || main_win_->is_train_mode() )
                 return;
             //app_->local_logger().LogLocal(utility::FormatStr("UpdateIfNecessary AppendStockData %d", k_type_));
@@ -1943,7 +1937,6 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
                 p_hisdata_container_ = p_cur_time_contain;
                 is_need_updated = true;
             }
-
         }
         if( is_need_updated )
         {
@@ -1954,53 +1947,53 @@ void KLineWall::UpdateIfNecessary(int target_date, int cur_hhmm)
 
     }
 }
-
-void KLineWall::SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm)
-{
-    const int old_rend_index = k_rend_index_;
-    const int old_k_num = k_num_;
-    int target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
-    if( target_r_end_index > -1 )
-    {
-        k_rend_index_ = target_r_end_index; 
-        k_rend_index_for_train_ = target_r_end_index; 
-    }else
-    {
-        QDate qdate_obj(date/10000, (date%10000)/100, date%100);
-        int start_date = 0;
-        if( tp_period >= TypePeriod::PERIOD_DAY )
-            start_date = qdate_obj.addDays( -1 * (4 * 30) ).toString("yyyyMMdd").toInt(); 
-        else if( tp_period == TypePeriod::PERIOD_HOUR )
-            start_date = qdate_obj.addDays( -1 * 10 ).toString("yyyyMMdd").toInt(); 
-        else if( tp_period >= TypePeriod::PERIOD_15M && tp_period <= TypePeriod::PERIOD_30M )
-            start_date = qdate_obj.addDays( -1 * 5 ).toString("yyyyMMdd").toInt(); 
-        else if( tp_period <= TypePeriod::PERIOD_5M )
-            start_date = qdate_obj.addDays( -1 * 3 ).toString("yyyyMMdd").toInt();
-
-        AppendPreData(start_date);
-        target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
-        if( target_r_end_index > -1 )
-        {
-            k_rend_index_ = target_r_end_index; 
-            k_rend_index_for_train_ = target_r_end_index; 
-            //k_num_ = WOKRPLACE_DEFUALT_K_NUM;
-        }else
-        {
-            k_rend_index_for_train_ = p_hisdata_container_->size() > 0 ? p_hisdata_container_->size() - 1 : 0;
-            k_num_ = 0;
-        }
-    }
-    k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
-    k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
-
-    if( old_rend_index != k_rend_index_ || old_k_num != k_num_ )
-    {
-        UpdateKwallMinMaxPrice();
-        UpdatePosDatas();
-        update();
-    }
-    
-}
+//
+//void KLineWall::SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm)
+//{
+//    const int old_rend_index = k_rend_index_;
+//    const int old_k_num = k_num_;
+//    int target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
+//    if( target_r_end_index > -1 )
+//    {
+//        k_rend_index_ = target_r_end_index; 
+//        k_rend_index_for_train_ = target_r_end_index; 
+//    }else
+//    {
+//        QDate qdate_obj(date/10000, (date%10000)/100, date%100);
+//        int start_date = 0;
+//        if( tp_period >= TypePeriod::PERIOD_DAY )
+//            start_date = qdate_obj.addDays( -1 * (4 * 30) ).toString("yyyyMMdd").toInt(); 
+//        else if( tp_period == TypePeriod::PERIOD_HOUR )
+//            start_date = qdate_obj.addDays( -1 * 10 ).toString("yyyyMMdd").toInt(); 
+//        else if( tp_period >= TypePeriod::PERIOD_15M && tp_period <= TypePeriod::PERIOD_30M )
+//            start_date = qdate_obj.addDays( -1 * 5 ).toString("yyyyMMdd").toInt(); 
+//        else if( tp_period <= TypePeriod::PERIOD_5M )
+//            start_date = qdate_obj.addDays( -1 * 3 ).toString("yyyyMMdd").toInt();
+//
+//        AppendPreData(start_date);
+//        target_r_end_index = FindKRendIndex(p_hisdata_container_, date, hhmm);
+//        if( target_r_end_index > -1 )
+//        {
+//            k_rend_index_ = target_r_end_index; 
+//            k_rend_index_for_train_ = target_r_end_index; 
+//            //k_num_ = WOKRPLACE_DEFUALT_K_NUM;
+//        }else
+//        {
+//            k_rend_index_for_train_ = p_hisdata_container_->size() > 0 ? p_hisdata_container_->size() - 1 : 0;
+//            k_num_ = 0;
+//        }
+//    }
+//    k_cur_train_date_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.date;
+//    k_cur_train_hhmm_ = (*(p_hisdata_container_->rbegin() + k_rend_index_for_train_))->stk_item.hhmmss;
+//
+//    if( old_rend_index != k_rend_index_ || old_k_num != k_num_ )
+//    {
+//        UpdateKwallMinMaxPrice();
+//        UpdatePosDatas();
+//        update();
+//    }
+//    
+//}
 
 // return <data, hhmm> of next k
 std::tuple<int, int> KLineWall::MoveRightEndToNextK()

@@ -117,45 +117,8 @@ T_HisDataItemContainer* StockDataMan::FindStockData(PeriodType period_type, cons
     int real_end_date = exchange_calendar()->FloorTradeDate(end_date);
     if( real_start_date == 0 || real_end_date == 0 )
         return nullptr;
-    int start_hhmm = 0;
-    switch(period_type)
-    {
-        case PeriodType::PERIOD_YEAR:
-        case PeriodType::PERIOD_MON:
-        case PeriodType::PERIOD_WEEK:
-        case PeriodType::PERIOD_DAY:
-            start_hhmm = 0; break;
-        case PeriodType::PERIOD_HOUR:
-           if( real_start_date == start_date )
-                start_hhmm = 1000; 
-            else
-                start_hhmm = 2200; 
-            break;
-        case PeriodType::PERIOD_30M:
-            if( real_start_date == start_date )
-                start_hhmm = 930; 
-            else
-                start_hhmm = 2130; 
-            break;
-        case PeriodType::PERIOD_15M:
-            if( real_start_date == start_date )
-                start_hhmm = 915; 
-            else
-                start_hhmm = 2115; 
-            break;
-        case PeriodType::PERIOD_5M:
-            if( real_start_date == start_date )
-                start_hhmm = 905; 
-            else
-                start_hhmm = 2105; 
-            break;
-        case PeriodType::PERIOD_1M:
-            if( real_start_date == start_date )
-                start_hhmm = 901; 
-            else
-                start_hhmm = 2101; 
-            break;
-    }
+    int start_hhmm = GetKDataNatureStartTime(ToTypePeriod(period_type));
+     
     if( real_start_date == real_end_date )
     {
         if( FindDataIndex(items_in_container, real_end_date, cur_hhmm) > -1 )
@@ -188,7 +151,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
     assert( !stk_code.empty() );
      
     T_HisDataItemContainer & items_in_container = GetHisDataContainer(period_type, stk_code);
-   
+    const auto old_count = items_in_container.size();
     std::string code = stk_code;
     if( is_index )
         code = TransIndex2TusharedCode(stk_code);
@@ -273,38 +236,6 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             }
         }
 
-#if 0
-        if( p_data_items[p_data_items.size()-1].date < items_in_container.back()->stk_item.date 
-            || p_data_items[0].date < items_in_container.back()->stk_item.date )
-        { 
-            for( int k = count; k > 0; --k )
-            {  
-                //auto ck_val = p_data_items[k-1].date;
-                // push old to front
-                if( p_data_items[k-1].date < items_in_container.front()->stk_item.date || 
-                    (p_data_items[k-1].date == items_in_container.front()->stk_item.date &&
-                    p_data_items[k-1].hhmmss < items_in_container.front()->stk_item.hhmmss) )
-                {
-                    auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k-1]); 
-                    k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
-                    items_in_container.push_front(std::move(k_item));
-                }
-            }
-        }else
-        {
-            for( int k = 0; k < count; ++k )
-            {
-                if( p_data_items[k].date > items_in_container.back()->stk_item.date ||
-                    (p_data_items[k].date == items_in_container.back()->stk_item.date &&
-                    p_data_items[k].hhmmss > items_in_container.back()->stk_item.hhmmss) )
-                {
-                    auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k]); 
-                    k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
-                    items_in_container.push_back(std::move(k_item));
-                }
-            }
-        }
-#endif
     }else // first insert
     {
         for( int k = 0; k < count; ++k )
@@ -314,43 +245,44 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             items_in_container.push_back(std::move(k_item));
         }
     }
- 
     
     // sort T_KlineDateItems by day from small to bigger
-    //std::sort(items_in_container.begin(), items_in_container.end(), dompare);
-
-    CaculateZhibiao(items_in_container);
-
+    //std::sort(items_in_container.begin(), items_in_container.end(), dompare); // already sort so nouse it
+     
 #if defined(USE_WINNER_API) || defined(USE_TDXHQ) 
     delete p_stk_hisdata_item_vector;
     p_stk_hisdata_item_vector = nullptr;
 #else
     stk_hisdata_release_(p_data_items);
 #endif
-    TraverseClearFractalType(items_in_container);
+    if( items_in_container.size() != old_count )
+    {
+        CaculateZhibiao(items_in_container);
 
-    TraverseSetUpwardFractal(items_in_container);
+        TraverseClearFractalType(items_in_container);
 
-    TraverseSetDownwardFractal(items_in_container);
-    
-    TraverseAjustFractal(items_in_container);
-    if( is_index )
-        TraverseGetBi(period_type, stk_code, items_in_container);
-    else 
-        TraverseGetBi(period_type, code, items_in_container);
-    if( is_index )
-        TraverseGetStuctLines(period_type, stk_code, items_in_container);
-    else
-        TraverseGetStuctLines(period_type, code, items_in_container);
-    if( is_index )
-        TraversGetSections(period_type, stk_code, items_in_container);
-    else
-        TraversGetSections(period_type, code, items_in_container);
+        TraverseSetUpwardFractal(items_in_container);
 
-    TraverSetSignale(ToTypePeriod(period_type), items_in_container, false);
+        TraverseSetDownwardFractal(items_in_container);
+
+        TraverseAjustFractal(items_in_container);
+        if( is_index )
+            TraverseGetBi(period_type, stk_code, items_in_container);
+        else 
+            TraverseGetBi(period_type, code, items_in_container);
+        if( is_index )
+            TraverseGetStuctLines(period_type, stk_code, items_in_container);
+        else
+            TraverseGetStuctLines(period_type, code, items_in_container);
+        if( is_index )
+            TraversGetSections(period_type, stk_code, items_in_container);
+        else
+            TraversGetSections(period_type, code, items_in_container);
+
+        TraverSetSignale(ToTypePeriod(period_type), items_in_container, false);
+    }
 
 	return std::addressof(items_in_container);
-
 }
 
 // ret 0: unupdated; 1: updated last item; 2: appended an item
@@ -374,18 +306,18 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
             if( items_in_container.back()->stk_item.hhmmss == item.hhmmss )
             {
                 memcpy( std::addressof(items_in_container.back()->stk_item), &item, sizeof(item) );
+                CaculateZhibiao(items_in_container, 2); 
                 ret = 1;
-            }
-            else if( items_in_container.back()->stk_item.hhmmss < item.hhmmss ) // append
+
+            }else if( items_in_container.back()->stk_item.hhmmss < item.hhmmss ) // append
             {
                 auto k_date_item = std::make_shared<T_KlineDataItem>(item);
                 k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
                 items_in_container.push_back(std::move(k_date_item));
-                
+                CaculateZhibiao(items_in_container, 2); 
                 //kwall_->IncreaseRendIndex();
                 ret = 2;
-            }
-            else
+            }else
             { 
                 return 0;
             }
@@ -395,10 +327,11 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
             auto k_date_item = std::make_shared<T_KlineDataItem>(item);
             k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
             items_in_container.push_back(std::move(k_date_item));
-             
+            CaculateZhibiao(items_in_container, 2); 
             ret = 2;
+
         }
-        CaculateZhibiao(items_in_container);
+        
         return ret;
     }else
         return 0;
@@ -414,6 +347,24 @@ void StockDataMan::CaculateZhibiao(T_HisDataItemContainer &data_items_in_contain
         case ZhibiaoType::MOMENTUM:
             {
                 MomentumZhibiao::Caculate(data_items_in_container);
+                break;
+            }
+        default: break;
+        }
+    }
+}
+
+
+// ps: data has sorted
+void StockDataMan::CaculateZhibiao(T_HisDataItemContainer &data_items_in_container, int end_span)
+{
+    for (unsigned int i = 0; i < zhibiao_types_.size(); ++i )
+    {
+        switch(zhibiao_types_[i])
+        {
+        case ZhibiaoType::MOMENTUM:
+            {
+                MomentumZhibiao::Caculate(data_items_in_container, end_span);
                 break;
             }
         default: break;

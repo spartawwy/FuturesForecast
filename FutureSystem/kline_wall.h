@@ -80,7 +80,7 @@ public:
 
     void UpdateIfNecessary(int target_date, int cur_hhmm);
     // train mode --------
-    void SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm);
+    //void SetTrainStartDateTime(TypePeriod tp_period, int date, int hhmm);
     std::tuple<int, int> MoveRightEndToNextK();
     void MoveRightEndToNextK(int date, int hhmm);
 
@@ -271,8 +271,6 @@ private:
 int CalculateSpanDays(TypePeriod type_period, int k_count);
 // ret: <date, hhmm>
 std::tuple<int, int> GetKDataTargetDateTime(ExchangeCalendar &exch_calender, TypePeriod type_period, int end_date, int tmp_hhmm, int max_k_count);
-// ret: hhmm
-int GetKDataTargetStartTime(TypePeriod type_period, int hhmm);
 
 int FindKRendIndex(T_HisDataItemContainer *p_hisdata_container, int date_val, int hhmm);
 
