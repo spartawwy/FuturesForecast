@@ -352,7 +352,7 @@ do
                     k_data.date = boost::lexical_cast<int>(match_result[index]);
                     k_data.hhmmss = 0;
                 }
-
+                qDebug() << k_data.date << " : " << k_data.hhmmss << "\n";
                 ++index;
                 k_data.open_price = boost::lexical_cast<double>(match_result[index]);
                 ++index;
@@ -411,7 +411,7 @@ do
                     k_data.date = boost::lexical_cast<int>(match_result[index]);
                     k_data.hhmmss = 0;
                 }
-
+                qDebug() << k_data.date << " : " << k_data.hhmmss << "\n";
                 ++index;
                 k_data.open_price = boost::lexical_cast<double>(match_result[index]);
                 ++index;

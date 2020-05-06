@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_KLineWall_t {
-    QByteArrayData data[7];
-    char stringdata[105];
+    QByteArrayData data[8];
+    char stringdata[123];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -34,12 +34,14 @@ QT_MOC_LITERAL(1, 10, 14),
 QT_MOC_LITERAL(2, 25, 0),
 QT_MOC_LITERAL(3, 26, 23),
 QT_MOC_LITERAL(4, 50, 15),
-QT_MOC_LITERAL(5, 66, 20),
-QT_MOC_LITERAL(6, 87, 16)
+QT_MOC_LITERAL(5, 66, 17),
+QT_MOC_LITERAL(6, 84, 20),
+QT_MOC_LITERAL(7, 105, 16)
     },
     "KLineWall\0sigUpdateKwall\0\0"
     "slotOpenRelatedSubKwall\0slotUpdateKwall\0"
-    "slotOpenStatisticDlg\0slotZoominSelect\0"
+    "slotDrawAlarmLine\0slotOpenStatisticDlg\0"
+    "slotZoominSelect\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -49,7 +51,7 @@ static const uint qt_meta_data_KLineWall[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -57,19 +59,21 @@ static const uint qt_meta_data_KLineWall[] = {
        1,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   39,    2, 0x06,
+       1,    0,   44,    2, 0x06,
 
  // slots: name, argc, parameters, tag, flags
-       3,    1,   40,    2, 0x0a,
-       4,    0,   43,    2, 0x0a,
-       5,    1,   44,    2, 0x08,
-       6,    1,   47,    2, 0x08,
+       3,    1,   45,    2, 0x0a,
+       4,    0,   48,    2, 0x0a,
+       5,    0,   49,    2, 0x0a,
+       6,    1,   50,    2, 0x08,
+       7,    1,   53,    2, 0x08,
 
  // signals: parameters
     QMetaType::Void,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Bool,    2,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Bool,    2,
     QMetaType::Void, QMetaType::Bool,    2,
@@ -85,8 +89,9 @@ void KLineWall::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 0: _t->sigUpdateKwall(); break;
         case 1: _t->slotOpenRelatedSubKwall((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 2: _t->slotUpdateKwall(); break;
-        case 3: _t->slotOpenStatisticDlg((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 4: _t->slotZoominSelect((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 3: _t->slotDrawAlarmLine(); break;
+        case 4: _t->slotOpenStatisticDlg((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 5: _t->slotZoominSelect((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -126,13 +131,13 @@ int KLineWall::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 6;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 6)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }

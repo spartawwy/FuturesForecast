@@ -815,7 +815,7 @@ void KLineWall::mousePressEvent(QMouseEvent * event )
         }
         auto item_c = GetKLineDataItemByXpos(event->pos().x());
         if( !item_c || item_c->stk_item.date < item_b->stk_item.date 
-            || (item_c->stk_item.date == item_b->stk_item.date && item_c->stk_item.hhmmss <= item_b->stk_item.hhmmss) )
+            || (item_c->stk_item.date == item_b->stk_item.date && item_c->stk_item.hhmmss < item_b->stk_item.hhmmss) )
         {   // todo: show warning msg
             return;
         }
@@ -1800,16 +1800,22 @@ bool KLineWall::Reset_Stock(const QString& stock, TypePeriod type_period, bool i
     //cur_date = 20190527;
     //int hhmm = GetKDataNatureStartTime(type_period);
     int k_tag_cur_hhmm = GetKTagDateTime(type_period, cur_hhmm);
+    int target_end_date = app_->exchange_calendar()->FloorTradeDate(cur_date);
     // find his k data which till cur hhmm --------------
-    p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(type_period), stock_code_, start_date, cur_date, k_tag_cur_hhmm, is_index);
-    if( !p_hisdata_container_ )
+    p_hisdata_container_ = app_->stock_data_man().FindStockData(ToPeriodType(type_period), stock_code_, start_date, target_end_date, k_tag_cur_hhmm, is_index);
+    
+    if( cur_hhmm > 2100 )
     {
+        target_end_date = app_->exchange_calendar()->NextTradeDate(cur_date, 1);
+    }
+    if( !p_hisdata_container_ )
+    { 
         //p_hisdata_container_ = app_->stock_data_man().AppendStockData(stock_code_, 20171216, 20180108); 
-        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket_, stock_code_, start_date, cur_date, is_index);
+        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket_, stock_code_, start_date, target_end_date, is_index);
     }else
     {
         int a_pre_date = app_->exchange_calendar()->PreTradeDate(cur_date, 1);
-        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket_, stock_code_, a_pre_date, cur_date, is_index);
+        p_hisdata_container_ = app_->stock_data_man().AppendStockData(ToPeriodType(type_period), nmarket_, stock_code_, a_pre_date, target_end_date, is_index);
     }
 	
     if( !p_hisdata_container_ )

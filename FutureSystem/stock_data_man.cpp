@@ -728,7 +728,7 @@ void TraverseSetDownwardFractal( T_HisDataItemContainer &kline_data_items, int b
 
         if( n_fractal_ahead > 0 && n_fractal_follow > 0 )
         {
-            qDebug() << __FUNCTION__ << " set top " << kline_data_items[index]->stk_item.date << " : " << kline_data_items[index]->stk_item.hhmmss << "\n";
+            //qDebug() << __FUNCTION__ << " set top " << kline_data_items[index]->stk_item.date << " : " << kline_data_items[index]->stk_item.hhmmss << "\n";
 
             kline_data_items[index]->type |= int(FractalType::TOP_AXIS_T_3);
             if( n_fractal_ahead > 1 && n_fractal_follow > 1 )
@@ -911,12 +911,12 @@ void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_
                     && left_top_price > kline_data_items[index]->stk_item.high_price)
                 { 
                     kline_data_items[left_top_index]->type |= (int)FractalType::TOP_FAKE;
-                    qDebug() << __LINE__ << " set top fake flag date " <<  kline_data_items[left_top_index]->stk_item.date << " " <<  kline_data_items[left_top_index]->stk_item.hhmmss;
+                    //qDebug() << __LINE__ << " set top fake flag date " <<  kline_data_items[left_top_index]->stk_item.date << " " <<  kline_data_items[left_top_index]->stk_item.hhmmss;
                     if( left_min_price < kline_data_items[index]->stk_item.low_price 
                         && left_min_index >= left_top_index )
                     {
-                        qDebug() << __LINE__ << "index " << index << " left_min_index " << left_min_index << " left_top_index " << left_top_index;
-                        qDebug() << __LINE__ << " set btm fake flag date " <<  kline_data_items[left_min_index]->stk_item.date<< " " <<  kline_data_items[left_min_index]->stk_item.hhmmss;
+                        //qDebug() << __LINE__ << "index " << index << " left_min_index " << left_min_index << " left_top_index " << left_top_index;
+                        //qDebug() << __LINE__ << " set btm fake flag date " <<  kline_data_items[left_min_index]->stk_item.date<< " " <<  kline_data_items[left_min_index]->stk_item.hhmmss;
                         kline_data_items[left_min_index]->type |= (int)FractalType::BTM_FAKE;
                         
                         //qDebug() << __LINE__ << " clear btm  date " <<  kline_data_items[index]->stk_item.date << " " <<  kline_data_items[index]->stk_item.hhmmss;
@@ -968,7 +968,7 @@ void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_
                 { 
                     //qDebug() << __LINE__ << " clear top flag date " <<  kline_data_items[top_index]->stk_item.date;
                     ClearTopFractal(*kline_data_items[top_index]);
-                    qDebug() << __LINE__ << " set top fake flag " << kline_data_items[max_p_index]->stk_item.date << ":" << kline_data_items[max_p_index]->stk_item.hhmmss;
+                    //qDebug() << __LINE__ << " set top fake flag " << kline_data_items[max_p_index]->stk_item.date << ":" << kline_data_items[max_p_index]->stk_item.hhmmss;
                     kline_data_items[max_p_index]->type |= (int)FractalType::TOP_FAKE;
                 }
                 else // ndchk
@@ -976,7 +976,7 @@ void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_
                 {
                     //qDebug() << __LINE__ << " clear btm fake date " <<  kline_data_items[index]->stk_item.date;
                     ClearBtmFractal(*kline_data_items[index]);
-                    qDebug() << __LINE__ << " set btm fake flag " <<  kline_data_items[min_p_index]->stk_item.date << ":" << kline_data_items[min_p_index]->stk_item.hhmmss;
+                    //qDebug() << __LINE__ << " set btm fake flag " <<  kline_data_items[min_p_index]->stk_item.date << ":" << kline_data_items[min_p_index]->stk_item.hhmmss;
                     kline_data_items[min_p_index]->type |= (int)FractalType::BTM_FAKE;
                 } 
             }
@@ -1011,7 +1011,7 @@ void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_
                     && kline_data_items[left_btm_index]->stk_item.low_price < kline_data_items[top_index]->stk_item.low_price /*+ 0.0001*/)
                 { 
                     kline_data_items[left_btm_index]->type |= (int)FractalType::BTM_FAKE;
-                    qDebug() << __LINE__ << " set btm fake flag date " <<  kline_data_items[left_btm_index]->stk_item.date;
+                    //qDebug() << __LINE__ << " set btm fake flag date " <<  kline_data_items[left_btm_index]->stk_item.date;
                 }else
                 {
                     if( kline_data_items[top_index]->stk_item.high_price < kline_data_items[index]->stk_item.high_price )
@@ -1055,13 +1055,13 @@ void TraverseAjustFractal( std::deque<std::shared_ptr<T_KlineDataItem> > &kline_
                 if( top_index > -1 && max_price > kline_data_items[index]->stk_item.high_price )
                 {
                     ClearTopFractal(*kline_data_items[index]);
-                    qDebug() << __LINE__ << " set top fake flag date " <<  kline_data_items[max_p_index]->stk_item.date;
+                    //qDebug() << __LINE__ << " set top fake flag date " <<  kline_data_items[max_p_index]->stk_item.date;
                     kline_data_items[max_p_index]->type |= (int)FractalType::TOP_FAKE;
                 }
                 if( min_price < kline_data_items[btm_index]->stk_item.low_price )
                 {
                     ClearBtmFractal(*kline_data_items[btm_index]);
-                    qDebug() << __LINE__ << " set btm fake flag date " <<  kline_data_items[min_p_index]->stk_item.date;
+                    //qDebug() << __LINE__ << " set btm fake flag date " <<  kline_data_items[min_p_index]->stk_item.date;
                     kline_data_items[min_p_index]->type |= (int)FractalType::BTM_FAKE;
                 } 
             }

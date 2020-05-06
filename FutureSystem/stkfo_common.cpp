@@ -262,7 +262,7 @@ void ClearTopFractal(T_KlineDataItem &k_data_item)
         tmp_val ^= 0xffffffff;
         k_data_item.type &= tmp_val;
     }
-    qDebug() << __FUNCTION__ << "  " << k_data_item.stk_item.date << ":" << k_data_item.stk_item.hhmmss << "\n";
+    //qDebug() << "ClearTopFractal" << "  " << k_data_item.stk_item.date << ":" << k_data_item.stk_item.hhmmss << "\n";
 }
 
 //void ClearBtmFractal(int &val)
