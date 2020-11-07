@@ -110,7 +110,8 @@ public:
 enum class ZhibiaoType: unsigned char
 {
     VOL = 0,
-    MOMENTUM 
+    MOMENTUM,
+    EXPMA
 };
 class ZhiBiaoAtom
 {
@@ -126,6 +127,10 @@ public:
     virtual double val2(){ return 0.0;}
     virtual void val3( double ){}
     virtual double val3(){ return 0.0;}
+    virtual void val4( double ){}
+    virtual double val4(){ return 0.0;}
+    virtual void val5( double ){}
+    virtual double val5(){ return 0.0;}
 };
 
 class T_KlineDataItem //_t_kline_dataitem
@@ -357,6 +362,7 @@ KGreenRedType KGGetGreenRedType(const T_StockHisDataItem &item, TypePeriod type_
 #define  DEFAULT_DECIMAL 1
 
 #define  MOMENTUM_POS 0
+#define  EXPMA_POS    1
 
 #define  DEFAULT_MAINKWALL_TYPE_PERIOD TypePeriod::PERIOD_5M //TypePeriod::PERIOD_1M 
 #define  DEFAULT_SUBKWALL_TYPE_PERIOD  TypePeriod::PERIOD_1M

@@ -85,6 +85,7 @@ StockDataMan::StockDataMan(/*KLineWall *p_kwall, */ExchangeCalendar *p_exchange_
 {
     //LoadDataFromFile("./data/600030.dat");
     zhibiao_types_.push_back(ZhibiaoType::MOMENTUM); // momentum is in pos MOMENTUM_POS: 0
+    zhibiao_types_.push_back(ZhibiaoType::EXPMA); // Expma is in pos MOMENTUM: 1
 }
 
 StockDataMan::~StockDataMan()
@@ -190,6 +191,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             {
                 auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k-1]); 
                 k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
                 items_in_container.push_front(std::move(k_item));
             }
         }else if( data_compare(p_data_items[0], items_in_container.back() ) > 0 )
@@ -198,6 +200,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             { 
                 auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k]); 
                 k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
                 items_in_container.push_back(std::move(k_item));
             }
 
@@ -216,6 +219,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             {
                 auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k-1]); 
                 k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
                 items_in_container.push_front(std::move(k_item));
             }
 
@@ -232,6 +236,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
             {
                 auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k]); 
                 k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                k_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
                 items_in_container.push_back(std::move(k_item));
             }
         }
@@ -242,6 +247,7 @@ T_HisDataItemContainer* StockDataMan::AppendStockData(PeriodType period_type, in
         {
             auto k_item = std::make_shared<T_KlineDataItem>(p_data_items[k]); 
             k_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+            k_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
             items_in_container.push_back(std::move(k_item));
         }
     }
@@ -313,6 +319,7 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
             {
                 auto k_date_item = std::make_shared<T_KlineDataItem>(item);
                 k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+                k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
                 items_in_container.push_back(std::move(k_date_item));
                 CaculateZhibiao(items_in_container, 2); 
                 //kwall_->IncreaseRendIndex();
@@ -326,6 +333,7 @@ int StockDataMan::UpdateOrAppendLatestItemStockData(PeriodType period_type, int 
         {
             auto k_date_item = std::make_shared<T_KlineDataItem>(item);
             k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<MomentumZhibiao>()));
+            k_date_item->zhibiao_atoms.push_back(std::move(std::make_shared<ExpmaZhibiao>()));
             items_in_container.push_back(std::move(k_date_item));
             CaculateZhibiao(items_in_container, 2); 
             ret = 2;
@@ -349,6 +357,11 @@ void StockDataMan::CaculateZhibiao(T_HisDataItemContainer &data_items_in_contain
                 MomentumZhibiao::Caculate(data_items_in_container);
                 break;
             }
+        case ZhibiaoType::EXPMA:
+            {
+                ExpmaZhibiao::Caculate(data_items_in_container);
+                break;
+            }
         default: break;
         }
     }
@@ -365,6 +378,11 @@ void StockDataMan::CaculateZhibiao(T_HisDataItemContainer &data_items_in_contain
         case ZhibiaoType::MOMENTUM:
             {
                 MomentumZhibiao::Caculate(data_items_in_container, end_span);
+                break;
+            }
+        case ZhibiaoType::EXPMA:
+            {
+                ExpmaZhibiao::Caculate(data_items_in_container, end_span);
                 break;
             }
         default: break;

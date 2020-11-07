@@ -21,7 +21,7 @@
 #include "exchange_calendar.h"
   
 
-#define DEFAULT_CODE  "SC2006"
+#define DEFAULT_CODE  "SC2011"
 
 static const int cst_default_year = 2017;
 static const Qt::CursorShape cst_cur_del_forcst_line = Qt::ClosedHandCursor;
@@ -573,6 +573,19 @@ void KLineWall::UpdatePosDatas()
         pos_data.top = QPointF(pos_data.x_left + k_bar_w / 2, get_price_y(maxPrice, k_mm_h));
         pos_data.bottom = QPointF(pos_data.x_left + k_bar_w / 2, get_price_y(minPrice, k_mm_h));
 
+        //  update Expma line pos     -------------------
+        auto quick_line_y = get_price_y(iter->get()->zhibiao_atoms[EXPMA_POS]->val0(), k_mm_h);
+        auto slow_line_y = get_price_y(iter->get()->zhibiao_atoms[EXPMA_POS]->val1(), k_mm_h);
+        if( wall_index_ == 0 )
+        {
+            iter->get()->zhibiao_atoms[EXPMA_POS]->val2(quick_line_y);
+            iter->get()->zhibiao_atoms[EXPMA_POS]->val3(slow_line_y);
+        }else
+        {
+            iter->get()->zhibiao_atoms[EXPMA_POS]->val4(quick_line_y);
+            iter->get()->zhibiao_atoms[EXPMA_POS]->val5(slow_line_y);
+        }
+
         // update drawing line point ---------------------
         if( item_a && item_a->stk_item.date == iter->get()->stk_item.date && item_a->stk_item.hhmmss == iter->get()->stk_item.hhmmss)
         {
@@ -890,32 +903,6 @@ void KLineWall::mouseReleaseEvent(QMouseEvent * e)
             //if( e->buttons() & Qt::RightButton ) // button has already been released
                 k_wall_point_menu_->popup(QCursor::pos()); 
         }
-        //else if( wall_index_ == (int)WallIndex::MAIN )
-        //{  
-        //    const double x_pos = e->localPos().x();
-        //    right_clicked_k_date_ = 0;
-        //    right_clicked_k_hhmm_ = 0;
-        //    int j = 0;
-        //    for( auto iter = p_hisdata_container_->rbegin() + k_rend_index_;
-        //        iter != p_hisdata_container_->rend() && j < k_num_; 
-        //        ++iter, ++j)
-        //    {  
-        //        T_KlinePosData &pos_data = iter->get()->kline_posdata(wall_index_);
-        //        if( pos_data.x_left == CST_MAGIC_POINT.x() )
-        //            continue;
-        //        //if( pos_data.x_left > 0.0 )
-        //        //    qDebug() << " " << pos_data.x_left << " " << x_pos << " " << pos_data.x_right << "\n";
-        //        if( pos_data.x_left <= x_pos && x_pos <= pos_data.x_right )
-        //        {
-        //            right_clicked_k_date_ = iter->get()->stk_item.date;
-        //            right_clicked_k_hhmm_ = iter->get()->stk_item.hhmmss;
-        //            break;
-        //        } 
-        //    }
-        //    if( right_clicked_k_date_ != 0 )
-        //        k_wall_area_menu_->popup(QCursor::pos());
-        //}
-     
     }else
     { 
         if( cur_select_forcast_ )
@@ -1133,7 +1120,8 @@ void KLineWall::paintEvent(QPaintEvent*)
             sprintf_s(buf, "%.2f\0", iter->get()->stk_item.low_price);
             painter.drawText(pos_data.bottom.x()-item_w/3, pos_data.bottom.y()+old_font.pointSizeF(), buf);
         }
-
+        
+        //----------------------------------
         if( pos_from_global.x() >= pos_data.x_left && pos_from_global.x() <= pos_data.x_right )
         {
             char temp_str[1024];
@@ -1152,7 +1140,23 @@ void KLineWall::paintEvent(QPaintEvent*)
         if( pos_data.date != iter->get()->stk_item.date )
         printf("error");*/
         // end -----------
-
+        //--------------EXPMA LINE----------
+        if( (iter + 1) != p_hisdata_container_->rend() && j - 1 > 0)
+        {
+            auto next_iter = iter + 1;
+            T_KlinePosData &next_pos_data = next_iter->get()->kline_posdata(wall_index_);
+            const double next_quick_line_y = wall_index_ == 0 ? next_iter->get()->zhibiao_atoms[EXPMA_POS]->val2() : next_iter->get()->zhibiao_atoms[EXPMA_POS]->val4();
+            const double next_slow_line_y = wall_index_ == 0 ? next_iter->get()->zhibiao_atoms[EXPMA_POS]->val3() : next_iter->get()->zhibiao_atoms[EXPMA_POS]->val5();
+            const double quick_line_y = wall_index_ == 0 ? iter->get()->zhibiao_atoms[EXPMA_POS]->val2() : iter->get()->zhibiao_atoms[EXPMA_POS]->val4();
+            const double slow_line_y = wall_index_ == 0 ? iter->get()->zhibiao_atoms[EXPMA_POS]->val3() : iter->get()->zhibiao_atoms[EXPMA_POS]->val5();
+            QPen expma_pen; 
+            expma_pen.setColor(Qt::darkGray);
+            painter.setPen(expma_pen);
+            painter.drawLine(next_pos_data.top.x(), next_quick_line_y, pos_data.top.x(), quick_line_y);
+            expma_pen.setColor(Qt::darkYellow);
+            painter.setPen(expma_pen);
+            painter.drawLine(next_pos_data.top.x(), next_slow_line_y, pos_data.top.x(), slow_line_y);
+        }
         // ------------fengxin relate ------------------- 
         if( (*iter)->type != (int)FractalType::UNKNOW_FRACTAL )
         {
@@ -1357,7 +1361,7 @@ void KLineWall::mouseMoveEvent(QMouseEvent *e)
     }else if( area_select_flag_ )
     {
          
-    }else
+    }else if( draw_action_ == DrawAction::NO_ACTION )
     {
         bool is_near_by = DoIfForcastLineNearbyCursor(*e);
         if( !is_near_by )
